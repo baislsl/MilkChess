@@ -4,12 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MilkChess.Engine
-{
-    internal interface IUcciEngine
-    {
-        // interactive interface?
+namespace MilkChess.Engine;
 
-        void Dispose();
-    }
+internal interface IUcciEngine
+{
+    // interactive interface?
+
+    void Dispose();
 }
+

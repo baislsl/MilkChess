@@ -1,10 +1,12 @@
-﻿namespace MilkChess
+﻿using MilkChess.UserInterface;
+
+namespace MilkChess
 {
     public partial class MainPage : ContentPage
     {
         int count = 0;
 
-        public MainPage()
+        public MainPage(BoardDrawable boardDrawable)
         {
             InitializeComponent();
         }
@@ -12,6 +14,7 @@
         private void OnCounterClicked(object sender, EventArgs e)
         {
             count++;
+            
 
             if (count == 1)
                 CounterBtn.Text = $"Clicked {count} time";

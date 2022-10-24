@@ -1,4 +1,7 @@
-﻿namespace MilkChess
+﻿using Microsoft.Extensions.Logging;
+using MilkChess.UserInterface;
+
+namespace MilkChess
 {
     using Ucci;
 
@@ -14,8 +17,13 @@
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                     fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
                 });
-
-            var _ = Command.Quit;
+            builder.Services.AddLogging(configure =>
+            {
+                configure.AddDebug();
+            });
+            
+            builder.Services.AddSingleton<MainPage>();
+            builder.Services.AddTransient<BoardDrawable>();
 
             return builder.Build();
         }
