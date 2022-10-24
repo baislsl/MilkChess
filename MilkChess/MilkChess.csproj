@@ -44,14 +44,15 @@
 
 		<!-- Images -->
 <!--		<MauiImage Include="Resources\Images\*" />-->
-		<MauiImage Include="Resources\Images\large\board.png" />
 		<MauiImage Update="Resources\Images\dotnet_bot.svg" BaseSize="168,208" />
 
+		<EmbeddedResource Include="Resources\Images\large\*" />
 		<!-- Custom Fonts -->
 		<MauiFont Include="Resources\Fonts\*" />
 
 		<!-- Raw Assets (also remove the "Resources\Raw" prefix) -->
 		<MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
 	</ItemGroup>
+	
 
 </Project>

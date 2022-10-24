@@ -12,41 +12,27 @@ public class BoardDrawable : IDrawable
 
     public void Draw(ICanvas canvas, RectF dirtyRect)
     {
-        // var board = this.InternalLoadImage("board.png");
-        // canvas.SetFillImage(board);
+        var image = this.InternalLoadImage("MilkChess.Resources.Images.large.board.png");
+        canvas.DrawImage(image, 0, 0, image.Width, image.Height);
         
-        LinearGradientPaint linearGradientPaint = new LinearGradientPaint
-        {
-            StartColor = Colors.Yellow,
-            EndColor = Colors.Green,
-            // StartPoint is already (0,0)
-            EndPoint = new Point(1, 0)
-        };
-
-        RectF linearRectangle = new RectF(10, 10, 200, 100);
-        canvas.SetFillPaint(linearGradientPaint, linearRectangle);
-        canvas.SetShadow(new SizeF(10, 10), 10, Colors.Grey);
-        canvas.FillRoundedRectangle(linearRectangle, 12);
+        image = this.InternalLoadImage("MilkChess.Resources.Images.large.bb.png");
+        canvas.DrawImage(image, 50, 50, image.Width, image.Height);
+        
+        
+        
     }
 
     private IImage InternalLoadImage(string imagePath)
     {
         IImage image;
         Assembly assembly = GetType().GetTypeInfo().Assembly;
-        using (Stream stream = assembly.GetManifestResourceStream("MilkChess.Resources.Images.large.board.png"))
+
+        using (Stream stream = assembly.GetManifestResourceStream(imagePath))
         {
             // PlatformImage isn't currently supported on Windows.
             image = PlatformImage.FromStream(stream);
         }
-        Console.WriteLine("load image {}", image);
-        
-        if (image == null)
-        {
-            Console.WriteLine("load image {} errro", image);
 
-            throw new Exception("123");
-        }
-        
         return image;
     }
 }
