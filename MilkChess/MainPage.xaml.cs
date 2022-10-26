@@ -9,6 +9,7 @@ namespace MilkChess
         public MainPage(BoardDrawable boardDrawable)
         {
             InitializeComponent();
+            this.Resources.Add("Board", boardDrawable);
         }
 
         private void OnCounterClicked(object sender, EventArgs e)

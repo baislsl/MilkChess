@@ -1,12 +1,15 @@
 ﻿using Microsoft.Extensions.Logging;
+using MilkChess.Source.Model;
 using MilkChess.UserInterface;
 
 namespace MilkChess
 {
-    using Ucci;
-
     public static class MauiProgram
     {
+#if !(IOS || ANDROID || MACCATALYST || WINDOWS)
+        public static void Main(string[] args) {
+        }
+#endif
         public static MauiApp CreateMauiApp()
         {
             var builder = MauiApp.CreateBuilder();
@@ -17,13 +20,12 @@ namespace MilkChess
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                     fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
                 });
-            builder.Services.AddLogging(configure =>
-            {
-                configure.AddDebug();
-            });
-            
+            builder.Services.AddLogging(configure => { configure.AddDebug(); });
+
+
             builder.Services.AddSingleton<MainPage>();
-            builder.Services.AddTransient<BoardDrawable>();
+            builder.Services.AddSingleton<ChessModel>();
+            builder.Services.AddSingleton<BoardDrawable>();
 
             return builder.Build();
         }
