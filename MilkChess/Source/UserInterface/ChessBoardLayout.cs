@@ -1,6 +1,7 @@
 using Microsoft.Maui.Layouts;
 using MilkChess.Source.Helper;
 using MilkChess.Source.Model;
+using MilkChess.Ucci;
 using Color = Microsoft.Maui.Graphics.Color;
 using static MilkChess.UserInterface.UIConstants;
 
@@ -10,6 +11,12 @@ public class ChessBoardLayout : AbsoluteLayout
 {
     public static readonly BindableProperty ChessModelProperty =
         BindableProperty.Create("ChessModel", typeof(ChessModel), typeof(ChessBoardLayout));
+
+    private List<List<ChessButton>> Martix;
+
+    private CursorSelector CursorSelector;
+
+    private ChessButton SelectedChess = null;
 
     public ChessModel ChessModel
     {
@@ -23,11 +30,17 @@ public class ChessBoardLayout : AbsoluteLayout
     {
         this.WidthRequest = UIConstants.ChessBoardWidth;
         this.HeightRequest = UIConstants.ChessBoardHeight;
-        
+
         // TODO: remove hard static object
-        this.ChessModel = ChessModel.Instance;
+        this.ChessModel ??= ChessModel.Instance;
+        this.Martix = new List<List<ChessButton>>(Constants.ChessBoardHeight);
+        for (int i = 0; i < Constants.ChessBoardHeight; i++)
+        {
+            this.Martix.Add(new List<ChessButton>(new ChessButton[Constants.ChessBoardWidth]));
+        }
 
         this.buildBackground()
+            .buildCursor()
             .buildChessItems();
     }
 
@@ -51,18 +64,11 @@ public class ChessBoardLayout : AbsoluteLayout
         Iterator.IterateOverChessBoard(position =>
         {
             Chess chess = this.ChessModel.GetChessAtPosition(position);
-            ChessButton chessButton = new ChessButton(chess, position);
+            ChessButton chessButton = new ChessButton(this.ChessModel, chess, position);
 
-            AbsoluteLayout.SetLayoutBounds(chessButton,
-                new Rect(
-                    position.X * ChessSize + HorizontalOffset,
-                    //(9 - position.Y) * ChessSize + VerticalOffset,
-                    (9 - position.Y) * ChessSize + VerticalOffset,
-                    53, 53));
-            AbsoluteLayout.SetLayoutFlags(chessButton, AbsoluteLayoutFlags.None);
-            
             chessButton.Clicked += this.CreateOnClickedCommand(position);
             this.Children.Add(chessButton);
+            this.Martix[position.Y][position.X] = chessButton;
         });
 
         return this;
@@ -72,12 +78,30 @@ public class ChessBoardLayout : AbsoluteLayout
     {
         return (sender, args) =>
         {
-            // TODO:
+            ChessButton chessButton = (ChessButton) sender;
+
+            if (chessButton == null) throw new ArgumentNullException("Chess button null");
+            
+            if (this.SelectedChess?.Chess == null)
+            {
+                this.SelectedChess = chessButton;
+                this.CursorSelector.Position = chessButton.Position;
+            }
+            else
+            {
+                Chess moveChess = this.SelectedChess.Chess;
+                this.SelectedChess.Chess = null;
+                this.SelectedChess = null;
+                chessButton.Chess = moveChess;
+                this.CursorSelector.Position = chessButton.Position;
+            }
         };
     }
 
     public ChessBoardLayout buildCursor()
     {
+        this.CursorSelector = new CursorSelector(this.ChessModel, this.ChessModel.Cursor.Position);
+        this.Children.Add(CursorSelector);
         return this;
     }
 }

@@ -14,7 +14,7 @@ public class ChessModel
 
     public ChessModel()
     {
-        this.Cursor = new Cursor();
+        this.Cursor = new Cursor(new Position(0, 0));
         this.Reset();
     }
 
@@ -31,7 +31,7 @@ public class ChessModel
     public void SetChessAtPosition(Chess chess, Position position, out Chess removedChess)
     {
         removedChess = this.GetChessAtPosition(position);
-        this.board[position.X][position.Y] = chess;
+        this.board[position.Y][position.X] = chess;
     }
 
     public void MoveChess(Position from, Position to, out Chess removedChess)

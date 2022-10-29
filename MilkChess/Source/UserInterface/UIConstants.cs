@@ -1,3 +1,5 @@
+using MilkChess.Source.Model;
+
 namespace MilkChess.UserInterface;
 
 public class UIConstants
@@ -6,8 +8,29 @@ public class UIConstants
     public const int ChessBoardWidth = 572;
 
     public const string ChessBoardBackgroundResource = "board.png";
-    
+    public const string CursorBackgroundResource = "mask.png";
+
     public const int HorizontalOffset = 39;
     public const int VerticalOffset = 39;
     public const int ChessSize = 55;
+}
+
+internal static class UserInterfaceHelper
+{
+    public static int GetAbsoluteCoordinateX(this Position position)
+    {
+        return position.X * UIConstants.ChessSize + UIConstants.HorizontalOffset;
+    }
+
+    public static int GetAbsoluteCoordinateY(this Position position)
+    {
+        return (9 - position.Y) * UIConstants.ChessSize + UIConstants.VerticalOffset;
+    }
+
+    public static string DrawableResource(this Chess chess)
+    {
+        string color = chess.Color == MilkChess.Source.Model.Color.RED ? "r" : "b";
+        string symbol = chess.Symbol.ToLower();
+        return $"{color}{symbol}.png";
+    }
 }
