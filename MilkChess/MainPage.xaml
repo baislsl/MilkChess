@@ -1,23 +1,40 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+﻿<?xml version="1.0" encoding="utf-8"?>
+
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:milkChess="clr-namespace:MilkChess"
+             xmlns:userInterface="clr-namespace:MilkChess.UserInterface"
+             x:Name="ContentPage"
              x:Class="MilkChess.MainPage">
-    
+
     <ScrollView>
         <VerticalStackLayout
             Spacing="25"
             Padding="30,0"
             VerticalOptions="Center">
 
-            <Image
-                Source="dotnet_bot.png"
-                SemanticProperties.Description="Cute dot net bot waving hi to you!"
-                HeightRequest="200"
-                HorizontalOptions="Center" />
-            
-            <GraphicsView Drawable="{x:DynamicResource Board}"
-                          HeightRequest="626"
-                          WidthRequest="572" />
+            <!-- <GraphicsView Drawable="{x:DynamicResource Board}" -->
+            <!--               HeightRequest="626" -->
+            <!--               WidthRequest="572" /> -->
+
+            <userInterface:ChessBoardLayout
+                ChessModel="{Binding Source={x:Reference ContentPage}, Path=ChessModel }"
+                x:Name="ChessBoardLayout" />
+            <!-- ChessModel="{Binding Source={x:Reference ContentPage}, Path=ChessModel }" -->
+
+            <!-- <AbsoluteLayout -->
+            <!--     x:Name="ChessBoard" -->
+            <!--     WidthRequest="572" -->
+            <!--     HeightRequest="626"> -->
+            <!--     ~1~ <ImageButton @1@ -->
+            <!--     ~1~     AbsoluteLayout.LayoutBounds="100, 100, 40, 40" @1@ -->
+            <!--     ~1~     Clicked="ImageButton_OnClicked" @1@ -->
+            <!--     ~1~     Source="dotnet_bot.png"/> @1@ -->
+            <!--     ~1~ <ImageButton @1@ -->
+            <!--     ~1~     AbsoluteLayout.LayoutBounds="100, 200, 40, 40" @1@ -->
+            <!--     ~1~     Clicked="ImageButton_OnClicked" @1@ -->
+            <!--     ~1~     Source="dotnet_bot.png"/> @1@ -->
+            <!-- </AbsoluteLayout> -->
 
             <Label
                 Text="Hello, World! 123"

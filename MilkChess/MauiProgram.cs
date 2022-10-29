@@ -24,8 +24,9 @@ namespace MilkChess
 
 
             builder.Services.AddSingleton<MainPage>();
-            builder.Services.AddSingleton<ChessModel>();
+            builder.Services.AddSingleton<ChessModel>(ChessModel.Instance);
             builder.Services.AddSingleton<BoardDrawable>();
+            builder.Services.AddSingleton<ChessBoardLayout>();
 
             return builder.Build();
         }
