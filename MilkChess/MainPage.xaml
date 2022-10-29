@@ -2,61 +2,14 @@
 
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:milkChess="clr-namespace:MilkChess"
              xmlns:userInterface="clr-namespace:MilkChess.UserInterface"
-             x:Name="ContentPage"
+             x:DataType="userInterface:ChessBoardViewModel"
              x:Class="MilkChess.MainPage">
 
-    <ScrollView>
-        <VerticalStackLayout
-            Spacing="25"
-            Padding="30,0"
-            VerticalOptions="Center">
-
-            <!-- <GraphicsView Drawable="{x:DynamicResource Board}" -->
-            <!--               HeightRequest="626" -->
-            <!--               WidthRequest="572" /> -->
-
-            <userInterface:ChessBoardLayout
-                ChessModel="{Binding Source={x:Reference ContentPage}, Path=ChessModel }"
-                x:Name="ChessBoardLayout" />
-            <!-- ChessModel="{Binding Source={x:Reference ContentPage}, Path=ChessModel }" -->
-
-            <!-- <AbsoluteLayout -->
-            <!--     x:Name="ChessBoard" -->
-            <!--     WidthRequest="572" -->
-            <!--     HeightRequest="626"> -->
-            <!--     ~1~ <ImageButton @1@ -->
-            <!--     ~1~     AbsoluteLayout.LayoutBounds="100, 100, 40, 40" @1@ -->
-            <!--     ~1~     Clicked="ImageButton_OnClicked" @1@ -->
-            <!--     ~1~     Source="dotnet_bot.png"/> @1@ -->
-            <!--     ~1~ <ImageButton @1@ -->
-            <!--     ~1~     AbsoluteLayout.LayoutBounds="100, 200, 40, 40" @1@ -->
-            <!--     ~1~     Clicked="ImageButton_OnClicked" @1@ -->
-            <!--     ~1~     Source="dotnet_bot.png"/> @1@ -->
-            <!-- </AbsoluteLayout> -->
-
-            <Label
-                Text="Hello, World! 123"
-                SemanticProperties.HeadingLevel="Level1"
-                FontSize="32"
-                HorizontalOptions="Center" />
-
-            <Label
-                Text="Welcome to .NET Multi-platform App UI"
-                SemanticProperties.HeadingLevel="Level2"
-                SemanticProperties.Description="Welcome to dot net Multi platform App U I"
-                FontSize="18"
-                HorizontalOptions="Center" />
-
-            <Button
-                x:Name="CounterBtn"
-                Text="Click me"
-                SemanticProperties.Hint="Counts the number of times you click"
-                Clicked="OnCounterClicked"
-                HorizontalOptions="Center" />
-
-        </VerticalStackLayout>
-    </ScrollView>
+    <AbsoluteLayout
+        WidthRequest="{Binding ChessBoardWidth}"
+        HeightRequest="{Binding ChessBoardHeight}"
+        x:Name="ChessBoardLayout">
+    </AbsoluteLayout>
 
 </ContentPage>

@@ -1,7 +1,7 @@
 using MilkChess.Source.Model;
 using MilkChess.Ucci;
 
-namespace MilkChess.Source.Helper;
+namespace MilkChess.Helper;
 
 public static class Iterator
 {

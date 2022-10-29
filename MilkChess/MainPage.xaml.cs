@@ -1,4 +1,6 @@
-﻿using Microsoft.Maui.Layouts;
+﻿using Microsoft.Extensions.Logging;
+using Microsoft.Maui.Layouts;
+using MilkChess.Helper;
 using MilkChess.Source.Model;
 using MilkChess.UserInterface;
 
@@ -6,35 +8,51 @@ namespace MilkChess
 {
     public partial class MainPage : ContentPage
     {
-        int count = 0;
-        public ChessModel ChessModel { get; set; }
+        private readonly ILogger Logger;
+        private readonly ChessBoardViewModel ChessBoardViewModel;
+        private readonly ChessModel ChessModel;
 
-        public MainPage(BoardDrawable boardDrawable, ChessModel chessModel)
+        public MainPage(ChessBoardViewModel chessBoardViewModel,
+            ChessModel chessModel,
+            ILogger<MainPage> logger)
         {
-            this.ChessModel = chessModel;
+            ChessBoardViewModel = chessBoardViewModel;
+            ChessModel = chessModel;
+            Logger = logger;
 
             InitializeComponent();
-            
-            this.Resources.Add("Board", boardDrawable);
-            this.Resources.Add("ChessModel", chessModel);
-        }
-        
-        private void OnCounterClicked(object sender, EventArgs e)
-        {
-            count++;
+            InitChessBoardLayout();
 
-
-            if (count == 1)
-                CounterBtn.Text = $"Clicked {count} time";
-            else
-                CounterBtn.Text = $"Clicked {count} times";
-
-            SemanticScreenReader.Announce(CounterBtn.Text);
+            logger.LogInformation("Started");
         }
 
-        private void ImageButton_OnClicked(object sender, EventArgs e)
+        public void InitChessBoardLayout()
         {
-            CounterBtn.Text = $"Clicked {e.GetHashCode()}";
+            Logger.LogInformation("InitChessBoardLayout");
+
+            // background image
+            Image backgroundImage = new Image()
+            {
+                Source = UIConstants.ChessBoardBackgroundResource
+            };
+            AbsoluteLayout.SetLayoutBounds(backgroundImage,
+                new Rect(0, 0, AbsoluteLayout.AutoSize, AbsoluteLayout.AutoSize));
+            AbsoluteLayout.SetLayoutFlags(backgroundImage, AbsoluteLayoutFlags.PositionProportional);
+            ChessBoardLayout.Add(backgroundImage);
+
+            // chess
+            Iterator.IterateOverChessBoard(position =>
+            {
+                Chess chess = ChessModel.GetChessAtPosition(position);
+                ChessButton chessButton = new ChessButton(ChessModel, chess, position);
+
+                chessButton.Clicked += ChessBoardViewModel.CreateOnClickedCommand(position);
+                ChessBoardViewModel.Martix[position.Y][position.X] = chessButton;
+                
+                ChessBoardLayout.Add(chessButton);
+            });
+
+            ChessBoardLayout.Add(ChessBoardViewModel.CursorSelector);
         }
     }
 }
