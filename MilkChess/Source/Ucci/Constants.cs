@@ -17,16 +17,20 @@ public static class Constants
 
     public static List<string> RedhorizontalCoordinate = new List<string>
     {
-                    "九", "八", "七", "六", "五", "四", "三", "二", "一"
+                    "一", "二", "三", "四", "五", "六", "七", "八", "九",
     };
 
     public const string BlackHorizontalCoordinate = "123456789";
 
     public const string ManualActionForward = "进";
-    
+
     public const string ManualActionBackward = "退";
 
     public const string ManualActionPan = "平";
+
+    public const string PositionProportionalFirst = "前";
+    
+    public const string PositionProportionalLast = "后";
 }
 
 public static class Command

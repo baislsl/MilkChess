@@ -18,7 +18,7 @@ public static class MovementExtension
         return $"{XArixs[position.X]}{YArixs[position.Y]}";
     }
 
-    private static string GetXCoordinateString(int x, Color color)
+    private static string GetChineseColorNumber(int x, Color color)
     {
         if (color == Color.RED)
         {
@@ -30,36 +30,42 @@ public static class MovementExtension
         }
     }
 
+    private static string GetChineseXColorNumber(int x, Color color)
+    {
+        return color == Color.RED
+                        ? GetChineseColorNumber(8 - x, color)
+                        : GetChineseColorNumber(x, color);
+    }
+
     public static string ToUnifyString(this Movement movement)
     {
         return $"{movement.From.ToUnifyString()}{movement.To.ToUnifyString()}";
     }
 
     // 马二进三
-    // {Chess}{XCoordinate}{Action}{NewXCoordinate}
-    // TODO: how to ensure in a dynamic movement?
+    // {Chess}{XCoordinate}{Action}{NewCoordinate}
     public static string ToChineseViewableString(this Movement movement, IChessBoardHandler chessBoardHandler)
     {
-        string XCoordinate = GetXCoordinateString(movement.From.X, movement.ExecutedColor);
-        string NewXCoordinate = GetXCoordinateString(movement.To.X, movement.ExecutedColor);
+        string XCoordinate = GetChineseXColorNumber(movement.From.X, movement.ExecutedColor);
 
-        // Action
+        // Action, NewCoordinate
         int dx = movement.To.X - movement.From.X,
-                        dy = movement.To.Y - movement.To.Y;
+                        dy = movement.To.Y - movement.From.Y;
 
         if (movement.MovedChess.Color == Color.BLACK)
         {
             dy = -dy;
         }
 
-        string action = "";
+        string action, newCoordinate;
         if (dy == 0)
         {
             action = ManualActionPan;
+            newCoordinate = GetChineseXColorNumber(movement.To.X, movement.ExecutedColor);
         }
         else
         {
-            if (dx > 0)
+            if (dy > 0)
             {
                 action = ManualActionForward;
             }
@@ -67,21 +73,33 @@ public static class MovementExtension
             {
                 action = ManualActionBackward;
             }
+
+            if (dx == 0)
+            {
+                newCoordinate = GetChineseColorNumber(Math.Abs(dy) - 1, movement.ExecutedColor);
+            }
+            else
+            {
+                newCoordinate = GetChineseXColorNumber(movement.To.X, movement.ExecutedColor);
+            }
         }
 
         // Chess
         string chessName = movement.MovedChess.ChineseName;
+
         List<int> inSameVerticalLine = new List<int>();
         for (int Y = 0; Y < ChessBoardHeight; Y++)
         {
-            if (chessBoardHandler.GetChessAtPosition(new Position(movement.From.X, Y)) != null)
+            var chess = chessBoardHandler.GetChessAtPosition(new Position(movement.From.X, Y));
+            if (chess != null && chess.Number == movement.MovedChess.Number && chess.Color == movement.MovedChess.Color)
             {
                 inSameVerticalLine.Add(Y);
             }
         }
 
-        // TODO:
-        if (inSameVerticalLine.Count > 0 && false)
+        string header = null;
+        // TODO: 兵的特殊情况暂且不管了，只处理最多两个同棋子的情况
+        if (inSameVerticalLine.Count > 1)
         {
             int rank = -1;
             inSameVerticalLine.Sort();
@@ -93,8 +111,17 @@ public static class MovementExtension
                     break;
                 }
             }
+
+            header = (rank == 0 && movement.ExecutedColor == Color.BLACK) ||
+                     (rank == 1 && movement.ExecutedColor == Color.RED)
+                            ? PositionProportionalFirst
+                            : PositionProportionalLast;
         }
-        
-        return $"{chessName}{XCoordinate}{action}{NewXCoordinate}";
+
+        movement.ChineseViewableString = string.IsNullOrEmpty(header)
+                        ? $"{chessName}{XCoordinate}{action}{newCoordinate}"
+                        : $"{header}{chessName}{action}{newCoordinate}";
+
+        return movement.ChineseViewableString;
     }
 }

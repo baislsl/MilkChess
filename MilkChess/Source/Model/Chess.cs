@@ -27,6 +27,8 @@ public class ChessDefinition
         this.Name = name;
         this.Symbol = symbol;
         this.Number = number;
+        this.RName = rName;
+        this.BName = bName;
     }
 }
 

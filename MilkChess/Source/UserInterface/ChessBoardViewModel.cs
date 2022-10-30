@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using MilkChess.Helper;
 using MilkChess.Model;
+using MilkChess.Ucci;
 
 namespace MilkChess.UserInterface;
 
@@ -22,7 +23,7 @@ public class ChessBoardViewModel : IChessBoardHandler
     public HistoryManager HistoryManager { get; }
 
     public ChessBoardViewModel(ILogger<ChessBoardViewModel> logger, ChessModel chessModel,
-        HistoryManager historyManager)
+                    HistoryManager historyManager)
     {
         Logger = logger;
         ChessModel = chessModel;
@@ -43,7 +44,7 @@ public class ChessBoardViewModel : IChessBoardHandler
     {
         ChessButton clickedButton = (ChessButton) sender;
         Logger.LogInformation(
-            $"Clicked {clickedButton.Position} {clickedButton.Chess}; Selected {SelectedChess?.Position}, {SelectedChess?.Chess}");
+                        $"Clicked {clickedButton.Position} {clickedButton.Chess}; Selected {SelectedChess?.Position}, {SelectedChess?.Chess}");
 
         if (SelectedChess?.Chess == null
             || SelectedChess.Chess.Color != HistoryManager.NextColorStep()
@@ -56,16 +57,18 @@ public class ChessBoardViewModel : IChessBoardHandler
         }
         else
         {
-            Logger.LogInformation(
-                $"MoveChess {SelectedChess.Chess} {SelectedChess.Position}->{clickedButton.Position}");
-
             Movement movement = new Movement
             {
-                MovedChess = SelectedChess.Chess,
-                RemovedChess = clickedButton.Chess,
-                From = SelectedChess.Position,
-                To = clickedButton.Position
+                            MovedChess = SelectedChess.Chess,
+                            RemovedChess = clickedButton.Chess,
+                            From = SelectedChess.Position,
+                            To = clickedButton.Position
             };
+            movement.GetStandardDescription();  // trigger cachin StandardDescription
+
+            Logger.LogInformation(
+                            $"MoveChess {SelectedChess.Chess} {SelectedChess.Position}->{clickedButton.Position}");
+            Logger.LogInformation($"{movement.ToChineseViewableString(this)}");
 
             this.ApplyMovement(movement);
             SelectedChess = null;
@@ -133,8 +136,8 @@ public class ChessBoardViewModel : IChessBoardHandler
     {
         return this.Martix[position.Y][position.X];
     }
-    
-    
+
+
     public Chess GetChessAtPosition(Position position)
     {
         return this.Martix[position.Y][position.X].Chess;
