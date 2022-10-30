@@ -1,4 +1,4 @@
-namespace MilkChess.Source.Model;
+namespace MilkChess.Model;
 
 public class Movement
 {

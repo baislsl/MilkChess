@@ -1,5 +1,5 @@
 using Microsoft.Maui.Layouts;
-using MilkChess.Source.Model;
+using MilkChess.Model;
 
 namespace MilkChess.UserInterface;
 

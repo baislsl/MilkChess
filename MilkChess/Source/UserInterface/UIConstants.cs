@@ -1,4 +1,4 @@
-using MilkChess.Source.Model;
+using MilkChess.Model;
 
 namespace MilkChess.UserInterface;
 
@@ -29,7 +29,7 @@ internal static class UserInterfaceHelper
 
     public static string DrawableResource(this Chess chess)
     {
-        string color = chess.Color == MilkChess.Source.Model.Color.RED ? "r" : "b";
+        string color = chess.Color == Model.Color.RED ? "r" : "b";
         string symbol = chess.Symbol.ToLower();
         return $"{color}{symbol}.png";
     }

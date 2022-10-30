@@ -1,7 +1,7 @@
 using System.Collections;
 using Microsoft.Extensions.Logging;
 
-namespace MilkChess.Source.Model;
+namespace MilkChess.Model;
 
 public class HistoryManager
 {
@@ -66,7 +66,7 @@ public class HistoryManager
 
     public IEnumerable<Movement> GetMovementHistory()
     {
-        return this.Movements.Skip(1);
+        return this.Movements;
     }
 
     public Color NextColorStep()

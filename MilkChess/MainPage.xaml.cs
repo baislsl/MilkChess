@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Maui.Layouts;
 using MilkChess.Helper;
-using MilkChess.Source.Model;
+using MilkChess.Model;
 using MilkChess.UserInterface;
 
 namespace MilkChess

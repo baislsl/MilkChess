@@ -1,10 +1,10 @@
 using Microsoft.Extensions.Logging;
 using MilkChess.Helper;
-using MilkChess.Source.Model;
+using MilkChess.Model;
 
 namespace MilkChess.UserInterface;
 
-public class ChessBoardViewModel
+public class ChessBoardViewModel : IChessBoardHandler
 {
     public int ChessBoardHeight => UIConstants.ChessBoardHeight;
     public int ChessBoardWidth => UIConstants.ChessBoardWidth;
@@ -19,7 +19,7 @@ public class ChessBoardViewModel
 
     public readonly ILogger Logger;
 
-    private readonly HistoryManager HistoryManager;
+    public HistoryManager HistoryManager { get; }
 
     public ChessBoardViewModel(ILogger<ChessBoardViewModel> logger, ChessModel chessModel,
         HistoryManager historyManager)
@@ -132,5 +132,17 @@ public class ChessBoardViewModel
     private ChessButton GetChessButtonAt(Position position)
     {
         return this.Martix[position.Y][position.X];
+    }
+    
+    
+    public Chess GetChessAtPosition(Position position)
+    {
+        return this.Martix[position.Y][position.X].Chess;
+    }
+
+    public void SetChessAtPosition(Chess chess, Position position, out Chess removedChess)
+    {
+        removedChess = this.GetChessAtPosition(position);
+        GetChessButtonAt(position).Chess = chess;
     }
 }

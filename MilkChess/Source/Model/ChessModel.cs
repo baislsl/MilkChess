@@ -1,9 +1,9 @@
 using System.Collections;
 using Microsoft.Extensions.Logging;
 using MilkChess.Ucci;
-using static MilkChess.Source.Model.Color;
+using static MilkChess.Model.Color;
 
-namespace MilkChess.Source.Model;
+namespace MilkChess.Model;
 
 public class ChessModel
 {

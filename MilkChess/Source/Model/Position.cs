@@ -1,6 +1,6 @@
 using MilkChess.Ucci;
 
-namespace MilkChess.Source.Model;
+namespace MilkChess.Model;
 
 public sealed class Position
 {

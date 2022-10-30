@@ -1,4 +1,4 @@
-using MilkChess.Source.Model;
+using MilkChess.Model;
 using MilkChess.Ucci;
 
 namespace MilkChess.Helper;

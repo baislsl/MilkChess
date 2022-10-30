@@ -1,6 +1,34 @@
 using MilkChess.Ucci;
 
-namespace MilkChess.Source.Model;
+namespace MilkChess.Model;
+
+public class ChessDefinition
+{
+    public static readonly ChessDefinition King = new ChessDefinition(ChessName.King, "K", 1, "帅", "将");
+    public static readonly ChessDefinition Advisor = new ChessDefinition(ChessName.Advisor, "A", 2, "仕", "士");
+    public static readonly ChessDefinition Bishop = new ChessDefinition(ChessName.Bishop, "B", 3, "象", "相");
+    public static readonly ChessDefinition Knight = new ChessDefinition(ChessName.Knight, "N", 4, "马", "马");
+    public static readonly ChessDefinition Rook = new ChessDefinition(ChessName.Rook, "R", 5, "车", "车");
+    public static readonly ChessDefinition Cannon = new ChessDefinition(ChessName.Cannon, "C", 6, "炮", "炮");
+    public static readonly ChessDefinition Pawn = new ChessDefinition(ChessName.Pawn, "P", 7, "兵", "兵");
+
+    public string Name { get; }
+
+    public string Symbol { get; }
+
+    public int Number { get; }
+
+    public string RName { get; set; }
+
+    public string BName { get; set; }
+
+    private ChessDefinition(string name, string symbol, int number, string rName, string bName)
+    {
+        this.Name = name;
+        this.Symbol = symbol;
+        this.Number = number;
+    }
+}
 
 public enum Color
 {
@@ -27,6 +55,11 @@ public abstract class Chess : ICloneable
     public int Number => ChessDefinition.Number;
 
     public Color Color { get; set; }
+
+    public string ChineseName
+    {
+        get { return this.Color == Color.RED ? ChessDefinition.RName : ChessDefinition.BName; }
+    }
 
     public Chess()
     {
@@ -56,7 +89,7 @@ public class Bishop : Chess
     public override ChessDefinition ChessDefinition => ChessDefinition.Bishop;
 
     public Bishop(Color color)
-        : base(color)
+                    : base(color)
     {
     }
 }

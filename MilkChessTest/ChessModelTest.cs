@@ -1,5 +1,5 @@
 using MilkChess;
-using MilkChess.Source.Model;
+using MilkChess.Model;
 using MilkChess.Ucci;
 
 namespace MilkChessTest;
