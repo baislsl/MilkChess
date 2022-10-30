@@ -9,6 +9,7 @@ public class ChessModelTest
     [TestMethod]
     public void TestInitialize()
     {
+        
         ChessModel chessModel = new ChessModel();
 
         Assert.AreEqual(chessModel.board.Count, Constants.ChessBoardHeight);
@@ -16,5 +17,11 @@ public class ChessModelTest
 
         Assert.IsNotNull(chessModel.Cursor);
         Assert.IsNotNull(chessModel.GetChessAtPosition(new Position(0, 0)));
+    }
+
+    [TestMethod]
+    public void TestMovement()
+    {
+        
     }
 }

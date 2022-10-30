@@ -46,13 +46,18 @@ namespace MilkChess
                 Chess chess = ChessModel.GetChessAtPosition(position);
                 ChessButton chessButton = new ChessButton(ChessModel, chess, position);
 
-                chessButton.Clicked += ChessBoardViewModel.CreateOnClickedCommand(position);
+                chessButton.Clicked += ChessBoardViewModel.OnChessSelected;
                 ChessBoardViewModel.Martix[position.Y][position.X] = chessButton;
                 
                 ChessBoardLayout.Add(chessButton);
             });
 
             ChessBoardLayout.Add(ChessBoardViewModel.CursorSelector);
+        }
+
+        private void ResetCommand(object sender, EventArgs e)
+        {
+            ChessBoardViewModel.Reset();
         }
     }
 }

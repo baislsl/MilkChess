@@ -27,11 +27,11 @@ public static class Command
 
 public static class ChessName
 {
-    public const string King = nameof(King);
-    public const string Advisor = nameof(Advisor);
-    public const string Bishop = nameof(Bishop);
-    public const string Knight = nameof(Knight);
-    public const string Rook = nameof(Rook);
-    public const string Cannon = nameof(Cannon);
-    public const string Pawn = nameof(Pawn);
+    public const string King = nameof(King);        // 将
+    public const string Advisor = nameof(Advisor);  // 士
+    public const string Bishop = nameof(Bishop);    // 象
+    public const string Knight = nameof(Knight);    // 马
+    public const string Rook = nameof(Rook);        // 车
+    public const string Cannon = nameof(Cannon);    // 炮
+    public const string Pawn = nameof(Pawn);        // 兵
 }

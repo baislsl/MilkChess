@@ -25,7 +25,7 @@ namespace MilkChess
             builder.Services.AddLogging(configure => { configure.AddConsole(); });
             builder.Services.AddTransient<MainPage>();
             builder.Services.AddTransient<ChessBoardViewModel>();
-            builder.Services.AddSingleton<ChessModel>(ChessModel.Instance);
+            builder.Services.AddSingleton<ChessModel>();
 
             return builder.Build();
         }

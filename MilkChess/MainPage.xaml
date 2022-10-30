@@ -6,10 +6,38 @@
              x:DataType="userInterface:ChessBoardViewModel"
              x:Class="MilkChess.MainPage">
 
-    <AbsoluteLayout
-        WidthRequest="{Binding ChessBoardWidth}"
-        HeightRequest="{Binding ChessBoardHeight}"
-        x:Name="ChessBoardLayout">
-    </AbsoluteLayout>
+    <HorizontalStackLayout
+        Margin="20">
+        <AbsoluteLayout
+            WidthRequest="{Binding ChessBoardWidth}"
+            HeightRequest="{Binding ChessBoardHeight}"
+            x:Name="ChessBoardLayout">
+        </AbsoluteLayout>
 
+        <StackLayout
+            Margin="10">
+            <Grid
+                Margin="4"
+                WidthRequest="300"
+                HeightRequest="200"
+                x:Name="CommonFunction">
+                <Grid.RowDefinitions>
+                    <RowDefinition />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <Button Grid.Row="0" Grid.Column="0" Text="Reset" Clicked="ResetCommand"></Button>
+                <Button Grid.Row="0" Grid.Column="1" Text="Reset01"></Button>
+                <Button Grid.Row="0" Grid.Column="2" Text="Reset02"></Button>
+                <Button Grid.Row="1" Grid.Column="0" Text="Reset10"></Button>
+                <Button Grid.Row="1" Grid.Column="1" Text="Reset11"></Button>
+
+
+            </Grid>
+        </StackLayout>
+    </HorizontalStackLayout>
 </ContentPage>

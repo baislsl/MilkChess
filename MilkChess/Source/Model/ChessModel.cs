@@ -1,4 +1,5 @@
 using System.Collections;
+using Microsoft.Extensions.Logging;
 using MilkChess.Ucci;
 using static MilkChess.Source.Model.Color;
 
@@ -6,14 +7,15 @@ namespace MilkChess.Source.Model;
 
 public class ChessModel
 {
-    public static ChessModel Instance = new ChessModel();
-
     public Cursor Cursor { get; internal set; }
 
     public List<List<Chess>> board { get; set; }
 
-    public ChessModel()
+    public ILogger Logger;
+
+    public ChessModel(ILogger<ChessModel> logger)
     {
+        this.Logger = logger;
         this.Cursor = new Cursor(new Position(0, 0));
         this.Reset();
     }
@@ -21,6 +23,11 @@ public class ChessModel
     public void Initialize(List<List<Chess>> board)
     {
         this.board = board;
+    }
+
+    public bool HasChessAtPosition(Position position)
+    {
+        return this.GetChessAtPosition(position) != null;
     }
 
     public Chess GetChessAtPosition(Position position)
@@ -44,6 +51,179 @@ public class ChessModel
     {
         this.Cursor.Position = position;
         return this.Cursor;
+    }
+
+    public bool ValidateMovement(Position from, Position to)
+    {
+        this.Logger.LogInformation($"ValidateMovement {from} {to}");
+        var ret = InternalValidateMovement(from, to);
+        this.Logger.LogInformation(
+            $"{ret} {from}->{to} | {this.GetChessAtPosition(from)}->{this.GetChessAtPosition(to)} ");
+        return ret;
+    }
+
+    private bool InternalValidateMovement(Position from, Position to)
+    {
+        if (from == to) return false;
+
+        Chess moveChess = this.GetChessAtPosition(from);
+        Chess overrideChess = this.GetChessAtPosition(to);
+
+        if (moveChess == null) return false;
+        if (overrideChess != null && moveChess.Color == overrideChess.Color)
+        {
+            return false;
+        }
+
+        foreach (var nextPosition in this.GetAvailableNextPosition(from))
+        {
+            if (nextPosition == to) return true;
+        }
+
+        return false;
+    }
+
+    public IEnumerable<Position> GetAvailableNextPosition(Position position)
+    {
+        int[][] dir = new int[][] {new[] {0, 1}, new[] {1, 0}, new[] {0, -1}, new[] {-1, 0}};
+        int[][] xyDir = new int[][] {new[] {1, 1}, new[] {1, -1}, new[] {-1, 1}, new[] {-1, -1}};
+
+        Chess moveChess = this.GetChessAtPosition(position);
+        switch (moveChess.Name)
+        {
+            case ChessName.King:
+                foreach (var d in dir)
+                {
+                    if (Position.IsLegalKingPositionXY(moveChess.Color, position.X + d[0], position.Y + d[1]))
+                    {
+                        yield return new Position(position.X + d[0], position.Y + d[1]);
+                    }
+                }
+
+                yield break;
+            case ChessName.Advisor:
+                foreach (var d in xyDir)
+                {
+                    if (Position.IsLegalAdvisorPositionXY(moveChess.Color, position.X + d[0], position.Y + d[1]))
+                    {
+                        yield return new Position(position.X + d[0], position.Y + d[1]);
+                    }
+                }
+
+                yield break;
+            case ChessName.Bishop:
+                foreach (var d in xyDir)
+                {
+                    if (Position.IsLegalBiShopPositionXY(moveChess.Color, position.X + 2 * d[0],
+                            position.Y + 2 * d[1])
+                        && !this.HasChessAtPosition(new Position(position.X + d[0], position.Y + d[1])))
+                    {
+                        yield return new Position(position.X + 2 * d[0], position.Y + 2 * d[1]);
+                    }
+                }
+
+                yield break;
+            case ChessName.Rook:
+                foreach (var d in dir)
+                {
+                    for (int step = 1;; step++)
+                    {
+                        int nx = position.X + step * d[0], ny = position.Y + step * d[1];
+                        if (Position.IsLegalXY(nx, ny))
+                        {
+                            yield return new Position(nx, ny);
+                        }
+                        else
+                        {
+                            break;
+                        }
+
+                        if (this.HasChessAtPosition(new Position(nx, ny)))
+                        {
+                            break;
+                        }
+                    }
+                }
+
+                yield break;
+            case ChessName.Knight:
+                foreach (var d in xyDir)
+                {
+                    int nx = position.X + d[0], ny = position.Y + 2 * d[1];
+                    if (Position.IsLegalXY(nx, ny) && !this.HasChessAtPosition(new Position(nx - d[0], ny - d[1])))
+                    {
+                        yield return new Position(nx, ny);
+                    }
+
+                    nx = position.X + 2 * d[0];
+                    ny = position.Y + d[1];
+                    if (Position.IsLegalXY(nx, ny) && !this.HasChessAtPosition(new Position(nx - d[0], ny - d[1])))
+                    {
+                        yield return new Position(nx, ny);
+                    }
+                }
+
+                yield break;
+            case ChessName.Pawn:
+                List<int[]> ds;
+                if (moveChess.Color == RED)
+                {
+                    ds = new List<int[]> {new[] {0, 1}};
+                    if (position.InColorArea(BLACK))
+                    {
+                        ds.Add(new[] {-1, 0});
+                        ds.Add(new[] {1, 0});
+                    }
+                }
+                else
+                {
+                    ds = new List<int[]> {new[] {0, -1}};
+                    if (position.InColorArea(RED))
+                    {
+                        ds.Add(new[] {-1, 0});
+                        ds.Add(new[] {1, 0});
+                    }
+                }
+
+                foreach (var d in ds)
+                {
+                    if (Position.IsLegalXY(position.X + d[0], position.Y + d[1]))
+                    {
+                        yield return new Position(position.X + d[0], position.Y + d[1]);
+                    }
+                }
+
+                yield break;
+            case ChessName.Cannon:
+                foreach (var d in dir)
+                {
+                    bool flag = false;
+                    for (int step = 1;; step++)
+                    {
+                        int nx = position.X + step * d[0], ny = position.Y + step * d[1];
+                        if (!Position.IsLegalXY(nx, ny)) break;
+
+                        if (this.HasChessAtPosition(new Position(nx, ny)))
+                        {
+                            if (flag)
+                            {
+                                yield return new Position(nx, ny);
+                                break;
+                            }
+                            else
+                            {
+                                flag = true;
+                            }
+                        }
+                        else
+                        {
+                            if (!flag) yield return new Position(nx, ny);
+                        }
+                    }
+                }
+
+                yield break;
+        }
     }
 
     public void Reset()

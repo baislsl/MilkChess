@@ -24,6 +24,11 @@ public abstract class Chess : ICloneable
     {
     }
 
+    public override string ToString()
+    {
+        return this.Name;
+    }
+
     public Chess(Color color) : this()
     {
         this.Color = color;

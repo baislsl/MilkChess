@@ -17,7 +17,7 @@ public class ChessBoardViewModel
 
     public readonly ChessModel ChessModel;
 
-    public ILogger Logger;
+    public readonly ILogger Logger;
 
     public ChessBoardViewModel(ILogger<ChessBoardViewModel> logger, ChessModel chessModel)
     {
@@ -31,31 +31,45 @@ public class ChessBoardViewModel
         }
 
         this.CursorSelector = new CursorSelector(this.ChessModel, this.ChessModel.Cursor.Position);
-        
+
         Logger.LogInformation("Init view model");
     }
 
-    public EventHandler CreateOnClickedCommand(Position position)
+    public void OnChessSelected(object sender, EventArgs args)
     {
-        return (sender, args) =>
+        ChessButton clickedButton = (ChessButton) sender;
+        Logger.LogInformation($"Clicked {clickedButton.Position} {clickedButton.Chess}; Selected {SelectedChess?.Position}, {SelectedChess?.Chess}");
+
+        // var v = ChessModel.ValidateMovement(SelectedChess?.Position, chessButton.Position);
+        if (SelectedChess?.Chess == null || !ChessModel.ValidateMovement(SelectedChess.Position, clickedButton.Position))
         {
-            ChessButton chessButton = (ChessButton) sender;
+            SelectedChess = clickedButton;
+            CursorSelector.Position = clickedButton.Position;
+            
+            Logger.LogInformation($"MoveSelector {SelectedChess.Chess} {CursorSelector.Position}");
 
-            if (chessButton == null) throw new ArgumentNullException("Chess button null");
+        }
+        else
+        {
+            Logger.LogInformation("MoveChess ");
+            // Move from SelectedChess to chessButton
+            Chess moveChess = SelectedChess.Chess;
+            SelectedChess.Chess = null;
+            SelectedChess = null;
+            clickedButton.Chess = moveChess;
+            CursorSelector.Position = clickedButton.Position;
+        }
+    }
 
-            if (SelectedChess?.Chess == null)
-            {
-                SelectedChess = chessButton;
-                CursorSelector.Position = chessButton.Position;
-            }
-            else
-            {
-                Chess moveChess = SelectedChess.Chess;
-                SelectedChess.Chess = null;
-                SelectedChess = null;
-                chessButton.Chess = moveChess;
-                CursorSelector.Position = chessButton.Position;
-            }
-        };
+    public void Reset()
+    {
+        ChessModel.Reset();
+        Iterator.IterateOverChessBoard(position =>
+        {
+            this.Martix[position.Y][position.X].Chess = ChessModel.GetChessAtPosition(position);
+            ;
+        });
+
+        this.SelectedChess = null;
     }
 }
