@@ -8,6 +8,14 @@ public enum Color
     BLACK
 }
 
+public static class ColorExtension
+{
+    public static Color Reverse(this Color color)
+    {
+        return color == Color.RED ? Color.BLACK : Color.RED;
+    }
+}
+
 public abstract class Chess : ICloneable
 {
     public abstract ChessDefinition ChessDefinition { get; }

@@ -48,7 +48,7 @@ namespace MilkChess
 
                 chessButton.Clicked += ChessBoardViewModel.OnChessSelected;
                 ChessBoardViewModel.Martix[position.Y][position.X] = chessButton;
-                
+
                 ChessBoardLayout.Add(chessButton);
             });
 
@@ -58,6 +58,26 @@ namespace MilkChess
         private void ResetCommand(object sender, EventArgs e)
         {
             ChessBoardViewModel.Reset();
+        }
+
+        private void MoveForwardCommand(object sender, EventArgs e)
+        {
+            ChessBoardViewModel.MoveForward();
+        }
+
+        private void MoveBackwardCommand(object sender, EventArgs e)
+        {
+            ChessBoardViewModel.MoveBackward();
+        }
+
+        private void MoveToStartCommand(object sender, EventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void MoveToEndCommand(object sender, EventArgs e)
+        {
+            throw new NotImplementedException();
         }
     }
 }

@@ -6,7 +6,20 @@ public class Movement
 
     public Position To { get; set; }
 
-    public Chess MoveChess { get; set; }
+    public Chess MovedChess { get; set; }
 
-    public Chess RemoveChess { get; set; }
+    public Chess RemovedChess { get; set; }
+
+    public Color ExecutedColor => MovedChess.Color;
+
+    public override string ToString()
+    {
+        return $"{MovedChess.Symbol} {From}->{To}";
+    }
+
+    public string GetStandardDescription()
+    {
+        // TODO;
+        return this.ToString();
+    }
 }

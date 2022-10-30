@@ -1,3 +1,4 @@
+using MilkChess;
 using MilkChess.Source.Model;
 using MilkChess.Ucci;
 
@@ -9,19 +10,13 @@ public class ChessModelTest
     [TestMethod]
     public void TestInitialize()
     {
-        
-        ChessModel chessModel = new ChessModel();
+        var app = MauiProgram.CreateMauiApp();
+        ChessModel chessModel = app.Services.GetService<ChessModel>();
 
         Assert.AreEqual(chessModel.board.Count, Constants.ChessBoardHeight);
         Assert.AreEqual(chessModel.board[0].Count, Constants.ChessBoardWidth);
 
         Assert.IsNotNull(chessModel.Cursor);
         Assert.IsNotNull(chessModel.GetChessAtPosition(new Position(0, 0)));
-    }
-
-    [TestMethod]
-    public void TestMovement()
-    {
-        
     }
 }

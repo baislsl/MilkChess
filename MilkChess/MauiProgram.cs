@@ -26,6 +26,8 @@ namespace MilkChess
             builder.Services.AddTransient<MainPage>();
             builder.Services.AddTransient<ChessBoardViewModel>();
             builder.Services.AddSingleton<ChessModel>();
+            builder.Services.AddSingleton<HistoryManager>();
+
 
             return builder.Build();
         }

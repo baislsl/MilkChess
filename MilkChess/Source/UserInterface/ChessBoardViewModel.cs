@@ -19,10 +19,14 @@ public class ChessBoardViewModel
 
     public readonly ILogger Logger;
 
-    public ChessBoardViewModel(ILogger<ChessBoardViewModel> logger, ChessModel chessModel)
+    private readonly HistoryManager HistoryManager;
+
+    public ChessBoardViewModel(ILogger<ChessBoardViewModel> logger, ChessModel chessModel,
+        HistoryManager historyManager)
     {
-        ChessModel = chessModel;
         Logger = logger;
+        ChessModel = chessModel;
+        HistoryManager = historyManager;
 
         Martix = new List<List<ChessButton>>(ChessBoardHeight);
         for (int i = 0; i < ChessBoardHeight; i++)
@@ -38,38 +42,95 @@ public class ChessBoardViewModel
     public void OnChessSelected(object sender, EventArgs args)
     {
         ChessButton clickedButton = (ChessButton) sender;
-        Logger.LogInformation($"Clicked {clickedButton.Position} {clickedButton.Chess}; Selected {SelectedChess?.Position}, {SelectedChess?.Chess}");
+        Logger.LogInformation(
+            $"Clicked {clickedButton.Position} {clickedButton.Chess}; Selected {SelectedChess?.Position}, {SelectedChess?.Chess}");
 
-        // var v = ChessModel.ValidateMovement(SelectedChess?.Position, chessButton.Position);
-        if (SelectedChess?.Chess == null || !ChessModel.ValidateMovement(SelectedChess.Position, clickedButton.Position))
+        if (SelectedChess?.Chess == null
+            || SelectedChess.Chess.Color != HistoryManager.NextColorStep()
+            || !ChessModel.ValidateMovement(SelectedChess.Position, clickedButton.Position))
         {
             SelectedChess = clickedButton;
             CursorSelector.Position = clickedButton.Position;
-            
-            Logger.LogInformation($"MoveSelector {SelectedChess.Chess} {CursorSelector.Position}");
 
+            Logger.LogInformation($"MoveSelector {SelectedChess.Chess} {CursorSelector.Position}");
         }
         else
         {
-            Logger.LogInformation("MoveChess ");
-            // Move from SelectedChess to chessButton
-            Chess moveChess = SelectedChess.Chess;
-            SelectedChess.Chess = null;
+            Logger.LogInformation(
+                $"MoveChess {SelectedChess.Chess} {SelectedChess.Position}->{clickedButton.Position}");
+
+            Movement movement = new Movement
+            {
+                MovedChess = SelectedChess.Chess,
+                RemovedChess = clickedButton.Chess,
+                From = SelectedChess.Position,
+                To = clickedButton.Position
+            };
+
+            this.ApplyMovement(movement);
             SelectedChess = null;
-            clickedButton.Chess = moveChess;
             CursorSelector.Position = clickedButton.Position;
+
+            HistoryManager.InsertMovement(movement);
+
+            // // Move from SelectedChess to chessButton
+            // Chess moveChess = SelectedChess.Chess;
+            // SelectedChess.Chess = null;
+            // SelectedChess = null;
+            // clickedButton.Chess = moveChess;
+            // CursorSelector.Position = clickedButton.Position;
         }
     }
 
     public void Reset()
     {
         ChessModel.Reset();
+        HistoryManager.Reset();
+
         Iterator.IterateOverChessBoard(position =>
         {
             this.Martix[position.Y][position.X].Chess = ChessModel.GetChessAtPosition(position);
-            ;
         });
 
         this.SelectedChess = null;
+    }
+
+    public bool MoveForward()
+    {
+        Movement movement = HistoryManager.MoveForward();
+        if (movement != null)
+        {
+            this.ApplyMovement(movement);
+        }
+
+        return movement != null;
+    }
+
+    public bool MoveBackward()
+    {
+        Movement movement = HistoryManager.MoveBackward();
+        if (movement != null)
+        {
+            this.RevertMovement(movement);
+        }
+
+        return movement != null;
+    }
+
+    public void ApplyMovement(Movement movement)
+    {
+        GetChessButtonAt(movement.From).Chess = null;
+        GetChessButtonAt(movement.To).Chess = movement.MovedChess;
+    }
+
+    public void RevertMovement(Movement movement)
+    {
+        GetChessButtonAt(movement.From).Chess = movement.MovedChess;
+        GetChessButtonAt(movement.To).Chess = movement.RemovedChess;
+    }
+
+    private ChessButton GetChessButtonAt(Position position)
+    {
+        return this.Martix[position.Y][position.X];
     }
 }
