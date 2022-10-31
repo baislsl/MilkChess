@@ -7,41 +7,63 @@
              x:Class="MilkChess.MainPage">
 
     <HorizontalStackLayout
+        BackgroundColor="YellowGreen"
         Margin="20">
         <AbsoluteLayout
             WidthRequest="{Binding ChessBoardWidth}"
             HeightRequest="{Binding ChessBoardHeight}"
             x:Name="ChessBoardLayout">
         </AbsoluteLayout>
+        <Grid
+            Margin="10"
+            WidthRequest="300"
+            HeightRequest="200"
+            BackgroundColor="LightBlue"
+            x:Name="CommonFunction">
+            <Grid.RowDefinitions>
+                <RowDefinition />
+                <RowDefinition />
+                <RowDefinition />
+                <RowDefinition />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <Button Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Text="Reset" Command="{Binding ResetCommand}" />
 
-        <StackLayout
-            Margin="10">
-            <Grid
-                Margin="4"
-                WidthRequest="300"
-                HeightRequest="120"
-                x:Name="CommonFunction">
-                <Grid.RowDefinitions>
-                    <RowDefinition />
-                    <RowDefinition />
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition />
-                    <ColumnDefinition />
-                    <ColumnDefinition />
-                    <ColumnDefinition />
-                </Grid.ColumnDefinitions>
-                <Button Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Text="Reset" Command="{Binding ResetCommand}" />
-                <Button Grid.Row="0" Grid.Column="2" Text="ToBegin" Command="{Binding MoveToStartCommand}" />
-                <Button Grid.Row="0" Grid.Column="3" Text="ToEnd" Command="{Binding MoveToEndCommand}" />
+            <Button Grid.Row="1" Grid.Column="0" Text="Go back" Command="{Binding MoveBackwardCommand}" />
+            <Button Grid.Row="1" Grid.Column="1" Text="Move forward" Command="{Binding MoveForwardCommand}" />
 
-                <Button Grid.Row="1" Grid.Column="0" Text="Go back" Command="{Binding MoveBackwardCommand}" />
-                <Button Grid.Row="1" Grid.Column="1" Text="Go back1" Command="{Binding MoveBackwardCommand}" />
-                <Button Grid.Row="1" Grid.Column="2" Text="Move forward1" Command="{Binding  MoveForwardCommand}" />
-                <Button Grid.Row="1" Grid.Column="3" Text="Move forward" Command="{Binding MoveToEndCommand}" />
+            <Button Grid.Row="2" Grid.Column="0" Text="To Start" Command="{Binding MoveToStartCommand}" />
+            <Button Grid.Row="2" Grid.Column="1" Text="To End" Command="{Binding  MoveToEndCommand}" />
+        </Grid>
+        <ListView
+            WidthRequest="200"
+            RowHeight="20"
+            Margin="4"
+            BackgroundColor="LightBlue"
+            ItemsSource="{Binding HistoryMovement}">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <ViewCell
+                        Height="20">
+                        <Label HeightRequest="20"
+                               TextColor="Black"
+                               FontSize="18"
+                               FontAttributes="Bold">
+                            <Label.Text>
+                                <MultiBinding StringFormat="{}{0}. {1}">
+                                    <Binding Path="ActionCount" />
+                                    <Binding Path="ChineseViewableString" />
+                                </MultiBinding>
+                            </Label.Text>
+                        </Label>
 
+                    </ViewCell>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
 
-            </Grid>
-        </StackLayout>
     </HorizontalStackLayout>
 </ContentPage>

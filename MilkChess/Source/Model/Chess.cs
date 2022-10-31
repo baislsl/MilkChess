@@ -10,7 +10,7 @@ public class ChessDefinition
     public static readonly ChessDefinition Knight = new ChessDefinition(ChessName.Knight, "N", 4, "马", "马");
     public static readonly ChessDefinition Rook = new ChessDefinition(ChessName.Rook, "R", 5, "车", "车");
     public static readonly ChessDefinition Cannon = new ChessDefinition(ChessName.Cannon, "C", 6, "炮", "炮");
-    public static readonly ChessDefinition Pawn = new ChessDefinition(ChessName.Pawn, "P", 7, "兵", "兵");
+    public static readonly ChessDefinition Pawn = new ChessDefinition(ChessName.Pawn, "P", 7, "兵", "卒");
 
     public string Name { get; }
 

@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.ObjectModel;
 using Microsoft.Extensions.Logging;
 
 namespace MilkChess.Model;
@@ -9,15 +10,11 @@ public class HistoryManager
 
     public Color NextColorStep { get; set; }
 
-    private List<Movement> Movements;
+    public IList<Movement> Movements { get; private set; }
 
-    private int Cursor;
-
-    private static LinkedListNode<Movement> HEADER = new LinkedListNode<Movement>(null);
+    public int Cursor;
 
     private readonly ILogger Logger;
-
-    private readonly ChessModel ChessModel;
 
     public Movement LastMovement
     {
@@ -28,9 +25,10 @@ public class HistoryManager
         }
     }
 
-    public HistoryManager(ILogger<HistoryManager> logger)
+    public HistoryManager(ILogger<HistoryManager> logger, Collection<Movement> movementContainer = null)
     {
         this.Logger = logger;
+        this.Movements = movementContainer ?? (IList<Movement>) new List<Movement>();
         this.Reset();
     }
 
@@ -49,10 +47,9 @@ public class HistoryManager
 
     public Movement MoveBackward()
     {
-        this.NextColorStep = this.NextColorStep.Reverse();
-
         if (this.Cursor == 0) return null;
 
+        this.NextColorStep = this.NextColorStep.Reverse();
         var ret = LastMovement;
         this.Cursor--;
         return ret;
@@ -60,13 +57,12 @@ public class HistoryManager
 
     public Movement MoveForward()
     {
-        this.NextColorStep = this.NextColorStep.Reverse();
-
         if (this.Cursor == Movements.Count)
         {
             return null;
         }
 
+        this.NextColorStep = this.NextColorStep.Reverse();
         this.Cursor++;
         return this.Movements[this.Cursor - 1];
     }
@@ -78,7 +74,7 @@ public class HistoryManager
 
     public void Reset()
     {
-        this.Movements = new List<Movement>();
+        this.Movements.Clear();
         this.Cursor = 0;
         this.NextColorStep = Color.RED;
     }

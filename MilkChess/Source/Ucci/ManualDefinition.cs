@@ -118,10 +118,8 @@ public static class MovementExtension
                             : PositionProportionalLast;
         }
 
-        movement.ChineseViewableString = string.IsNullOrEmpty(header)
+        return string.IsNullOrEmpty(header)
                         ? $"{chessName}{XCoordinate}{action}{newCoordinate}"
                         : $"{header}{chessName}{action}{newCoordinate}";
-
-        return movement.ChineseViewableString;
     }
 }

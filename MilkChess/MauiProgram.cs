@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System.Collections.ObjectModel;
+using Microsoft.Extensions.Logging;
 using MilkChess.Model;
 using MilkChess.UserInterface;
 
@@ -15,18 +16,20 @@ namespace MilkChess
         {
             var builder = MauiApp.CreateBuilder();
             builder
-                .UseMauiApp<App>()
-                .ConfigureFonts(fonts =>
-                {
-                    fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
-                    fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
-                });
+                            .UseMauiApp<App>()
+                            .ConfigureFonts(fonts =>
+                            {
+                                fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
+                                fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
+                            });
 
             builder.Services.AddLogging(configure => { configure.AddConsole(); });
             builder.Services.AddTransient<MainPage>();
             builder.Services.AddTransient<ChessBoardViewModel>();
             builder.Services.AddSingleton<ChessModel>();
-            builder.Services.AddSingleton<HistoryManager>();
+            builder.Services.AddTransient<HistoryManager>(x =>
+                            new HistoryManager(x.GetRequiredService<ILogger<HistoryManager>>(),
+                                            new ObservableCollection<Movement>()));
 
 
             return builder.Build();

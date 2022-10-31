@@ -1,3 +1,5 @@
+using System.Collections.ObjectModel;
+using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using Microsoft.Extensions.Logging;
 using MilkChess.Helper;
@@ -61,13 +63,15 @@ public class ChessBoardViewModel : IChessBoardHandler
                             MovedChess = SelectedChess.Chess,
                             RemovedChess = clickedButton.Chess,
                             From = SelectedChess.Position,
-                            To = clickedButton.Position
+                            To = clickedButton.Position,
+                            ActionCount = HistoryManager.Cursor / 2 + 1,
             };
-            movement.GetStandardDescription(); // trigger cachin StandardDescription
 
-            Logger.LogInformation(
-                            $"MoveChess {SelectedChess.Chess} {SelectedChess.Position}->{clickedButton.Position}");
-            Logger.LogInformation($"{movement.ToChineseViewableString(this)}");
+            // 存下招法中文表示
+            movement.ChineseViewableString =
+                            movement.ToChineseViewableString(this);
+
+            Logger.LogInformation($"Execute movement {movement}");
 
             this.ApplyMovement(movement);
             SelectedChess = null;
@@ -112,13 +116,21 @@ public class ChessBoardViewModel : IChessBoardHandler
 
     public void MoveToStart()
     {
+        Movement movement;
+        while ((movement = HistoryManager.MoveBackward()) != null)
+        {
+            this.RevertMovement(movement);
+        }
     }
 
     public void MoveToEnd()
     {
-        var ret = this.AdoptForsythEdwardsNotation(
-                        "rnbakabnr/9/4c4/p1p1p1p1p/9/9/P1P1P1P1P/1C3CN2/9/1RBAKAB1R b - - 0 1");
-        Logger.LogInformation($"adopt {ret}");
+        Movement movement;
+
+        while ((movement = HistoryManager.MoveForward()) != null)
+        {
+            this.ApplyMovement(movement);
+        }
     }
 
     public void ApplyMovement(Movement movement)
@@ -150,17 +162,24 @@ public class ChessBoardViewModel : IChessBoardHandler
         GetChessButtonAt(position).Chess = chess;
     }
 
-    public ICommand ResetCommand => this.WrapClickCommand(this.Reset, "Reset");
+    // Compiler will throw error result if I remove this unused fields.
+    // This seems to be the compiler bug.
+    public string ChineseViewableString => default;
+    public string ActionCount => default;
 
-    public ICommand MoveBackwardCommand => this.WrapClickCommand(this.MoveBackward, "MoveBackward");
+    public ObservableCollection<Movement> HistoryMovement => (ObservableCollection<Movement>) HistoryManager.Movements;
 
-    public ICommand MoveForwardCommand => this.WrapClickCommand(this.MoveForward, "MoveForward");
+    public ICommand ResetCommand => this.WrapClickCommand(this.Reset);
 
-    public ICommand MoveToStartCommand => this.WrapClickCommand(this.MoveToStart, "MoveToStart");
+    public ICommand MoveBackwardCommand => this.WrapClickCommand(this.MoveBackward);
 
-    public ICommand MoveToEndCommand => this.WrapClickCommand(this.MoveToEnd, "MoveToEnd");
+    public ICommand MoveForwardCommand => this.WrapClickCommand(this.MoveForward);
 
-    private ICommand WrapClickCommand(Action action, string commandName)
+    public ICommand MoveToStartCommand => this.WrapClickCommand(this.MoveToStart);
+
+    public ICommand MoveToEndCommand => this.WrapClickCommand(this.MoveToEnd);
+
+    private ICommand WrapClickCommand(Action action, [CallerMemberName] string commandName = "")
     {
         return new Command<object>((object Object) =>
         {
