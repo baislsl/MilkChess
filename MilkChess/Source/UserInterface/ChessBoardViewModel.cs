@@ -1,3 +1,4 @@
+using System.Windows.Input;
 using Microsoft.Extensions.Logging;
 using MilkChess.Helper;
 using MilkChess.Model;
@@ -36,8 +37,6 @@ public class ChessBoardViewModel : IChessBoardHandler
         }
 
         this.CursorSelector = new CursorSelector(this.ChessModel, this.ChessModel.Cursor.Position);
-
-        Logger.LogInformation("Init view model");
     }
 
     public void OnChessSelected(object sender, EventArgs args)
@@ -47,7 +46,7 @@ public class ChessBoardViewModel : IChessBoardHandler
                         $"Clicked {clickedButton.Position} {clickedButton.Chess}; Selected {SelectedChess?.Position}, {SelectedChess?.Chess}");
 
         if (SelectedChess?.Chess == null
-            || SelectedChess.Chess.Color != HistoryManager.NextColorStep()
+            || SelectedChess.Chess.Color != HistoryManager.NextColorStep
             || !ChessModel.ValidateMovement(SelectedChess.Position, clickedButton.Position))
         {
             SelectedChess = clickedButton;
@@ -64,7 +63,7 @@ public class ChessBoardViewModel : IChessBoardHandler
                             From = SelectedChess.Position,
                             To = clickedButton.Position
             };
-            movement.GetStandardDescription();  // trigger cachin StandardDescription
+            movement.GetStandardDescription(); // trigger cachin StandardDescription
 
             Logger.LogInformation(
                             $"MoveChess {SelectedChess.Chess} {SelectedChess.Position}->{clickedButton.Position}");
@@ -76,12 +75,7 @@ public class ChessBoardViewModel : IChessBoardHandler
 
             HistoryManager.InsertMovement(movement);
 
-            // // Move from SelectedChess to chessButton
-            // Chess moveChess = SelectedChess.Chess;
-            // SelectedChess.Chess = null;
-            // SelectedChess = null;
-            // clickedButton.Chess = moveChess;
-            // CursorSelector.Position = clickedButton.Position;
+            Logger.LogInformation($"fen {this.BuildForsythEdwardsNotation().GetFenString()}");
         }
     }
 
@@ -98,26 +92,33 @@ public class ChessBoardViewModel : IChessBoardHandler
         this.SelectedChess = null;
     }
 
-    public bool MoveForward()
+    public void MoveForward()
     {
         Movement movement = HistoryManager.MoveForward();
         if (movement != null)
         {
             this.ApplyMovement(movement);
         }
-
-        return movement != null;
     }
 
-    public bool MoveBackward()
+    public void MoveBackward()
     {
         Movement movement = HistoryManager.MoveBackward();
         if (movement != null)
         {
             this.RevertMovement(movement);
         }
+    }
 
-        return movement != null;
+    public void MoveToStart()
+    {
+    }
+
+    public void MoveToEnd()
+    {
+        var ret = this.AdoptForsythEdwardsNotation(
+                        "rnbakabnr/9/4c4/p1p1p1p1p/9/9/P1P1P1P1P/1C3CN2/9/1RBAKAB1R b - - 0 1");
+        Logger.LogInformation($"adopt {ret}");
     }
 
     public void ApplyMovement(Movement movement)
@@ -147,5 +148,32 @@ public class ChessBoardViewModel : IChessBoardHandler
     {
         removedChess = this.GetChessAtPosition(position);
         GetChessButtonAt(position).Chess = chess;
+    }
+
+    public ICommand ResetCommand => this.WrapClickCommand(this.Reset, "Reset");
+
+    public ICommand MoveBackwardCommand => this.WrapClickCommand(this.MoveBackward, "MoveBackward");
+
+    public ICommand MoveForwardCommand => this.WrapClickCommand(this.MoveForward, "MoveForward");
+
+    public ICommand MoveToStartCommand => this.WrapClickCommand(this.MoveToStart, "MoveToStart");
+
+    public ICommand MoveToEndCommand => this.WrapClickCommand(this.MoveToEnd, "MoveToEnd");
+
+    private ICommand WrapClickCommand(Action action, string commandName)
+    {
+        return new Command<object>((object Object) =>
+        {
+            try
+            {
+                Logger.LogInformation($"Received command {commandName}");
+                action();
+                Logger.LogInformation($"Finished command {commandName}");
+            }
+            catch (Exception e)
+            {
+                Logger.LogError(e, "MilkChess click Event error");
+            }
+        }, canExecute: (object o) => true);
     }
 }

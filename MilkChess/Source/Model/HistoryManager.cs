@@ -7,9 +7,11 @@ public class HistoryManager
 {
     public ChessModel InitialLayout { get; set; }
 
+    public Color NextColorStep { get; set; }
+
     private List<Movement> Movements;
 
-    private int cursor;
+    private int Cursor;
 
     private static LinkedListNode<Movement> HEADER = new LinkedListNode<Movement>(null);
 
@@ -21,47 +23,52 @@ public class HistoryManager
     {
         get
         {
-            if (cursor >= 1) return Movements[cursor-1];
+            if (Cursor >= 1) return Movements[Cursor - 1];
             return null;
         }
     }
 
-    public HistoryManager(ILogger<HistoryManager> logger, ChessModel chessModel)
+    public HistoryManager(ILogger<HistoryManager> logger)
     {
         this.Logger = logger;
-        this.ChessModel = ChessModel;
         this.Reset();
     }
 
     public void InsertMovement(Movement movement)
     {
-        while (Movements.Any() && Movements.Count != cursor)
+        this.NextColorStep = this.NextColorStep.Reverse();
+
+        while (Movements.Any() && Movements.Count != Cursor)
         {
             Movements.RemoveAt(Movements.Count - 1);
         }
 
         Movements.Add(movement);
-        this.cursor = Movements.Count;
+        this.Cursor = Movements.Count;
     }
 
     public Movement MoveBackward()
     {
-        if (this.cursor == 0) return null;
-        
+        this.NextColorStep = this.NextColorStep.Reverse();
+
+        if (this.Cursor == 0) return null;
+
         var ret = LastMovement;
-        this.cursor--;
+        this.Cursor--;
         return ret;
     }
 
     public Movement MoveForward()
     {
-        if (this.cursor == Movements.Count)
+        this.NextColorStep = this.NextColorStep.Reverse();
+
+        if (this.Cursor == Movements.Count)
         {
             return null;
         }
 
-        this.cursor++;
-        return this.Movements[this.cursor-1];
+        this.Cursor++;
+        return this.Movements[this.Cursor - 1];
     }
 
     public IEnumerable<Movement> GetMovementHistory()
@@ -69,19 +76,10 @@ public class HistoryManager
         return this.Movements;
     }
 
-    public Color NextColorStep()
-    {
-        if (LastMovement == null)
-        {
-            return Color.RED;
-        }
-
-        return LastMovement.ExecutedColor.Reverse();
-    }
-
     public void Reset()
     {
         this.Movements = new List<Movement>();
-        this.cursor = 0;
+        this.Cursor = 0;
+        this.NextColorStep = Color.RED;
     }
 }

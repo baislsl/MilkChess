@@ -1,0 +1,29 @@
+using Microsoft.Extensions.Logging;
+using MilkChess.Model;
+using MilkChess.Ucci;
+
+namespace MilkChessTest;
+
+public class MockChessModel : IChessBoardHandler
+{
+    private Chess[,] Chesses = new Chess[Constants.ChessBoardHeight, Constants.ChessBoardWidth];
+
+    public MockChessModel(IServiceProvider serviceProvider)
+    {
+        HistoryManager = new HistoryManager(serviceProvider.GetRequiredService<ILogger<HistoryManager>>());
+    }
+
+    public HistoryManager HistoryManager { get; }
+
+    public Chess GetChessAtPosition(Position position)
+    {
+        return Chesses[position.Y, position.X];
+    }
+
+
+    public void SetChessAtPosition(Chess chess, Position position, out Chess removedChess)
+    {
+        removedChess = GetChessAtPosition(position);
+        Chesses[position.Y, position.X] = chess;
+    }
+}

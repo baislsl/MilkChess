@@ -2,6 +2,7 @@
 using Microsoft.Maui.Layouts;
 using MilkChess.Helper;
 using MilkChess.Model;
+using MilkChess.Ucci;
 using MilkChess.UserInterface;
 
 namespace MilkChess
@@ -13,14 +14,17 @@ namespace MilkChess
         private readonly ChessModel ChessModel;
 
         public MainPage(ChessBoardViewModel chessBoardViewModel,
-            ChessModel chessModel,
-            ILogger<MainPage> logger)
+                        ChessModel chessModel,
+                        ILogger<MainPage> logger)
         {
             ChessBoardViewModel = chessBoardViewModel;
             ChessModel = chessModel;
             Logger = logger;
 
             InitializeComponent();
+
+            BindingContext = chessBoardViewModel;
+
             InitChessBoardLayout();
 
             logger.LogInformation("Started");
@@ -33,10 +37,10 @@ namespace MilkChess
             // background image
             Image backgroundImage = new Image()
             {
-                Source = UIConstants.ChessBoardBackgroundResource
+                            Source = UIConstants.ChessBoardBackgroundResource
             };
             AbsoluteLayout.SetLayoutBounds(backgroundImage,
-                new Rect(0, 0, AbsoluteLayout.AutoSize, AbsoluteLayout.AutoSize));
+                            new Rect(0, 0, AbsoluteLayout.AutoSize, AbsoluteLayout.AutoSize));
             AbsoluteLayout.SetLayoutFlags(backgroundImage, AbsoluteLayoutFlags.PositionProportional);
             ChessBoardLayout.Add(backgroundImage);
 
@@ -55,29 +59,9 @@ namespace MilkChess
             ChessBoardLayout.Add(ChessBoardViewModel.CursorSelector);
         }
 
-        private void ResetCommand(object sender, EventArgs e)
+        private void Button_OnClicked(object sender, EventArgs e)
         {
-            ChessBoardViewModel.Reset();
-        }
-
-        private void MoveForwardCommand(object sender, EventArgs e)
-        {
-            ChessBoardViewModel.MoveForward();
-        }
-
-        private void MoveBackwardCommand(object sender, EventArgs e)
-        {
-            ChessBoardViewModel.MoveBackward();
-        }
-
-        private void MoveToStartCommand(object sender, EventArgs e)
-        {
-            throw new NotImplementedException();
-        }
-
-        private void MoveToEndCommand(object sender, EventArgs e)
-        {
-            throw new NotImplementedException();
+            ChessBoardViewModel.MoveBackwardCommand.Execute(sender);
         }
     }
 }

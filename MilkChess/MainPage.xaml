@@ -31,14 +31,14 @@
                     <ColumnDefinition />
                     <ColumnDefinition />
                 </Grid.ColumnDefinitions>
-                <Button Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Text="Reset" Clicked="ResetCommand" />
-                <Button Grid.Row="0" Grid.Column="2" Text="ToBegin" Clicked="MoveToStartCommand" />
-                <Button Grid.Row="0" Grid.Column="3" Text="ToEnd" Clicked="MoveToEndCommand" />
+                <Button Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Text="Reset" Command="{Binding ResetCommand}" />
+                <Button Grid.Row="0" Grid.Column="2" Text="ToBegin" Command="{Binding MoveToStartCommand}" />
+                <Button Grid.Row="0" Grid.Column="3" Text="ToEnd" Command="{Binding MoveToEndCommand}" />
 
-                <Button Grid.Row="1" Grid.Column="0" Text="Go back" Clicked="MoveBackwardCommand" />
-                <Button Grid.Row="1" Grid.Column="1" Text="Go back1" Clicked="MoveBackwardCommand" />
-                <Button Grid.Row="1" Grid.Column="2" Text="Move forward1" Clicked="MoveForwardCommand" />
-                <Button Grid.Row="1" Grid.Column="3" Text="Move forward" Clicked="MoveForwardCommand" />
+                <Button Grid.Row="1" Grid.Column="0" Text="Go back" Command="{Binding MoveBackwardCommand}" />
+                <Button Grid.Row="1" Grid.Column="1" Text="Go back1" Command="{Binding MoveBackwardCommand}" />
+                <Button Grid.Row="1" Grid.Column="2" Text="Move forward1" Command="{Binding  MoveForwardCommand}" />
+                <Button Grid.Row="1" Grid.Column="3" Text="Move forward" Command="{Binding MoveToEndCommand}" />
 
 
             </Grid>
