@@ -48,7 +48,7 @@ public class ChessBoardViewModel : IChessBoardHandler
                         $"Clicked {clickedButton.Position} {clickedButton.Chess}; Selected {SelectedChess?.Position}, {SelectedChess?.Chess}");
 
         if (SelectedChess?.Chess == null
-            || SelectedChess.Chess.Color != HistoryManager.NextColorStep
+            || SelectedChess.Chess.Color != HistoryManager.ExecutionTurn
             || !ChessModel.ValidateMovement(SelectedChess.Position, clickedButton.Position))
         {
             SelectedChess = clickedButton;

@@ -153,7 +153,7 @@ public static class ForsythEdwardsNotationExtension
         }
 
         chessBoardHandler.HistoryManager.Reset();
-        chessBoardHandler.HistoryManager.NextColorStep = forsythEdwardsNotation.ActiveColor;
+        chessBoardHandler.HistoryManager.ExecutionTurn = forsythEdwardsNotation.ActiveColor;
 
         return true;
     }
@@ -194,7 +194,7 @@ public static class ForsythEdwardsNotationExtension
         return new ForsythEdwardsNotation
         {
                         PiecePlacement = piecePlacement,
-                        ActiveColor = chessBoardHandler.HistoryManager.NextColorStep
+                        ActiveColor = chessBoardHandler.HistoryManager.ExecutionTurn
         };
     }
 }

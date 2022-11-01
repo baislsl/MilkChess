@@ -6,9 +6,19 @@ namespace MilkChess.Model;
 
 public class HistoryManager
 {
-    public ChessModel InitialLayout { get; set; }
+    private EventHandler ExecutionTurnEventHandler;
 
-    public Color NextColorStep { get; set; }
+    private Color _executionTurn;
+    
+    public Color ExecutionTurn
+    {
+        get => _executionTurn;
+        set
+        {
+            this._executionTurn = value;
+            ExecutionTurnEventHandler?.Invoke(this, EventArgs.Empty);
+        }
+    }
 
     public IList<Movement> Movements { get; private set; }
 
@@ -25,16 +35,16 @@ public class HistoryManager
         }
     }
 
-    public HistoryManager(ILogger<HistoryManager> logger, Collection<Movement> movementContainer = null)
+    public HistoryManager(ILogger<HistoryManager> logger, IList<Movement> movementContainer = null)
     {
         this.Logger = logger;
-        this.Movements = movementContainer ?? (IList<Movement>) new List<Movement>();
+        this.Movements = movementContainer ?? new List<Movement>();
         this.Reset();
     }
 
     public void InsertMovement(Movement movement)
     {
-        this.NextColorStep = this.NextColorStep.Reverse();
+        this.ExecutionTurn = this.ExecutionTurn.Reverse();
 
         while (Movements.Any() && Movements.Count != Cursor)
         {
@@ -49,7 +59,7 @@ public class HistoryManager
     {
         if (this.Cursor == 0) return null;
 
-        this.NextColorStep = this.NextColorStep.Reverse();
+        this.ExecutionTurn = this.ExecutionTurn.Reverse();
         var ret = LastMovement;
         this.Cursor--;
         return ret;
@@ -62,7 +72,7 @@ public class HistoryManager
             return null;
         }
 
-        this.NextColorStep = this.NextColorStep.Reverse();
+        this.ExecutionTurn = this.ExecutionTurn.Reverse();
         this.Cursor++;
         return this.Movements[this.Cursor - 1];
     }
@@ -76,6 +86,11 @@ public class HistoryManager
     {
         this.Movements.Clear();
         this.Cursor = 0;
-        this.NextColorStep = Color.RED;
+        this.ExecutionTurn = Color.RED;
+    }
+
+    public void AddActiveColorListener(EventHandler eventHandler)
+    {
+        this.ExecutionTurnEventHandler += eventHandler;
     }
 }

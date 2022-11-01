@@ -12,14 +12,17 @@ namespace MilkChess
         private readonly ILogger Logger;
         private readonly ChessBoardViewModel ChessBoardViewModel;
         private readonly ChessModel ChessModel;
+        private readonly HistoryManager HistoryManager;
 
         public MainPage(ChessBoardViewModel chessBoardViewModel,
                         ChessModel chessModel,
+                        HistoryManager historyManager,
                         ILogger<MainPage> logger)
         {
             ChessBoardViewModel = chessBoardViewModel;
             ChessModel = chessModel;
             Logger = logger;
+            HistoryManager = historyManager;
 
             InitializeComponent();
 
@@ -57,6 +60,17 @@ namespace MilkChess
             });
 
             ChessBoardLayout.Add(ChessBoardViewModel.CursorSelector);
+
+            ExecutionTurnNotifier executionTurnNotifier = new ExecutionTurnNotifier();
+            AbsoluteLayout.SetLayoutBounds(executionTurnNotifier,
+                            new Rect(UIConstants.HorizontalOffset/2.0, UIConstants.ChessBoardHeight/2.0, AbsoluteLayout.AutoSize,
+                                            AbsoluteLayout.AutoSize));
+            AbsoluteLayout.SetLayoutFlags(executionTurnNotifier, AbsoluteLayoutFlags.None);
+            HistoryManager.AddActiveColorListener(delegate(object sender, EventArgs args)
+            {
+                executionTurnNotifier.ExecutionTurn = HistoryManager.ExecutionTurn;
+            });
+            ChessBoardLayout.Add(executionTurnNotifier);
         }
 
         private void Button_OnClicked(object sender, EventArgs e)
