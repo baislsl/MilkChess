@@ -35,7 +35,7 @@ public static class Constants
 
 public static class Command
 {
-    public const string Ucci = "ucci";
+    public const string Ucci = "uci";
 
     public const string SetOption = "SetOption";
 
