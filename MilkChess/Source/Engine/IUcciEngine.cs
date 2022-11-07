@@ -7,6 +7,8 @@ internal interface INativeUcciEngine : IDisposable
 {
     void Initialize();
 
+    void DiscardBufferData();
+
     public void SendCommand(string command);
 
     public string GetFeedback();
@@ -14,15 +16,15 @@ internal interface INativeUcciEngine : IDisposable
 
 internal interface IUcciEngine
 {
-    public UciFeedback StartUci();
+    public UciFeedback StartUci(CancellationToken cancellationToken);
 
-    public void WaitToReady();
+    public void WaitToReady(CancellationToken cancellationToken);
 
-    public void SetOption(string option, string config);
+    public void SetOption(string option, string config, CancellationToken cancellationToken);
 
-    public void Position(IChessBoardHandler chessBoardHandler);
+    public void Position(IChessBoardHandler chessBoardHandler, CancellationToken cancellationToken);
 
-    public void BanMoves(IEnumerable<string> banMoves);
+    public void BanMoves(IEnumerable<string> banMoves, CancellationToken cancellationToken);
 
     public BestMove Go(GoOption option, CancellationToken cancellationToken, EventHandler<InfoFeedback> onInfoReceived);
 
@@ -80,4 +82,10 @@ public class UciFeedback
 {
     public Dictionary<string, string> ID { get; set; }
     public List<string> Options { get; set; }
+
+    public UciFeedback()
+    {
+        this.ID = new Dictionary<string, string>();
+        this.Options = new List<string>();
+    }
 }

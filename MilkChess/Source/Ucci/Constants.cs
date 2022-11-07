@@ -37,6 +37,8 @@ public static class Command
 {
     public const string Ucci = "uci";
 
+    public const string IsReady = "isready";
+
     public const string SetOption = "SetOption";
 
     public const string Position = "position";

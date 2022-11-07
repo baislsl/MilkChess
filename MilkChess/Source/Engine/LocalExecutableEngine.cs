@@ -42,7 +42,7 @@ public class LocalExecutableEngine : INativeUcciEngine
 
     public void SendCommand(string command)
     {
-        Logger.LogInformation($"[Send] ${command}");
+        Logger.LogInformation($"[Send] {command}");
         this.Process.StandardInput.WriteLine(command);
     }
 
@@ -51,6 +51,14 @@ public class LocalExecutableEngine : INativeUcciEngine
         string feedback = this.Process.StandardOutput.ReadLine();
         Logger.LogInformation($"[Received] {feedback}");
         return feedback;
+    }
+
+    public void DiscardBufferData()
+    {
+        while (this.Process.StandardOutput.Peek() > -1)
+        {
+            _ = this.GetFeedback();
+        }
     }
 
     public void Dispose()
