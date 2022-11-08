@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using Microsoft.Extensions.Logging;
+using MilkChess.Engine;
 using MilkChess.Model;
 using MilkChess.UserInterface;
 
@@ -7,6 +8,11 @@ namespace MilkChess
 {
     public static class MauiProgram
     {
+        private const string LocalExecutableFile =
+                        "/Users/baislsl/go/src/github.com/baislsl/UcciProxy/client/remote_engine";
+
+        private static Collection<string> Arguments = new Collection<string> {"-addr", "192.168.31.7:7890"};
+
 #if !(IOS || ANDROID || MACCATALYST || WINDOWS)
         public static void Main(string[] args)
         {
@@ -30,7 +36,13 @@ namespace MilkChess
             builder.Services.AddSingleton<HistoryManager>(x =>
                             new HistoryManager(x.GetRequiredService<ILogger<HistoryManager>>(),
                                             new ObservableCollection<Movement>()));
-
+            builder.Services.AddTransient<UcciEngineConfig>(x =>
+                            new UcciEngineConfig()
+                            {
+                                            LocalExecutableFile = LocalExecutableFile,
+                                            Arguments = Arguments,
+                            });
+            builder.Services.AddTransient<UcciEngine>();
             return builder.Build();
         }
     }

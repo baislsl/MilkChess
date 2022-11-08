@@ -1,6 +1,8 @@
 using System.Collections.ObjectModel;
+using System.Text;
 using Microsoft.Extensions.Logging;
 using MilkChess.Model;
+using MilkChess.Ucci;
 using Command = MilkChess.Ucci.Command;
 
 namespace MilkChess.Engine;
@@ -20,14 +22,14 @@ public class UcciEngine : IUcciEngine
     public UcciEngine(ILogger logger, UcciEngineConfig config)
     {
         this.Logger = logger;
-        this.NativeUcciEngine = new LocalExecutableEngine(logger, config.LocalExecutableFile, config.Arguments);
+        this.NativeUcciEngine = new LocalExecutableEngine(config.LocalExecutableFile, config.Arguments);
     }
 
     public UciFeedback StartUci(CancellationToken cancellationToken)
     {
         NativeUcciEngine.Initialize();
 
-        this.ClearBufferData();
+        this.DiscardBufferData();
         this.SendCommand(Command.Ucci);
 
         UciFeedback feedback = new UciFeedback();
@@ -62,7 +64,7 @@ public class UcciEngine : IUcciEngine
 
     public void WaitToReady(CancellationToken cancellationToken)
     {
-        this.ClearBufferData();
+        this.DiscardBufferData();
         this.SendCommand(Command.IsReady);
         UcciFeedback ucciFeedback = this.ReceiveFeedback();
         if (ucciFeedback.Command != FeedbackCommand.ReadyOk)
@@ -78,7 +80,7 @@ public class UcciEngine : IUcciEngine
 
     public void Position(IChessBoardHandler chessBoardHandler, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        this.SendCommand($"{Command.Position} fen {chessBoardHandler.BuildForsythEdwardsNotation().GetFenString()}");
     }
 
     public void BanMoves(IEnumerable<string> banMoves, CancellationToken cancellationToken)
@@ -88,20 +90,101 @@ public class UcciEngine : IUcciEngine
 
     public BestMove Go(GoOption option, CancellationToken cancellationToken, EventHandler<InfoFeedback> onInfoReceived)
     {
-        throw new NotImplementedException();
+        BestMove bestMove = null;
+
+        this.DiscardBufferData();
+        this.SendCommand(this.BuildGoCommand(option));
+
+        while (!cancellationToken.IsCancellationRequested && bestMove == null)
+        {
+            UcciFeedback feedback = this.ReceiveFeedback();
+
+            if (feedback == null) continue;
+
+            if (feedback.Command == FeedbackCommand.Info)
+            {
+                onInfoReceived?.Invoke(this, new InfoFeedback()
+                {
+                                Pv = feedback.InfoPv,
+                                Info = feedback.InfoDict,
+                });
+            }
+            else if (feedback.Command == FeedbackCommand.BestMove)
+            {
+                bestMove = new BestMove()
+                {
+                                BestMovement = feedback.BestMoveBestMovement,
+                                Ponder = feedback.BestMovePonder,
+                                Draw = feedback.BestMoveDraw,
+                                Resign = feedback.BestMoveResign,
+                };
+            }
+        }
+
+        if (cancellationToken.IsCancellationRequested && bestMove != null)
+        {
+            this.SendCommand(Command.Stop);
+        }
+
+        return bestMove;
+    }
+
+    private string BuildGoCommand(GoOption option)
+    {
+        StringBuilder cmd = new StringBuilder("go");
+
+        if (option.Ponder.HasValue)
+        {
+            cmd.Append(" ponder");
+        }
+        else if (option.Draw.HasValue)
+        {
+            cmd.Append(" draw");
+        }
+
+        if (option.Depth.HasValue)
+        {
+            if (option.Depth >= 0)
+            {
+                cmd.Append(" depth ").Append(option.Depth.Value);
+            }
+            else // infinite
+            {
+                cmd.Append(" depth ").Append("infinite");
+            }
+        }
+
+        if (option.Nodes.HasValue)
+        {
+            cmd.Append(" nodes ").Append(option.Nodes.Value);
+        }
+
+        if (option.Time.HasValue)
+        {
+            cmd.Append(" time ").Append(option.Time.Value);
+
+            if (option.MovesToGo.HasValue) cmd.Append(" movestogo ").Append(option.MovesToGo.Value);
+            if (option.Increment.HasValue) cmd.Append(" increment ").Append(option.Increment.Value);
+            if (option.OppTime.HasValue) cmd.Append(" opptime ").Append(option.OppTime.Value);
+            if (option.OppMovesToGo.HasValue) cmd.Append(" oppmovestogo ").Append(option.OppMovesToGo.Value);
+            if (option.OppIncrement.HasValue) cmd.Append(" oppincrement ").Append(option.OppIncrement.Value);
+        }
+
+        return cmd.ToString();
     }
 
     public void Quit()
     {
-        this.ClearBufferData();
+        this.DiscardBufferData();
         this.SendCommand(Command.Quit);
 
         this.NativeUcciEngine.Dispose();
     }
 
-    private void SendCommand(string cmd)
+    private void SendCommand(string command)
     {
-        this.NativeUcciEngine.SendCommand(cmd);
+        Logger.LogInformation($"[Send] {command}");
+        this.NativeUcciEngine.SendCommand(command);
     }
 
     private UcciFeedback ReceiveFeedback()
@@ -109,15 +192,19 @@ public class UcciEngine : IUcciEngine
         var feedback = this.NativeUcciEngine.GetFeedback();
         if (!UcciFeedback.TryParse(feedback, out UcciFeedback ucciFeedback))
         {
-            Logger.LogError($"Can't parse feedback {feedback}");
+            Logger.LogError($"Can't parse feedback: {feedback}");
             return null;
         }
 
+        Logger.LogInformation($"[Received] {feedback}");
         return ucciFeedback;
     }
 
-    private void ClearBufferData()
+    private void DiscardBufferData()
     {
-        this.NativeUcciEngine.DiscardBufferData();
+        foreach (var feedback in this.NativeUcciEngine.DiscardBufferData())
+        {
+            Logger.LogInformation($"[Discard] {feedback}");
+        }
     }
 }

@@ -44,6 +44,8 @@ public static class Command
     public const string Position = "position";
 
     public const string Go = "go";
+    
+    public const string Stop = "Stop";
 
     public const string Quit = "Quit";
 }

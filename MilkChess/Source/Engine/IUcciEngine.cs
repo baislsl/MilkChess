@@ -7,7 +7,7 @@ internal interface INativeUcciEngine : IDisposable
 {
     void Initialize();
 
-    void DiscardBufferData();
+    IEnumerable<string> DiscardBufferData();
 
     public void SendCommand(string command);
 
@@ -31,8 +31,10 @@ internal interface IUcciEngine
     public void Quit();
 }
 
-public struct GoOption
+public class GoOption
 {
+    public bool? Ponder { get; set; }
+    public bool? Draw { get; set; }
     public int? Depth { get; set; }
     public int? Nodes { get; set; }
     public int? Time { get; set; }
@@ -43,7 +45,7 @@ public struct GoOption
     public int? OppIncrement { get; set; }
 }
 
-public struct BestMove
+public class BestMove
 {
     public string BestMovement { get; set; }
     public string Ponder { get; set; }
@@ -53,18 +55,26 @@ public struct BestMove
 
 public class InfoFeedback
 {
+    public List<string> Pv { get; set; }
+    public Dictionary<string, string> Info { get; set; }
+
+    public InfoFeedback()
+    {
+        this.Pv = new List<string>();
+        this.Info = new Dictionary<string, string>();
+    }
 }
 
 public class TimeNodeFeedback : InfoFeedback
 {
-    public int Time { get; set; }
-    public int Nodes { get; set; }
+    public string Time { get; set; }
+    public string Nodes { get; set; }
 }
 
 public class DepthFeedback : InfoFeedback
 {
-    public int Depth { get; set; }
-    public int? Score { get; set; }
+    public string Depth { get; set; }
+    public string Score { get; set; }
     public List<string> Pv { get; set; }
 }
 

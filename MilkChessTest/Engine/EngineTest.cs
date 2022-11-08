@@ -20,10 +20,7 @@ public class EngineTest
     {
         var app = MauiProgram.CreateMauiApp();
 
-        LocalExecutableEngine engine = new LocalExecutableEngine(
-                        app.Services.GetService<ILogger<LocalExecutableEngine>>(),
-                        LocalExecutableFile
-                        , Arguments);
+        LocalExecutableEngine engine = new LocalExecutableEngine(LocalExecutableFile, Arguments);
         engine.Initialize();
         engine.DiscardBufferData();
         engine.SendCommand("uci");
@@ -48,9 +45,15 @@ public class EngineTest
                                         LocalExecutableFile = LocalExecutableFile,
                                         Arguments = Arguments,
                         });
-        
+
         engine.StartUci(CancellationToken.None);
         engine.WaitToReady(CancellationToken.None);
-        engine.Quit();        
+        engine.Position(new MockChessModel(app.Services), CancellationToken.None);
+        var goOption = new GoOption()
+        {
+                        Depth = 10,
+        };
+        engine.Go(goOption, CancellationToken.None, null);
+        engine.Quit();
     }
 }

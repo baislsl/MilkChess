@@ -6,15 +6,13 @@ namespace MilkChess.Engine;
 
 public class LocalExecutableEngine : INativeUcciEngine
 {
-    private readonly ILogger Logger;
     private readonly string ExecutableFile;
     private readonly Collection<string> Arguments;
 
     private Process Process;
 
-    public LocalExecutableEngine(ILogger logger, string executableFile, Collection<string> arguments)
+    public LocalExecutableEngine(string executableFile, Collection<string> arguments)
     {
-        this.Logger = logger;
         this.ExecutableFile = executableFile;
         this.Arguments = arguments;
     }
@@ -42,22 +40,19 @@ public class LocalExecutableEngine : INativeUcciEngine
 
     public void SendCommand(string command)
     {
-        Logger.LogInformation($"[Send] {command}");
         this.Process.StandardInput.WriteLine(command);
     }
 
     public string GetFeedback()
     {
-        string feedback = this.Process.StandardOutput.ReadLine();
-        Logger.LogInformation($"[Received] {feedback}");
-        return feedback;
+        return this.Process.StandardOutput.ReadLine();
     }
 
-    public void DiscardBufferData()
+    public IEnumerable<string> DiscardBufferData()
     {
         while (this.Process.StandardOutput.Peek() > -1)
         {
-            _ = this.GetFeedback();
+            yield return this.GetFeedback();
         }
     }
 

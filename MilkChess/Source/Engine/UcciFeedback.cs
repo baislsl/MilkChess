@@ -13,6 +13,14 @@ public enum FeedbackCommand
     Bye,
 }
 
+public enum SubInfoCommand
+{
+    Time,
+    Depth,
+    CurrMove,
+    Message,
+}
+
 public class UcciFeedback
 {
     public string RawCommand;
@@ -30,6 +38,23 @@ public class UcciFeedback
     #endregion
 
 
+    #region fields for Info
+
+    public List<string> InfoPv;
+    public Dictionary<string, string> InfoDict;
+
+    #endregion
+
+    #region BestMove
+
+    public string BestMoveBestMovement;
+    public string BestMovePonder;
+    public bool BestMoveDraw;
+    public bool BestMoveResign;
+
+    #endregion
+
+
     public override string ToString()
     {
         return this.RawCommand;
@@ -42,7 +67,7 @@ public class UcciFeedback
         s = s.Trim();
         var list = s.Split(' ');
 
-        if (list?.Length < 0)
+        if (list.Length <= 0)
         {
             return false;
         }
@@ -68,12 +93,31 @@ public class UcciFeedback
             case FeedbackCommand.ReadyOk:
                 break;
             case FeedbackCommand.Info:
+                int idx = 1;
+                feedback.InfoDict = new Dictionary<string, string>();
+                feedback.InfoPv = new List<string>();
+                while (idx < list.Length)
+                {
+                    if (list[idx] != "pv")
+                    {
+                        if (list[idx] == "lowerbound") idx++;   // adapt for GGchess
+                        if (idx + 1 >= list.Length) return false;
+                        feedback.InfoDict[list[idx]] = list[idx + 1];
+                        idx += 2;
+                    }
+                    else
+                    {
+                        feedback.InfoPv = list.Skip(idx + 1).ToList();
+                        break;
+                    }
+                }
+
                 break;
             case FeedbackCommand.BestMove:
                 break;
             case FeedbackCommand.NoBestMove:
                 break;
-            
+
             case FeedbackCommand.PopHash:
                 break;
             case FeedbackCommand.Bye:
