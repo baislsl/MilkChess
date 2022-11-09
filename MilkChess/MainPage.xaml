@@ -9,7 +9,7 @@
     <HorizontalStackLayout
         BackgroundColor="YellowGreen"
         Margin="20">
-        <HorizontalStackLayout>
+        <VerticalStackLayout>
             <Label Text="Score: 123"
                    HeightRequest="30" />
             <ListView
@@ -38,7 +38,7 @@
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>
-        </HorizontalStackLayout>
+        </VerticalStackLayout>
         <AbsoluteLayout
             WidthRequest="{Binding ChessBoardWidth}"
             HeightRequest="{Binding ChessBoardHeight}"

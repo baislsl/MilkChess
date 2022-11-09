@@ -11,14 +11,40 @@ namespace MilkChess.UserInterface;
 
 public class ChessBoardViewModel : IChessBoardHandler
 {
+    #region view model definition
+
     public int ChessBoardHeight => UIConstants.ChessBoardHeight;
+
     public int ChessBoardWidth => UIConstants.ChessBoardWidth;
 
-    public readonly List<List<ChessButton>> Martix;
+    public ObservableCollection<Movement> HistoryMovement => (ObservableCollection<Movement>) HistoryManager.Movements;
 
+    // Compiler will throw error result if I remove this unused fields.
+    // This seems to be the compiler bug.
+    public string ChineseViewableString => default;
+    public string ActionCount => default;
+
+    public ICommand ResetCommand => this.WrapClickCommand(this.Reset);
+
+    public ICommand MoveBackwardCommand => this.WrapClickCommand(this.MoveBackward);
+
+    public ICommand MoveForwardCommand => this.WrapClickCommand(this.MoveForward);
+
+    public ICommand MoveToStartCommand => this.WrapClickCommand(this.MoveToStart);
+
+    public ICommand MoveToEndCommand => this.WrapClickCommand(this.MoveToEnd);
+
+    #endregion
+
+    #region binding component
+    
     public readonly CursorSelector CursorSelector;
 
     public ChessButton SelectedChess = null;
+
+    #endregion
+
+    public readonly List<List<ChessButton>> Martix;
 
     public readonly ChessModel ChessModel;
 
@@ -108,10 +134,10 @@ public class ChessBoardViewModel : IChessBoardHandler
             HistoryManager.InsertMovement(movement);
 
             Logger.LogInformation($"fen {this.BuildForsythEdwardsNotation().GetFenString()}");
-            
+
             GoCancellationTokenSource?.Cancel();
             GoCancellationTokenSource = new CancellationTokenSource();
-            
+
             Engine.Position(this, GoCancellationTokenSource.Token);
             Engine.Go(new GoOption() {Depth = -1}, GoCancellationTokenSource.Token, this.OnInfoFeedbackReceived);
         }
@@ -201,23 +227,6 @@ public class ChessBoardViewModel : IChessBoardHandler
             this.ApplyMovement(movement);
         }
     }
-
-    // Compiler will throw error result if I remove this unused fields.
-    // This seems to be the compiler bug.
-    public string ChineseViewableString => default;
-    public string ActionCount => default;
-
-    public ObservableCollection<Movement> HistoryMovement => (ObservableCollection<Movement>) HistoryManager.Movements;
-
-    public ICommand ResetCommand => this.WrapClickCommand(this.Reset);
-
-    public ICommand MoveBackwardCommand => this.WrapClickCommand(this.MoveBackward);
-
-    public ICommand MoveForwardCommand => this.WrapClickCommand(this.MoveForward);
-
-    public ICommand MoveToStartCommand => this.WrapClickCommand(this.MoveToStart);
-
-    public ICommand MoveToEndCommand => this.WrapClickCommand(this.MoveToEnd);
 
     private ICommand WrapClickCommand(Action action, [CallerMemberName] string commandName = "")
     {
