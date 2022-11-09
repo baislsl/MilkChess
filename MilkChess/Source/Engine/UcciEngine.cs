@@ -16,10 +16,10 @@ public class UcciEngineConfig
 
 public class UcciEngine : IUcciEngine
 {
-    private INativeUcciEngine NativeUcciEngine;
-    private ILogger Logger;
+    private readonly INativeUcciEngine NativeUcciEngine;
+    private readonly ILogger Logger;
 
-    public UcciEngine(ILogger logger, UcciEngineConfig config)
+    public UcciEngine(ILogger<UcciEngine> logger, UcciEngineConfig config)
     {
         this.Logger = logger;
         this.NativeUcciEngine = new LocalExecutableEngine(config.LocalExecutableFile, config.Arguments);
@@ -33,9 +33,7 @@ public class UcciEngine : IUcciEngine
         this.SendCommand(Command.Ucci);
 
         UciFeedback feedback = new UciFeedback();
-        bool getUciFeedback = false;
-
-        while (!cancellationToken.IsCancellationRequested && !getUciFeedback)
+        while (!cancellationToken.IsCancellationRequested && !feedback.ReceivedUcciOk)
         {
             Task t = Task.Factory.StartNew(() =>
             {
@@ -44,7 +42,7 @@ public class UcciEngine : IUcciEngine
 
                 if (ucciFeedback.Command == FeedbackCommand.UciOk)
                 {
-                    getUciFeedback = true;
+                    feedback.ReceivedUcciOk = true;
                 }
                 else if (ucciFeedback.Command == FeedbackCommand.Id)
                 {
@@ -64,13 +62,17 @@ public class UcciEngine : IUcciEngine
 
     public void WaitToReady(CancellationToken cancellationToken)
     {
-        this.DiscardBufferData();
-        this.SendCommand(Command.IsReady);
-        UcciFeedback ucciFeedback = this.ReceiveFeedback();
-        if (ucciFeedback.Command != FeedbackCommand.ReadyOk)
+        Task task = Task.Factory.StartNew(() =>
         {
-            Logger.LogError($"IsReady receive incorrect feedback {ucciFeedback}");
-        }
+            this.DiscardBufferData();
+            this.SendCommand(Command.IsReady);
+            UcciFeedback ucciFeedback = this.ReceiveFeedback();
+            if (ucciFeedback.Command != FeedbackCommand.ReadyOk)
+            {
+                Logger.LogError($"IsReady receive incorrect feedback {ucciFeedback}");
+            }
+        });
+        task.Wait(cancellationToken);
     }
 
     public void SetOption(string option, string config, CancellationToken cancellationToken)

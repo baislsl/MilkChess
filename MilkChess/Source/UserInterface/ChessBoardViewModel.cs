@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using Microsoft.Extensions.Logging;
+using MilkChess.Engine;
 using MilkChess.Helper;
 using MilkChess.Model;
 using MilkChess.Ucci;
@@ -23,14 +24,23 @@ public class ChessBoardViewModel : IChessBoardHandler
 
     public readonly ILogger Logger;
 
+    private readonly UcciEngine Engine;
+
+    private CancellationTokenSource GoCancellationTokenSource;
+
+    private InfoFeedback infoFeedback;
+
     public HistoryManager HistoryManager { get; }
 
-    public ChessBoardViewModel(ILogger<ChessBoardViewModel> logger, ChessModel chessModel,
-                    HistoryManager historyManager)
+    public ChessBoardViewModel(ILogger<ChessBoardViewModel> logger,
+                    ChessModel chessModel,
+                    HistoryManager historyManager,
+                    UcciEngine engine)
     {
         Logger = logger;
         ChessModel = chessModel;
         HistoryManager = historyManager;
+        Engine = engine;
 
         Martix = new List<List<ChessButton>>(ChessBoardHeight);
         for (int i = 0; i < ChessBoardHeight; i++)
@@ -39,6 +49,24 @@ public class ChessBoardViewModel : IChessBoardHandler
         }
 
         this.CursorSelector = new CursorSelector(this.ChessModel, this.ChessModel.Cursor.Position);
+    }
+
+    public void InitializeUcciEngine()
+    {
+        Logger.LogInformation("Initailzing engine...");
+        CancellationTokenSource cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(15));
+
+        var startUciFeedback = Engine.StartUci(cancellationTokenSource.Token);
+        Engine.WaitToReady(cancellationTokenSource.Token);
+
+        if (!startUciFeedback.ReceivedUcciOk || cancellationTokenSource.IsCancellationRequested)
+        {
+            Logger.LogError("Init ucci engine failed");
+        }
+        else
+        {
+            Logger.LogInformation($"init engine success");
+        }
     }
 
     public void OnChessSelected(object sender, EventArgs args)
@@ -80,7 +108,48 @@ public class ChessBoardViewModel : IChessBoardHandler
             HistoryManager.InsertMovement(movement);
 
             Logger.LogInformation($"fen {this.BuildForsythEdwardsNotation().GetFenString()}");
+            
+            GoCancellationTokenSource?.Cancel();
+            GoCancellationTokenSource = new CancellationTokenSource();
+            
+            Engine.Position(this, GoCancellationTokenSource.Token);
+            Engine.Go(new GoOption() {Depth = -1}, GoCancellationTokenSource.Token, this.OnInfoFeedbackReceived);
         }
+    }
+
+    private void OnInfoFeedbackReceived(object o, InfoFeedback feedback)
+    {
+        this.infoFeedback = feedback;
+        Logger.LogInformation($"[Ucci feedback] {feedback}");
+    }
+
+    public void ApplyMovement(Movement movement)
+    {
+        GetChessButtonAt(movement.From).Chess = null;
+        GetChessButtonAt(movement.To).Chess = movement.MovedChess;
+    }
+
+    public void RevertMovement(Movement movement)
+    {
+        GetChessButtonAt(movement.From).Chess = movement.MovedChess;
+        GetChessButtonAt(movement.To).Chess = movement.RemovedChess;
+    }
+
+    private ChessButton GetChessButtonAt(Position position)
+    {
+        return this.Martix[position.Y][position.X];
+    }
+
+
+    public Chess GetChessAtPosition(Position position)
+    {
+        return this.Martix[position.Y][position.X].Chess;
+    }
+
+    public void SetChessAtPosition(Chess chess, Position position, out Chess removedChess)
+    {
+        removedChess = this.GetChessAtPosition(position);
+        GetChessButtonAt(position).Chess = chess;
     }
 
     public void Reset()
@@ -131,35 +200,6 @@ public class ChessBoardViewModel : IChessBoardHandler
         {
             this.ApplyMovement(movement);
         }
-    }
-
-    public void ApplyMovement(Movement movement)
-    {
-        GetChessButtonAt(movement.From).Chess = null;
-        GetChessButtonAt(movement.To).Chess = movement.MovedChess;
-    }
-
-    public void RevertMovement(Movement movement)
-    {
-        GetChessButtonAt(movement.From).Chess = movement.MovedChess;
-        GetChessButtonAt(movement.To).Chess = movement.RemovedChess;
-    }
-
-    private ChessButton GetChessButtonAt(Position position)
-    {
-        return this.Martix[position.Y][position.X];
-    }
-
-
-    public Chess GetChessAtPosition(Position position)
-    {
-        return this.Martix[position.Y][position.X].Chess;
-    }
-
-    public void SetChessAtPosition(Chess chess, Position position, out Chess removedChess)
-    {
-        removedChess = this.GetChessAtPosition(position);
-        GetChessButtonAt(position).Chess = chess;
     }
 
     // Compiler will throw error result if I remove this unused fields.

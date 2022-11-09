@@ -63,7 +63,8 @@ namespace MilkChess
 
             ExecutionTurnNotifier executionTurnNotifier = new ExecutionTurnNotifier();
             AbsoluteLayout.SetLayoutBounds(executionTurnNotifier,
-                            new Rect(UIConstants.HorizontalOffset/2.0, UIConstants.ChessBoardHeight/2.0, AbsoluteLayout.AutoSize,
+                            new Rect(UIConstants.HorizontalOffset / 2.0, UIConstants.ChessBoardHeight / 2.0,
+                                            AbsoluteLayout.AutoSize,
                                             AbsoluteLayout.AutoSize));
             AbsoluteLayout.SetLayoutFlags(executionTurnNotifier, AbsoluteLayoutFlags.None);
             HistoryManager.AddActiveColorListener(delegate(object sender, EventArgs args)
@@ -71,6 +72,7 @@ namespace MilkChess
                 executionTurnNotifier.ExecutionTurn = HistoryManager.ExecutionTurn;
             });
             ChessBoardLayout.Add(executionTurnNotifier);
+            ChessBoardViewModel.InitializeUcciEngine();
         }
 
         private void Button_OnClicked(object sender, EventArgs e)

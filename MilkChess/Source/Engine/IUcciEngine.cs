@@ -65,33 +65,12 @@ public class InfoFeedback
     }
 }
 
-public class TimeNodeFeedback : InfoFeedback
-{
-    public string Time { get; set; }
-    public string Nodes { get; set; }
-}
-
-public class DepthFeedback : InfoFeedback
-{
-    public string Depth { get; set; }
-    public string Score { get; set; }
-    public List<string> Pv { get; set; }
-}
-
-public class CurrMoveFeedback : InfoFeedback
-{
-    public string CurrMove { get; set; }
-}
-
-public class MessageFeedback : InfoFeedback
-{
-    public string NotifyMessage { get; set; }
-}
-
 public class UciFeedback
 {
     public Dictionary<string, string> ID { get; set; }
     public List<string> Options { get; set; }
+    
+    public bool ReceivedUcciOk { get; set; }
 
     public UciFeedback()
     {
