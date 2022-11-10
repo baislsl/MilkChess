@@ -72,7 +72,6 @@ namespace MilkChess
                 executionTurnNotifier.ExecutionTurn = HistoryManager.ExecutionTurn;
             });
             ChessBoardLayout.Add(executionTurnNotifier);
-            ChessBoardViewModel.InitializeUcciEngine();
         }
 
         private void Button_OnClicked(object sender, EventArgs e)

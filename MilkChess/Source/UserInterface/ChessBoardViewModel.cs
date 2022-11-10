@@ -34,10 +34,12 @@ public class ChessBoardViewModel : IChessBoardHandler
 
     public ICommand MoveToEndCommand => this.WrapClickCommand(this.MoveToEnd);
 
+    public ICommand ConnectToRemoteEngine => this.WrapClickCommand(this.InitializeUcciEngine);
+
     #endregion
 
     #region binding component
-    
+
     public readonly CursorSelector CursorSelector;
 
     public ChessButton SelectedChess = null;
@@ -50,23 +52,26 @@ public class ChessBoardViewModel : IChessBoardHandler
 
     public readonly ILogger Logger;
 
-    private readonly UcciEngine Engine;
+    private UcciEngine Engine;
 
     private CancellationTokenSource GoCancellationTokenSource;
 
     private InfoFeedback infoFeedback;
 
+    private IServiceProvider ServiceProvider;
+
     public HistoryManager HistoryManager { get; }
 
-    public ChessBoardViewModel(ILogger<ChessBoardViewModel> logger,
+    public ChessBoardViewModel(
+                    IServiceProvider serviceProvider,
+                    ILogger<ChessBoardViewModel> logger,
                     ChessModel chessModel,
-                    HistoryManager historyManager,
-                    UcciEngine engine)
+                    HistoryManager historyManager)
     {
         Logger = logger;
         ChessModel = chessModel;
         HistoryManager = historyManager;
-        Engine = engine;
+        ServiceProvider = serviceProvider;
 
         Martix = new List<List<ChessButton>>(ChessBoardHeight);
         for (int i = 0; i < ChessBoardHeight; i++)
@@ -75,24 +80,6 @@ public class ChessBoardViewModel : IChessBoardHandler
         }
 
         this.CursorSelector = new CursorSelector(this.ChessModel, this.ChessModel.Cursor.Position);
-    }
-
-    public void InitializeUcciEngine()
-    {
-        Logger.LogInformation("Initailzing engine...");
-        CancellationTokenSource cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(15));
-
-        var startUciFeedback = Engine.StartUci(cancellationTokenSource.Token);
-        Engine.WaitToReady(cancellationTokenSource.Token);
-
-        if (!startUciFeedback.ReceivedUcciOk || cancellationTokenSource.IsCancellationRequested)
-        {
-            Logger.LogError("Init ucci engine failed");
-        }
-        else
-        {
-            Logger.LogInformation($"init engine success");
-        }
     }
 
     public void OnChessSelected(object sender, EventArgs args)
@@ -138,8 +125,8 @@ public class ChessBoardViewModel : IChessBoardHandler
             GoCancellationTokenSource?.Cancel();
             GoCancellationTokenSource = new CancellationTokenSource();
 
-            Engine.Position(this, GoCancellationTokenSource.Token);
-            Engine.Go(new GoOption() {Depth = -1}, GoCancellationTokenSource.Token, this.OnInfoFeedbackReceived);
+            Engine?.Position(this, GoCancellationTokenSource.Token);
+            Engine?.Go(new GoOption() {Depth = 10}, GoCancellationTokenSource.Token, this.OnInfoFeedbackReceived);
         }
     }
 
@@ -176,6 +163,29 @@ public class ChessBoardViewModel : IChessBoardHandler
     {
         removedChess = this.GetChessAtPosition(position);
         GetChessButtonAt(position).Chess = chess;
+    }
+
+    public void InitializeUcciEngine()
+    {
+        if (Engine != null) return;
+        
+        Logger.LogInformation("Initailzing engine...")
+                        ;
+        Engine = ServiceProvider.GetService<UcciEngine>();
+        
+        CancellationTokenSource cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(15));
+        var startUciFeedback = Engine.StartUci(cancellationTokenSource.Token);
+        
+        Engine.WaitToReady(cancellationTokenSource.Token);
+
+        if (!startUciFeedback.ReceivedUcciOk || cancellationTokenSource.IsCancellationRequested)
+        {
+            Logger.LogError("Init ucci engine failed");
+        }
+        else
+        {
+            Logger.LogInformation($"init engine success");
+        }
     }
 
     public void Reset()

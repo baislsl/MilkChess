@@ -67,6 +67,8 @@
 
             <Button Grid.Row="2" Grid.Column="0" Text="To Start" Command="{Binding MoveToStartCommand}" />
             <Button Grid.Row="2" Grid.Column="1" Text="To End" Command="{Binding  MoveToEndCommand}" />
+            
+            <Button Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Text="ConnectEngine" Command="{Binding ConnectToRemoteEngine}" />
         </Grid>
         <ListView
             WidthRequest="200"

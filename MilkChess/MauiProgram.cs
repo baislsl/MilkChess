@@ -10,8 +10,13 @@ namespace MilkChess
     {
         private const string LocalExecutableFile =
                         "/Users/baislsl/go/src/github.com/baislsl/UcciProxy/client/remote_engine";
+        
+        private static Collection<string> Arguments = new Collection<string>
+        {
+                        "-addr", "192.168.31.7:7890",
+                        "-output", "/private/tmp/remote_engine.log"
+        };
 
-        private static Collection<string> Arguments = new Collection<string> {"-addr", "192.168.31.7:7890"};
 
 #if !(IOS || ANDROID || MACCATALYST || WINDOWS)
         public static void Main(string[] args)
