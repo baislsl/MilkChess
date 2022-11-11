@@ -9,7 +9,7 @@ using MilkChess.Ucci;
 
 namespace MilkChess.UserInterface;
 
-public class ChessBoardViewModel : IChessBoardHandler
+public class ChessBoardViewModel : ChessModel, IChessBoardHandler
 {
     #region view model definition
 
@@ -24,6 +24,8 @@ public class ChessBoardViewModel : IChessBoardHandler
     public string ChineseViewableString => default;
     public string ActionCount => default;
 
+    public EventHandler OnButtonSelectEvent => this.WrapEventHandler(this.OnChessSelected);
+
     public ICommand ResetCommand => this.WrapClickCommand(this.Reset);
 
     public ICommand MoveBackwardCommand => this.WrapClickCommand(this.MoveBackward);
@@ -34,7 +36,9 @@ public class ChessBoardViewModel : IChessBoardHandler
 
     public ICommand MoveToEndCommand => this.WrapClickCommand(this.MoveToEnd);
 
-    public ICommand ConnectToRemoteEngine => this.WrapClickCommand(this.InitializeUcciEngine);
+    public ICommand ConnectToRemoteEngineCommand => this.WrapClickCommand(this.InitializeUcciEngine);
+
+    public ICommand InvokeBestMovementCommand => this.WrapClickCommand(this.InvokeBestMovement);
 
     #endregion
 
@@ -42,44 +46,65 @@ public class ChessBoardViewModel : IChessBoardHandler
 
     public readonly CursorSelector CursorSelector;
 
-    public ChessButton SelectedChess = null;
+    public ChessButton SelectedChess;
 
     #endregion
 
-    public readonly List<List<ChessButton>> Martix;
+    public readonly List<List<ChessButton>> Matrix;
 
-    public readonly ChessModel ChessModel;
+    public new readonly ILogger Logger;
 
-    public readonly ILogger Logger;
+    private readonly IServiceProvider ServiceProvider;
+
+    public readonly MovementIndicator MovementIndicator;
 
     private UcciEngine Engine;
 
     private CancellationTokenSource GoCancellationTokenSource;
 
+    private uint LastEngineRequestId = 0;
+
     private InfoFeedback infoFeedback;
 
-    private IServiceProvider ServiceProvider;
 
     public HistoryManager HistoryManager { get; }
 
     public ChessBoardViewModel(
                     IServiceProvider serviceProvider,
                     ILogger<ChessBoardViewModel> logger,
-                    ChessModel chessModel,
                     HistoryManager historyManager)
+                    : base(serviceProvider.GetService<ILogger<ChessModel>>())
     {
         Logger = logger;
-        ChessModel = chessModel;
         HistoryManager = historyManager;
         ServiceProvider = serviceProvider;
 
-        Martix = new List<List<ChessButton>>(ChessBoardHeight);
+        Matrix = new List<List<ChessButton>>(ChessBoardHeight);
         for (int i = 0; i < ChessBoardHeight; i++)
         {
-            Martix.Add(new List<ChessButton>(new ChessButton[ChessBoardWidth]));
+            Matrix.Add(new List<ChessButton>(new ChessButton[ChessBoardWidth]));
         }
 
-        this.CursorSelector = new CursorSelector(this.ChessModel, this.ChessModel.Cursor.Position);
+        Iterator.IterateOverChessBoard(position =>
+        {
+            Chess chess = this.GetChessAtPosition(position);
+            ChessButton chessButton = new ChessButton(chess, position);
+
+            chessButton.Clicked += this.OnButtonSelectEvent;
+            Matrix[position.Y][position.X] = chessButton;
+        });
+
+        CursorSelector = new CursorSelector(new Position(0, 0), UIConstants.CursorBackgroundResource);
+        MovementIndicator = new MovementIndicator();
+    }
+
+    public void AddToAbsoluteLayout(AbsoluteLayout layout)
+    {
+        MovementIndicator.AddToAbsoluteLayout(layout);
+
+        Iterator.IterateOverChessBoard(position => { layout.Add(Matrix[position.Y][position.X]); });
+
+        layout.Add(CursorSelector);
     }
 
     public void OnChessSelected(object sender, EventArgs args)
@@ -90,7 +115,7 @@ public class ChessBoardViewModel : IChessBoardHandler
 
         if (SelectedChess?.Chess == null
             || SelectedChess.Chess.Color != HistoryManager.ExecutionTurn
-            || !ChessModel.ValidateMovement(SelectedChess.Position, clickedButton.Position))
+            || !this.ValidateMovement(SelectedChess.Position, clickedButton.Position))
         {
             SelectedChess = clickedButton;
             CursorSelector.Position = clickedButton.Position;
@@ -115,67 +140,87 @@ public class ChessBoardViewModel : IChessBoardHandler
             Logger.LogInformation($"Execute movement {movement}");
 
             this.ApplyMovement(movement);
+            HistoryManager.InsertMovement(movement);
+
             SelectedChess = null;
             CursorSelector.Position = clickedButton.Position;
 
-            HistoryManager.InsertMovement(movement);
-
             Logger.LogInformation($"fen {this.BuildForsythEdwardsNotation().GetFenString()}");
-
-            GoCancellationTokenSource?.Cancel();
-            GoCancellationTokenSource = new CancellationTokenSource();
-
-            Engine?.Position(this, GoCancellationTokenSource.Token);
-            Engine?.Go(new GoOption() {Depth = 10}, GoCancellationTokenSource.Token, this.OnInfoFeedbackReceived);
+            BlockingRefreshEngineFeedback();
         }
     }
 
-    private void OnInfoFeedbackReceived(object o, InfoFeedback feedback)
+    private void BlockingRefreshEngineFeedback()
     {
-        this.infoFeedback = feedback;
-        Logger.LogInformation($"[Ucci feedback] {feedback}");
+        GoCancellationTokenSource?.Cancel();
+        GoCancellationTokenSource = new CancellationTokenSource();
+
+        uint requestId = Interlocked.Increment(ref LastEngineRequestId);
+
+        Engine?.Position(this, GoCancellationTokenSource.Token);
+        var bestMove = Engine?.Go(new GoOption() {Depth = 10}, GoCancellationTokenSource.Token,
+                        delegate(object sender, InfoFeedback feedback)
+                        {
+                            // there may be multiple thread running in the same time
+                            // only up\date UI for the last engine request
+                            if (requestId == LastEngineRequestId)
+                            {
+                                this.infoFeedback = feedback;
+                                Logger.LogInformation($"[Ucci feedback] {feedback}");
+                            }
+                        });
+
+        if (bestMove != null)
+        {
+            if (MovementExtension.ParseMovementFromUnifyString(bestMove.BestMovement, out Movement bestMovement))
+            {
+                this.PopulateMovement(bestMovement);
+                Logger.LogInformation("Best move {} {}, {}", bestMove.BestMovement,
+                                bestMovement.ChineseViewableString, bestMovement);
+
+                // there may be multiple thread running in the same time
+                // only up\date UI for the last engine request
+                if (requestId == LastEngineRequestId)
+                {
+                    MovementIndicator.SetMovement(bestMovement);
+                }
+            }
+            else
+            {
+                Logger.LogError($"Unable to parse best movement {bestMove.BestMovement}");
+            }
+        }
     }
 
     public void ApplyMovement(Movement movement)
     {
-        GetChessButtonAt(movement.From).Chess = null;
-        GetChessButtonAt(movement.To).Chess = movement.MovedChess;
+        SetChessAtPosition(null, movement.From, out _);
+        SetChessAtPosition(movement.MovedChess, movement.To, out _);
     }
 
     public void RevertMovement(Movement movement)
     {
-        GetChessButtonAt(movement.From).Chess = movement.MovedChess;
-        GetChessButtonAt(movement.To).Chess = movement.RemovedChess;
+        SetChessAtPosition(movement.MovedChess, movement.From, out _);
+        SetChessAtPosition(movement.RemovedChess, movement.To, out _);
     }
 
-    private ChessButton GetChessButtonAt(Position position)
+    public override void SetChessAtPosition(Chess chess, Position position, out Chess removedChess)
     {
-        return this.Martix[position.Y][position.X];
-    }
-
-
-    public Chess GetChessAtPosition(Position position)
-    {
-        return this.Martix[position.Y][position.X].Chess;
-    }
-
-    public void SetChessAtPosition(Chess chess, Position position, out Chess removedChess)
-    {
-        removedChess = this.GetChessAtPosition(position);
-        GetChessButtonAt(position).Chess = chess;
+        base.SetChessAtPosition(chess, position, out removedChess);
+        this.Matrix[position.Y][position.X].Chess = chess;
     }
 
     public void InitializeUcciEngine()
     {
         if (Engine != null) return;
-        
+
         Logger.LogInformation("Initailzing engine...")
                         ;
         Engine = ServiceProvider.GetService<UcciEngine>();
-        
+
         CancellationTokenSource cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(15));
         var startUciFeedback = Engine.StartUci(cancellationTokenSource.Token);
-        
+
         Engine.WaitToReady(cancellationTokenSource.Token);
 
         if (!startUciFeedback.ReceivedUcciOk || cancellationTokenSource.IsCancellationRequested)
@@ -186,19 +231,22 @@ public class ChessBoardViewModel : IChessBoardHandler
         {
             Logger.LogInformation($"init engine success");
         }
+
+        BlockingRefreshEngineFeedback();
     }
 
-    public void Reset()
+    public override void Reset()
     {
-        ChessModel.Reset();
+        base.Reset();
         HistoryManager.Reset();
 
         Iterator.IterateOverChessBoard(position =>
         {
-            this.Martix[position.Y][position.X].Chess = ChessModel.GetChessAtPosition(position);
+            this.Matrix[position.Y][position.X].Chess = this.GetChessAtPosition(position);
         });
 
         this.SelectedChess = null;
+        BlockingRefreshEngineFeedback();
     }
 
     public void MoveForward()
@@ -208,6 +256,8 @@ public class ChessBoardViewModel : IChessBoardHandler
         {
             this.ApplyMovement(movement);
         }
+
+        BlockingRefreshEngineFeedback();
     }
 
     public void MoveBackward()
@@ -217,6 +267,8 @@ public class ChessBoardViewModel : IChessBoardHandler
         {
             this.RevertMovement(movement);
         }
+
+        BlockingRefreshEngineFeedback();
     }
 
     public void MoveToStart()
@@ -226,6 +278,8 @@ public class ChessBoardViewModel : IChessBoardHandler
         {
             this.RevertMovement(movement);
         }
+
+        BlockingRefreshEngineFeedback();
     }
 
     public void MoveToEnd()
@@ -235,6 +289,20 @@ public class ChessBoardViewModel : IChessBoardHandler
         while ((movement = HistoryManager.MoveForward()) != null)
         {
             this.ApplyMovement(movement);
+        }
+
+        BlockingRefreshEngineFeedback();
+    }
+
+    public void InvokeBestMovement()
+    {
+        Movement movement = this.MovementIndicator?.Movement;
+        if (movement != null)
+        {
+            this.ApplyMovement(movement);
+            HistoryManager.InsertMovement(movement);
+            
+            BlockingRefreshEngineFeedback();
         }
     }
 
@@ -253,5 +321,22 @@ public class ChessBoardViewModel : IChessBoardHandler
                 Logger.LogError(e, "MilkChess click Event error");
             }
         }, canExecute: (object o) => true);
+    }
+
+    private EventHandler WrapEventHandler(EventHandler handler, [CallerMemberName] string eventName = "")
+    {
+        return delegate(object sender, EventArgs args)
+        {
+            try
+            {
+                Logger.LogInformation("Received event {}", eventName);
+                handler.Invoke(sender, args);
+                Logger.LogInformation("Finished event {}", eventName);
+            }
+            catch (Exception e)
+            {
+                Logger.LogError(e, "Event error {}", eventName);
+            }
+        };
     }
 }

@@ -9,6 +9,7 @@ public class UIConstants
 
     public const string ChessBoardBackgroundResource = "board.png";
     public const string CursorBackgroundResource = "mask.png";
+    public const string BaseMovementCursorResource = "bmask.png";
 
     public const int HorizontalOffset = 39;
     public const int VerticalOffset = 39;

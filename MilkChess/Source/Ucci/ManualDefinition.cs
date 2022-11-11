@@ -42,6 +42,53 @@ public static class MovementExtension
         return $"{movement.From.ToUnifyString()}{movement.To.ToUnifyString()}";
     }
 
+    public static bool ParsePositionFromUnifyString(string unifyString, out Position position)
+    {
+        position = null;
+        if (unifyString.Length != 2) return false;
+        
+        int x = unifyString[0] - XArixs[0], y = unifyString[1] - YArixs[0];
+        if (!Position.IsLegalXY(x, y)) return false;
+
+        position = new Position(x, y);
+        return true;
+    }
+
+    /*
+     * Movement at list contains from and to position
+     */
+    public static void PopulateMovement(this IChessBoardHandler chessBoardHandler, Movement movement)
+    {
+        movement.MovedChess = chessBoardHandler.GetChessAtPosition(movement.From);
+        movement.RemovedChess = chessBoardHandler.GetChessAtPosition(movement.To);
+        movement.ChineseViewableString = movement.ToChineseViewableString(chessBoardHandler);
+    }
+
+    public static bool ParseMovementFromUnifyString(string unifyString, out Movement movement)
+    {
+        movement = null;
+
+        if (unifyString?.Length != 4) return false;
+
+        if (!ParsePositionFromUnifyString(unifyString.Substring(0, 2), out Position from))
+        {
+            return false;
+        }
+
+        if (!ParsePositionFromUnifyString(unifyString.Substring(2, 2), out Position to))
+        {
+            return false;
+        }
+
+        movement = new Movement()
+        {
+                        From = from,
+                        To = to,
+        };
+
+        return true;
+    }
+
     // 马二进三
     // {Chess}{XCoordinate}{Action}{NewCoordinate}
     public static string ToChineseViewableString(this Movement movement, IChessBoardHandler chessBoardHandler)

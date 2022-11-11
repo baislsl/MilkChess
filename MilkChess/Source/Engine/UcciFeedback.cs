@@ -77,6 +77,7 @@ public class UcciFeedback
             return false;
         }
 
+        int idx = 1;
         switch (feedback.Command)
         {
             case FeedbackCommand.Id:
@@ -93,14 +94,13 @@ public class UcciFeedback
             case FeedbackCommand.ReadyOk:
                 break;
             case FeedbackCommand.Info:
-                int idx = 1;
                 feedback.InfoDict = new Dictionary<string, string>();
                 feedback.InfoPv = new List<string>();
                 while (idx < list.Length)
                 {
                     if (list[idx] != "pv")
                     {
-                        if (list[idx] == "lowerbound") idx++;   // adapt for GGchess
+                        if (list[idx] == "lowerbound") idx++; // adapt for GGchess
                         if (idx + 1 >= list.Length) return false;
                         feedback.InfoDict[list[idx]] = list[idx + 1];
                         idx += 2;
@@ -114,6 +114,26 @@ public class UcciFeedback
 
                 break;
             case FeedbackCommand.BestMove:
+                if (list.Length < 2) return false;
+                feedback.BestMoveBestMovement = list[idx++];
+                while (idx < list.Length)
+                {
+                    string action = list[idx++];
+                    switch (action)
+                    {
+                        case "ponder":
+                            feedback.BestMovePonder = list[idx++];
+                            break;
+                        case "draw":
+                            feedback.BestMoveDraw = true;
+                            break;
+                        case "resign":
+                            feedback.BestMoveResign = true;
+                            break;
+                        default:
+                            return false;
+                    }
+                }
                 break;
             case FeedbackCommand.NoBestMove:
                 break;

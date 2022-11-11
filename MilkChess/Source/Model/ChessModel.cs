@@ -7,8 +7,6 @@ namespace MilkChess.Model;
 
 public class ChessModel
 {
-    public Cursor Cursor { get; internal set; }
-
     public List<List<Chess>> board { get; set; }
 
     public ILogger Logger;
@@ -16,41 +14,29 @@ public class ChessModel
     public ChessModel(ILogger<ChessModel> logger)
     {
         this.Logger = logger;
-        this.Cursor = new Cursor(new Position(0, 0));
-        this.Reset();
+        this.InternalReset();
     }
-
-    public void Initialize(List<List<Chess>> board)
-    {
-        this.board = board;
-    }
-
-    public bool HasChessAtPosition(Position position)
+    
+    public  bool HasChessAtPosition(Position position)
     {
         return this.GetChessAtPosition(position) != null;
     }
 
-    public Chess GetChessAtPosition(Position position)
+    public virtual Chess GetChessAtPosition(Position position)
     {
         return this.board[position.Y][position.X];
     }
 
-    public void SetChessAtPosition(Chess chess, Position position, out Chess removedChess)
+    public virtual void SetChessAtPosition(Chess chess, Position position, out Chess removedChess)
     {
         removedChess = this.GetChessAtPosition(position);
         this.board[position.Y][position.X] = chess;
     }
 
-    public void MoveChess(Position from, Position to, out Chess removedChess)
+    public virtual void MoveChess(Position from, Position to, out Chess removedChess)
     {
         Chess chess = this.GetChessAtPosition(from);
         this.SetChessAtPosition(chess, to, out removedChess);
-    }
-
-    public Cursor MoveCursor(Position position)
-    {
-        this.Cursor.Position = position;
-        return this.Cursor;
     }
 
     public bool ValidateMovement(Position from, Position to)
@@ -226,7 +212,12 @@ public class ChessModel
         }
     }
 
-    public void Reset()
+    public virtual void Reset()
+    {
+        this.InternalReset();   
+    }
+
+    private void InternalReset()
     {
         this.board = new List<List<Chess>>(Constants.ChessBoardHeight);
         for (int i = 0; i < this.board.Capacity; i++)

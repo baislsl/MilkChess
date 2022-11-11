@@ -5,8 +5,6 @@ namespace MilkChess.UserInterface;
 
 public class CursorSelector : Image
 {
-    private ChessModel ChessModelBinder;
-
     private Position _position;
 
     public Position Position
@@ -16,7 +14,6 @@ public class CursorSelector : Image
         set
         {
             this._position = value;
-            this.ChessModelBinder.Cursor.Position = value;
 
             AbsoluteLayout.SetLayoutBounds(this, new Rect(
                 value.GetAbsoluteCoordinateX(),
@@ -27,11 +24,9 @@ public class CursorSelector : Image
         }
     }
 
-    public CursorSelector(ChessModel chessModel, Position position)
+    public CursorSelector(Position position, string source)
     {
-        this.ChessModelBinder = chessModel;
-
-        this.Source = UIConstants.CursorBackgroundResource;
+        this.Source = source;
         this.Position = position;
     }
 }

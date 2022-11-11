@@ -11,16 +11,13 @@ namespace MilkChess
     {
         private readonly ILogger Logger;
         private readonly ChessBoardViewModel ChessBoardViewModel;
-        private readonly ChessModel ChessModel;
         private readonly HistoryManager HistoryManager;
 
         public MainPage(ChessBoardViewModel chessBoardViewModel,
-                        ChessModel chessModel,
                         HistoryManager historyManager,
                         ILogger<MainPage> logger)
         {
             ChessBoardViewModel = chessBoardViewModel;
-            ChessModel = chessModel;
             Logger = logger;
             HistoryManager = historyManager;
 
@@ -47,19 +44,7 @@ namespace MilkChess
             AbsoluteLayout.SetLayoutFlags(backgroundImage, AbsoluteLayoutFlags.PositionProportional);
             ChessBoardLayout.Add(backgroundImage);
 
-            // chess
-            Iterator.IterateOverChessBoard(position =>
-            {
-                Chess chess = ChessModel.GetChessAtPosition(position);
-                ChessButton chessButton = new ChessButton(ChessModel, chess, position);
-
-                chessButton.Clicked += ChessBoardViewModel.OnChessSelected;
-                ChessBoardViewModel.Martix[position.Y][position.X] = chessButton;
-
-                ChessBoardLayout.Add(chessButton);
-            });
-
-            ChessBoardLayout.Add(ChessBoardViewModel.CursorSelector);
+            ChessBoardViewModel.AddToAbsoluteLayout(ChessBoardLayout);
 
             ExecutionTurnNotifier executionTurnNotifier = new ExecutionTurnNotifier();
             AbsoluteLayout.SetLayoutBounds(executionTurnNotifier,
@@ -72,11 +57,6 @@ namespace MilkChess
                 executionTurnNotifier.ExecutionTurn = HistoryManager.ExecutionTurn;
             });
             ChessBoardLayout.Add(executionTurnNotifier);
-        }
-
-        private void Button_OnClicked(object sender, EventArgs e)
-        {
-            ChessBoardViewModel.MoveBackwardCommand.Execute(sender);
         }
     }
 }

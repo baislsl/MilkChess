@@ -7,8 +7,6 @@ namespace MilkChess.UserInterface;
 public class ChessButton : ImageButton
 {
     private Chess _chess;
-
-    private ChessModel ChessModelBinder;
     
     public readonly Position Position;
 
@@ -19,18 +17,16 @@ public class ChessButton : ImageButton
         set
         {
             this._chess = value;
-            this.ChessModelBinder.SetChessAtPosition(value, this.Position, out _);
             this.Source = value?.DrawableResource();
         }
     }
 
-    public ChessButton(ChessModel chessModel, Chess chess, Position position)
+    public ChessButton(Chess chess, Position position)
     {
-        this.ChessModelBinder = chessModel;
-
         this.BackgroundColor = Color.FromRgba(0, 0, 0, 0);
         this.Position = position;
-        this.Chess = chess;
+        this._chess = chess;
+        this.Source = chess?.DrawableResource();
         
         AbsoluteLayout.SetLayoutBounds(this, new Rect(
             position.GetAbsoluteCoordinateX(),

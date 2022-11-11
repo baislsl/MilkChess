@@ -46,6 +46,8 @@ public class HistoryManager
     {
         this.ExecutionTurn = this.ExecutionTurn.Reverse();
 
+        movement.ActionCount = this.Cursor / 2 + 1;
+
         while (Movements.Any() && Movements.Count != Cursor)
         {
             Movements.RemoveAt(Movements.Count - 1);

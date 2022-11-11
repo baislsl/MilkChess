@@ -37,7 +37,6 @@ namespace MilkChess
             builder.Services.AddLogging(configure => { configure.AddConsole(); });
             builder.Services.AddTransient<MainPage>();
             builder.Services.AddTransient<ChessBoardViewModel>();
-            builder.Services.AddSingleton<ChessModel>();
             builder.Services.AddSingleton<HistoryManager>(x =>
                             new HistoryManager(x.GetRequiredService<ILogger<HistoryManager>>(),
                                             new ObservableCollection<Movement>()));
