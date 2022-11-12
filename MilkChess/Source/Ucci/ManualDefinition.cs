@@ -6,9 +6,9 @@ namespace MilkChess.Ucci;
 
 public interface IChessManualTranslator
 {
-    void LoadFromStream(Stream file, IChessBoardHandler chessBoardHandler);
+    void LoadFromStream(Stream file, IChessBoardContext chessBoardContext);
 
-    void SaveToStream(Stream file, IChessBoardHandler chessBoardHandler);
+    void SaveToStream(Stream file, IChessBoardContext chessBoardContext);
 }
 
 public static class MovementExtension
@@ -57,11 +57,11 @@ public static class MovementExtension
     /*
      * Movement at list contains from and to position
      */
-    public static void PopulateMovement(this IChessBoardHandler chessBoardHandler, Movement movement)
+    public static void PopulateMovement(this IChessBoard chessBoard, Movement movement)
     {
-        movement.MovedChess = chessBoardHandler.GetChessAtPosition(movement.From);
-        movement.RemovedChess = chessBoardHandler.GetChessAtPosition(movement.To);
-        movement.ChineseViewableString = movement.ToChineseViewableString(chessBoardHandler);
+        movement.MovedChess = chessBoard.GetChessAtPosition(movement.From);
+        movement.RemovedChess = chessBoard.GetChessAtPosition(movement.To);
+        movement.ChineseViewableString = movement.ToChineseViewableString(chessBoard);
     }
 
     public static bool ParseMovementFromUnifyString(string unifyString, out Movement movement)
@@ -91,7 +91,7 @@ public static class MovementExtension
 
     // 马二进三
     // {Chess}{XCoordinate}{Action}{NewCoordinate}
-    public static string ToChineseViewableString(this Movement movement, IChessBoardHandler chessBoardHandler)
+    public static string ToChineseViewableString(this Movement movement, IChessBoard chessBoard)
     {
         string XCoordinate = GetChineseXColorNumber(movement.From.X, movement.ExecutedColor);
 
@@ -137,7 +137,7 @@ public static class MovementExtension
         List<int> inSameVerticalLine = new List<int>();
         for (int Y = 0; Y < ChessBoardHeight; Y++)
         {
-            var chess = chessBoardHandler.GetChessAtPosition(new Position(movement.From.X, Y));
+            var chess = chessBoard.GetChessAtPosition(new Position(movement.From.X, Y));
             if (chess != null && chess.Number == movement.MovedChess.Number && chess.Color == movement.MovedChess.Color)
             {
                 inSameVerticalLine.Add(Y);

@@ -9,29 +9,40 @@
     <HorizontalStackLayout
         BackgroundColor="YellowGreen"
         Margin="20">
-        <VerticalStackLayout>
-            <Label Text="Score: 123"
+        <VerticalStackLayout
+            Margin="100">
+            <Label Text="{Binding Path = Score,
+                                StringFormat='Score: {0}'}"
+                   HeightRequest="30"
+                   TextColor="{Binding ScoreColor}"
+                   FontSize="20"
+                   FontAttributes="Bold" />
+
+            <Label Text=""
                    HeightRequest="30" />
+            <Label Text="Predict Movements:" FontAttributes="Bold" FontSize="18" />
             <ListView
-                WidthRequest="200"
-                RowHeight="20"
+                WidthRequest="400"
+                RowHeight="60"
                 Margin="4"
                 BackgroundColor="LightBlue"
-                ItemsSource="{Binding HistoryMovement}">
+                ItemsSource="{Binding  EngineSuggestedMovements}">
                 <ListView.ItemTemplate>
                     <DataTemplate>
-                        <ViewCell
-                            Height="20">
-                            <Label HeightRequest="20"
-                                   TextColor="Black"
-                                   FontSize="18"
-                                   FontAttributes="Bold">
-                                <Label.Text>
-                                    <MultiBinding StringFormat="{}{0}. {1}">
-                                        <Binding Path="ActionCount" />
-                                        <Binding Path="ChineseViewableString" />
-                                    </MultiBinding>
-                                </Label.Text>
+                        <ViewCell>
+                            <Label
+                                LineBreakMode="WordWrap"
+                                MaxLines="3"
+                                TextColor="Black"
+                                FontSize="18">
+                                <Label.FormattedText>
+                                    <FormattedString>
+                                        <Span Text="Score: " TextColor="Black" />
+                                        <Span Text="{Binding Score}" TextColor="Black" FontAttributes="Bold" />
+                                        <Span Text="{Binding Path=Movements, StringFormat='  {0}' }" TextColor="Black"
+                                              FontAttributes="Italic" />
+                                    </FormattedString>
+                                </Label.FormattedText>
                             </Label>
 
                         </ViewCell>
@@ -68,17 +79,19 @@
 
             <Button Grid.Row="2" Grid.Column="0" Text="To Start" Command="{Binding MoveToStartCommand}" />
             <Button Grid.Row="2" Grid.Column="1" Text="To End" Command="{Binding  MoveToEndCommand}" />
-            
-            <Button Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Text="ConnectEngine" Command="{Binding ConnectToRemoteEngineCommand}" />
-            
-            <Button Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Text="UseBestMovement" Command="{Binding InvokeBestMovementCommand}" />
+
+            <Button Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Text="ConnectEngine"
+                    Command="{Binding ConnectToRemoteEngineCommand}" />
+
+            <Button Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Text="UseBestMovement"
+                    Command="{Binding InvokeBestMovementCommand}" />
         </Grid>
         <ListView
             WidthRequest="200"
             RowHeight="20"
             Margin="4"
             BackgroundColor="LightBlue"
-            ItemsSource="{Binding HistoryMovement}">
+            ItemsSource="{Binding HistoryMovements}">
             <ListView.ItemTemplate>
                 <DataTemplate>
                     <ViewCell

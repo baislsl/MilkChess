@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System.Text;
+using Microsoft.Extensions.Logging;
 using MilkChess.Model;
 
 namespace MilkChess.Engine;
@@ -22,7 +23,7 @@ internal interface IUcciEngine
 
     public void SetOption(string option, string config, CancellationToken cancellationToken);
 
-    public void Position(IChessBoardHandler chessBoardHandler, CancellationToken cancellationToken);
+    public void Position(IChessBoardContext chessBoardContext, CancellationToken cancellationToken);
 
     public void BanMoves(IEnumerable<string> banMoves, CancellationToken cancellationToken);
 
@@ -63,13 +64,29 @@ public class InfoFeedback
         this.Pv = new List<string>();
         this.Info = new Dictionary<string, string>();
     }
+
+    public override string ToString()
+    {
+        StringBuilder sb = new StringBuilder();
+        foreach (var keyPair in Info)
+        {
+            sb.Append($"{keyPair.Key}:{keyPair.Value} ");
+        }
+
+        foreach (var movement in Pv)
+        {
+            sb.Append(" ").Append(movement);
+        }
+
+        return sb.ToString();
+    }
 }
 
 public class UciFeedback
 {
     public Dictionary<string, string> ID { get; set; }
     public List<string> Options { get; set; }
-    
+
     public bool ReceivedUcciOk { get; set; }
 
     public UciFeedback()

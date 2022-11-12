@@ -106,18 +106,18 @@ public static class ForsythEdwardsNotationExtension
         }
     }
 
-    public static bool AdoptForsythEdwardsNotation(this IChessBoardHandler chessBoardHandler,
+    public static bool AdoptForsythEdwardsNotation(this IChessBoardContext chessBoardContext,
                     string forsythEdwardsNotation)
     {
         if (ForsythEdwardsNotation.ParseString(forsythEdwardsNotation, out var fen))
         {
-            return chessBoardHandler.AdoptForsythEdwardsNotation(fen);
+            return chessBoardContext.AdoptForsythEdwardsNotation(fen);
         }
 
         return false;
     }
 
-    public static bool AdoptForsythEdwardsNotation(this IChessBoardHandler chessBoardHandler,
+    public static bool AdoptForsythEdwardsNotation(this IChessBoardContext chessBoardContext,
                     ForsythEdwardsNotation forsythEdwardsNotation)
     {
         for (int row = 0; row < ChessBoardHeight; row++)
@@ -130,7 +130,7 @@ public static class ForsythEdwardsNotationExtension
                 {
                     for (var counter = '0'; counter < cc; counter++)
                     {
-                        chessBoardHandler.SetChessAtPosition(null, new Position(column++, ChessBoardHeight - 1 - row),
+                        chessBoardContext.SetChessAtPosition(null, new Position(column++, ChessBoardHeight - 1 - row),
                                         out _);
                     }
                 }
@@ -142,7 +142,7 @@ public static class ForsythEdwardsNotationExtension
                                     .GetConstructor(new Type[] {typeof(Color)})
                                     .Invoke(new object[] {color});
 
-                    chessBoardHandler.SetChessAtPosition(chess, new Position(column++, ChessBoardHeight - 1 - row),
+                    chessBoardContext.SetChessAtPosition(chess, new Position(column++, ChessBoardHeight - 1 - row),
                                     out _);
                 }
                 else
@@ -152,13 +152,13 @@ public static class ForsythEdwardsNotationExtension
             }
         }
 
-        chessBoardHandler.HistoryManager.Reset();
-        chessBoardHandler.HistoryManager.ExecutionTurn = forsythEdwardsNotation.ActiveColor;
+        chessBoardContext.HistoryManager.Reset();
+        chessBoardContext.HistoryManager.ExecutionTurn = forsythEdwardsNotation.ActiveColor;
 
         return true;
     }
 
-    public static ForsythEdwardsNotation BuildForsythEdwardsNotation(this IChessBoardHandler chessBoardHandler)
+    public static ForsythEdwardsNotation BuildForsythEdwardsNotation(this IChessBoardContext chessBoardContext)
     {
         List<string> piecePlacement = new List<string>();
         for (int i = 0; i < ChessBoardHeight; i++)
@@ -169,7 +169,7 @@ public static class ForsythEdwardsNotationExtension
             {
                 int start = j;
                 while (j < ChessBoardWidth &&
-                       chessBoardHandler.GetChessAtPosition(new Position(j, ChessBoardHeight - 1 - i)) == null)
+                       chessBoardContext.GetChessAtPosition(new Position(j, ChessBoardHeight - 1 - i)) == null)
                 {
                     j++;
                 }
@@ -180,9 +180,9 @@ public static class ForsythEdwardsNotationExtension
                 }
 
                 while (j < ChessBoardWidth &&
-                       chessBoardHandler.GetChessAtPosition(new Position(j, ChessBoardHeight - 1 - i)) != null)
+                       chessBoardContext.GetChessAtPosition(new Position(j, ChessBoardHeight - 1 - i)) != null)
                 {
-                    Chess chess = chessBoardHandler.GetChessAtPosition(new Position(j, ChessBoardHeight - 1 - i));
+                    Chess chess = chessBoardContext.GetChessAtPosition(new Position(j, ChessBoardHeight - 1 - i));
                     row += chess.ToFenSymbol();
                     j++;
                 }
@@ -194,7 +194,7 @@ public static class ForsythEdwardsNotationExtension
         return new ForsythEdwardsNotation
         {
                         PiecePlacement = piecePlacement,
-                        ActiveColor = chessBoardHandler.HistoryManager.ExecutionTurn
+                        ActiveColor = chessBoardContext.HistoryManager.ExecutionTurn
         };
     }
 }

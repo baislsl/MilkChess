@@ -80,9 +80,9 @@ public class UcciEngine : IUcciEngine
         throw new NotImplementedException();
     }
 
-    public void Position(IChessBoardHandler chessBoardHandler, CancellationToken cancellationToken)
+    public void Position(IChessBoardContext chessBoardContext, CancellationToken cancellationToken)
     {
-        this.SendCommand($"{Command.Position} fen {chessBoardHandler.BuildForsythEdwardsNotation().GetFenString()}");
+        this.SendCommand($"{Command.Position} fen {chessBoardContext.BuildForsythEdwardsNotation().GetFenString()}");
     }
 
     public void BanMoves(IEnumerable<string> banMoves, CancellationToken cancellationToken)

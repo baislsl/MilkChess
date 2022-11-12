@@ -7,12 +7,12 @@ namespace MilkChess.Ucci;
  */
 public class PortableGameNotation : IChessManualTranslator
 {
-    public void LoadFromStream(Stream file, IChessBoardHandler chessBoardHandler)
+    public void LoadFromStream(Stream file, IChessBoardContext chessBoardContext)
     {
         throw new NotImplementedException();
     }
 
-    public void SaveToStream(Stream file, IChessBoardHandler chessBoardHandler)
+    public void SaveToStream(Stream file, IChessBoardContext chessBoardContext)
     {
         throw new NotImplementedException();
     }

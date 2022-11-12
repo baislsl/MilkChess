@@ -4,7 +4,7 @@ using MilkChess.Ucci;
 
 namespace MilkChessTest;
 
-public class MockChessModel : IChessBoardHandler
+public class MockChessModel : IChessBoardContext
 {
     private Chess[,] Chesses = new Chess[Constants.ChessBoardHeight, Constants.ChessBoardWidth];
 

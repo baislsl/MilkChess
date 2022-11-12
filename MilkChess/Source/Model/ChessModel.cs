@@ -1,23 +1,39 @@
 using System.Collections;
 using Microsoft.Extensions.Logging;
+using MilkChess.Helper;
 using MilkChess.Ucci;
 using static MilkChess.Model.Color;
 
 namespace MilkChess.Model;
 
-public class ChessModel
+public class ChessModel : IChessBoard
 {
     public List<List<Chess>> board { get; set; }
 
-    public ILogger Logger;
+    public readonly ILogger Logger;
 
     public ChessModel(ILogger<ChessModel> logger)
     {
         this.Logger = logger;
         this.InternalReset();
     }
-    
-    public  bool HasChessAtPosition(Position position)
+
+    public ChessModel(ILogger<ChessModel> logger, IChessBoard chessBoard)
+    {
+        this.Logger = logger;
+        this.board = new List<List<Chess>>(Constants.ChessBoardHeight);
+        for (int i = 0; i < this.board.Capacity; i++)
+        {
+            this.board.Add(new List<Chess>(new Chess[Constants.ChessBoardWidth]));
+        }
+
+        Iterator.IterateOverChessBoard(position =>
+        {
+            SetChessAtPosition(chessBoard.GetChessAtPosition(position), position, out _);
+        });
+    }
+
+    public bool HasChessAtPosition(Position position)
     {
         return this.GetChessAtPosition(position) != null;
     }
@@ -33,6 +49,18 @@ public class ChessModel
         this.board[position.Y][position.X] = chess;
     }
 
+    public virtual void ApplyMovement(Movement movement)
+    {
+        SetChessAtPosition(null, movement.From, out _);
+        SetChessAtPosition(movement.MovedChess, movement.To, out _);
+    }
+
+    public virtual void RevertMovement(Movement movement)
+    {
+        SetChessAtPosition(movement.MovedChess, movement.From, out _);
+        SetChessAtPosition(movement.RemovedChess, movement.To, out _);
+    }
+
     public virtual void MoveChess(Position from, Position to, out Chess removedChess)
     {
         Chess chess = this.GetChessAtPosition(from);
@@ -41,10 +69,10 @@ public class ChessModel
 
     public bool ValidateMovement(Position from, Position to)
     {
-        this.Logger.LogInformation($"ValidateMovement {from} {to}");
+        this.Logger?.LogInformation($"ValidateMovement {from} {to}");
         var ret = InternalValidateMovement(from, to);
-        this.Logger.LogInformation(
-            $"{ret} {from}->{to} | {this.GetChessAtPosition(from)}->{this.GetChessAtPosition(to)} ");
+        this.Logger?.LogInformation(
+                        $"{ret} {from}->{to} | {this.GetChessAtPosition(from)}->{this.GetChessAtPosition(to)} ");
         return ret;
     }
 
@@ -101,7 +129,7 @@ public class ChessModel
                 foreach (var d in xyDir)
                 {
                     if (Position.IsLegalBiShopPositionXY(moveChess.Color, position.X + 2 * d[0],
-                            position.Y + 2 * d[1])
+                                        position.Y + 2 * d[1])
                         && !this.HasChessAtPosition(new Position(position.X + d[0], position.Y + d[1])))
                     {
                         yield return new Position(position.X + 2 * d[0], position.Y + 2 * d[1]);
@@ -214,7 +242,7 @@ public class ChessModel
 
     public virtual void Reset()
     {
-        this.InternalReset();   
+        this.InternalReset();
     }
 
     private void InternalReset()
@@ -227,21 +255,21 @@ public class ChessModel
 
         this.board[0] = new List<Chess>
         {
-            new Rook(RED), new Knight(RED), new Bishop(RED), new Advisor(RED),
-            new King(RED),
-            new Advisor(RED), new Bishop(RED), new Knight(RED), new Rook(RED)
+                        new Rook(RED), new Knight(RED), new Bishop(RED), new Advisor(RED),
+                        new King(RED),
+                        new Advisor(RED), new Bishop(RED), new Knight(RED), new Rook(RED)
         };
 
         this.board[2] = new List<Chess>
         {
-            null, new Cannon(RED), null, null, null, null, null, new Cannon(RED), null
+                        null, new Cannon(RED), null, null, null, null, null, new Cannon(RED), null
         };
 
         this.board[3] = new List<Chess>
         {
-            new Pawn(RED), null, new Pawn(RED), null,
-            new Pawn(RED),
-            null, new Pawn(RED), null, new Pawn(RED)
+                        new Pawn(RED), null, new Pawn(RED), null,
+                        new Pawn(RED),
+                        null, new Pawn(RED), null, new Pawn(RED)
         };
 
         // Initialize BLACK by copying from RED chess 

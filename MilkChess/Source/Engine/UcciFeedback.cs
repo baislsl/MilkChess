@@ -122,6 +122,7 @@ public class UcciFeedback
                     switch (action)
                     {
                         case "ponder":
+                            if (idx >= list.Length) return false;
                             feedback.BestMovePonder = list[idx++];
                             break;
                         case "draw":
@@ -134,6 +135,7 @@ public class UcciFeedback
                             return false;
                     }
                 }
+
                 break;
             case FeedbackCommand.NoBestMove:
                 break;

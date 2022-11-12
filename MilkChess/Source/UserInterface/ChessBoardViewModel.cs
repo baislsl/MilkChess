@@ -1,28 +1,49 @@
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Windows.Input;
 using Microsoft.Extensions.Logging;
 using MilkChess.Engine;
 using MilkChess.Helper;
 using MilkChess.Model;
 using MilkChess.Ucci;
+using Color = Microsoft.Maui.Graphics.Color;
 
 namespace MilkChess.UserInterface;
 
-public class ChessBoardViewModel : ChessModel, IChessBoardHandler
+public class ChessBoardViewModel : ChessModel, IChessBoardContext, INotifyPropertyChanged
 {
     #region view model definition
+
+    public Color ScoreColor => this.Score > 0 ? Colors.Red : Colors.Black;
+
+    private int _score;
+
+    public int Score
+    {
+        get => _score;
+        set
+        {
+            this._score = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Score"));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ScoreColor"));
+        }
+    }
+
+    public ObservableCollection<PredictMovementTrace> EngineSuggestedMovements { get; set; }
 
     public int ChessBoardHeight => UIConstants.ChessBoardHeight;
 
     public int ChessBoardWidth => UIConstants.ChessBoardWidth;
 
-    public ObservableCollection<Movement> HistoryMovement => (ObservableCollection<Movement>) HistoryManager.Movements;
+    public ObservableCollection<Movement> HistoryMovements => (ObservableCollection<Movement>) HistoryManager.Movements;
 
     // Compiler will throw error result if I remove this unused fields.
     // This seems to be the compiler bug.
     public string ChineseViewableString => default;
     public string ActionCount => default;
+    public string Movements => default;
 
     public EventHandler OnButtonSelectEvent => this.WrapEventHandler(this.OnChessSelected);
 
@@ -44,6 +65,8 @@ public class ChessBoardViewModel : ChessModel, IChessBoardHandler
 
     #region binding component
 
+    public event PropertyChangedEventHandler PropertyChanged;
+
     public readonly CursorSelector CursorSelector;
 
     public ChessButton SelectedChess;
@@ -63,10 +86,7 @@ public class ChessBoardViewModel : ChessModel, IChessBoardHandler
     private CancellationTokenSource GoCancellationTokenSource;
 
     private uint LastEngineRequestId = 0;
-
-    private InfoFeedback infoFeedback;
-
-
+    
     public HistoryManager HistoryManager { get; }
 
     public ChessBoardViewModel(
@@ -96,6 +116,7 @@ public class ChessBoardViewModel : ChessModel, IChessBoardHandler
 
         CursorSelector = new CursorSelector(new Position(0, 0), UIConstants.CursorBackgroundResource);
         MovementIndicator = new MovementIndicator();
+        EngineSuggestedMovements = new ObservableCollection<PredictMovementTrace>();
     }
 
     public void AddToAbsoluteLayout(AbsoluteLayout layout)
@@ -145,28 +166,76 @@ public class ChessBoardViewModel : ChessModel, IChessBoardHandler
             SelectedChess = null;
             CursorSelector.Position = clickedButton.Position;
 
-            Logger.LogInformation($"fen {this.BuildForsythEdwardsNotation().GetFenString()}");
             BlockingRefreshEngineFeedback();
         }
     }
 
+    private void HandleInfoFeedback(InfoFeedback feedback)
+    {
+        Logger.LogInformation("[HandleInfoFeedback]");
+
+        int score = 0;
+
+        if (feedback.Info.ContainsKey("score") &&
+            int.TryParse(feedback.Info["score"], out score))
+        {
+            if (HistoryManager.ExecutionTurn == Model.Color.BLACK)
+            {
+                score = -score;
+            }
+
+            this.Score = score;
+        }
+
+        if (feedback.Pv?.Count > 0)
+        {
+            StringBuilder predict = new StringBuilder();
+
+            ChessModel chessModel = new ChessModel(ServiceProvider.GetRequiredService<ILogger<ChessModel>>(), this);
+            
+            foreach (var pv in feedback.Pv)
+            {
+                if (!MovementExtension.ParseMovementFromUnifyString(pv, out Movement movement))
+                {
+                    Logger.LogError("Error parsing movement {}", pv);
+                    break;
+                }
+
+                chessModel.PopulateMovement(movement);
+                predict.Append(" ").Append(movement.ChineseViewableString);
+                chessModel.ApplyMovement(movement);
+            }
+
+            EngineSuggestedMovements.Insert(0, new PredictMovementTrace()
+            {
+                            Score = score,
+                            Movements = predict.ToString(),
+            });
+            
+            Logger.LogInformation("Engine suggest: {} {}", score, predict);
+        }
+
+        Logger.LogInformation("Finished HandleInfoFeedback");
+    }
+
     private void BlockingRefreshEngineFeedback()
     {
+        uint requestId = Interlocked.Increment(ref LastEngineRequestId);
+
+        EngineSuggestedMovements.Clear();
+
         GoCancellationTokenSource?.Cancel();
         GoCancellationTokenSource = new CancellationTokenSource();
-
-        uint requestId = Interlocked.Increment(ref LastEngineRequestId);
 
         Engine?.Position(this, GoCancellationTokenSource.Token);
         var bestMove = Engine?.Go(new GoOption() {Depth = 10}, GoCancellationTokenSource.Token,
                         delegate(object sender, InfoFeedback feedback)
                         {
                             // there may be multiple thread running in the same time
-                            // only up\date UI for the last engine request
+                            // only update UI for the last engine request
                             if (requestId == LastEngineRequestId)
                             {
-                                this.infoFeedback = feedback;
-                                Logger.LogInformation($"[Ucci feedback] {feedback}");
+                                HandleInfoFeedback(feedback);
                             }
                         });
 
@@ -179,7 +248,7 @@ public class ChessBoardViewModel : ChessModel, IChessBoardHandler
                                 bestMovement.ChineseViewableString, bestMovement);
 
                 // there may be multiple thread running in the same time
-                // only up\date UI for the last engine request
+                // only up\\date UI for the last engine request
                 if (requestId == LastEngineRequestId)
                 {
                     MovementIndicator.SetMovement(bestMovement);
@@ -190,18 +259,6 @@ public class ChessBoardViewModel : ChessModel, IChessBoardHandler
                 Logger.LogError($"Unable to parse best movement {bestMove.BestMovement}");
             }
         }
-    }
-
-    public void ApplyMovement(Movement movement)
-    {
-        SetChessAtPosition(null, movement.From, out _);
-        SetChessAtPosition(movement.MovedChess, movement.To, out _);
-    }
-
-    public void RevertMovement(Movement movement)
-    {
-        SetChessAtPosition(movement.MovedChess, movement.From, out _);
-        SetChessAtPosition(movement.RemovedChess, movement.To, out _);
     }
 
     public override void SetChessAtPosition(Chess chess, Position position, out Chess removedChess)
@@ -301,7 +358,7 @@ public class ChessBoardViewModel : ChessModel, IChessBoardHandler
         {
             this.ApplyMovement(movement);
             HistoryManager.InsertMovement(movement);
-            
+
             BlockingRefreshEngineFeedback();
         }
     }
@@ -338,5 +395,11 @@ public class ChessBoardViewModel : ChessModel, IChessBoardHandler
                 Logger.LogError(e, "Event error {}", eventName);
             }
         };
+    }
+
+    public class PredictMovementTrace
+    {
+        public int Score { get; set; }
+        public string Movements { get; set; }
     }
 }

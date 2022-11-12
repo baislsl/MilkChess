@@ -18,15 +18,15 @@ public class ForsythEdwardsNotationTest
         Assert.IsTrue(ret);
         Assert.AreEqual(BLACK, notation.ActiveColor);
 
-        IChessBoardHandler chessBoardHandler = new MockChessModel(app.Services);
-        chessBoardHandler.AdoptForsythEdwardsNotation(notation);
+        IChessBoardContext chessBoardContext = new MockChessModel(app.Services);
+        chessBoardContext.AdoptForsythEdwardsNotation(notation);
 
-        Assert.IsNull(chessBoardHandler.GetChessAtPosition(new Position(0, 0)));
-        Assert.AreEqual(ChessDefinition.Rook.Name, chessBoardHandler.GetChessAtPosition(new Position(1, 0)).Name);
-        Assert.AreEqual(ChessDefinition.Cannon.Name, chessBoardHandler.GetChessAtPosition(new Position(1, 2)).Name);
-        Assert.AreEqual(RED, chessBoardHandler.GetChessAtPosition(new Position(1, 2)).Color);
-        Assert.AreEqual(ChessDefinition.Cannon.Name, chessBoardHandler.GetChessAtPosition(new Position(4, 7)).Name);
-        Assert.AreEqual(BLACK, chessBoardHandler.GetChessAtPosition(new Position(4, 7)).Color);
+        Assert.IsNull(chessBoardContext.GetChessAtPosition(new Position(0, 0)));
+        Assert.AreEqual(ChessDefinition.Rook.Name, chessBoardContext.GetChessAtPosition(new Position(1, 0)).Name);
+        Assert.AreEqual(ChessDefinition.Cannon.Name, chessBoardContext.GetChessAtPosition(new Position(1, 2)).Name);
+        Assert.AreEqual(RED, chessBoardContext.GetChessAtPosition(new Position(1, 2)).Color);
+        Assert.AreEqual(ChessDefinition.Cannon.Name, chessBoardContext.GetChessAtPosition(new Position(4, 7)).Name);
+        Assert.AreEqual(BLACK, chessBoardContext.GetChessAtPosition(new Position(4, 7)).Color);
 
     }
     
