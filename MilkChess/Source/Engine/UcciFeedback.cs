@@ -100,7 +100,7 @@ public class UcciFeedback
                 {
                     if (list[idx] != "pv")
                     {
-                        if (list[idx] == "lowerbound") idx++; // adapt for GGchess
+                        if (list[idx] == "lowerbound" || list[idx] == "upperbound") idx++; // adapt for GGchess and XuanFeng
                         if (idx + 1 >= list.Length) return false;
                         feedback.InfoDict[list[idx]] = list[idx + 1];
                         idx += 2;

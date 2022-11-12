@@ -39,8 +39,14 @@ public class MovementIndicator
         }
         else
         {
-            From.IsEnabled = false;
-            To.IsEnabled = false;
+            this.ClearMovement();
         }
+    }
+
+    public void ClearMovement()
+    {
+        From.IsEnabled = false;
+        To.IsEnabled = false;
+        this.Movement = null;
     }
 }

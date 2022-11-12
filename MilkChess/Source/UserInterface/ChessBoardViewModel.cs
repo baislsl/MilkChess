@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
@@ -44,22 +45,21 @@ public class ChessBoardViewModel : ChessModel, IChessBoardContext, INotifyProper
     public string ChineseViewableString => default;
     public string ActionCount => default;
     public string Movements => default;
+    public string Depth => default;
 
-    public EventHandler OnButtonSelectEvent => this.WrapEventHandler(this.OnChessSelected);
+    public ICommand ResetCommand => this.WrapEngineInteractCommand(this.Reset);
 
-    public ICommand ResetCommand => this.WrapClickCommand(this.Reset);
+    public ICommand MoveBackwardCommand => this.WrapEngineInteractCommand(this.MoveBackward);
 
-    public ICommand MoveBackwardCommand => this.WrapClickCommand(this.MoveBackward);
+    public ICommand MoveForwardCommand => this.WrapEngineInteractCommand(this.MoveForward);
 
-    public ICommand MoveForwardCommand => this.WrapClickCommand(this.MoveForward);
+    public ICommand MoveToStartCommand => this.WrapEngineInteractCommand(this.MoveToStart);
 
-    public ICommand MoveToStartCommand => this.WrapClickCommand(this.MoveToStart);
+    public ICommand MoveToEndCommand => this.WrapEngineInteractCommand(this.MoveToEnd);
 
-    public ICommand MoveToEndCommand => this.WrapClickCommand(this.MoveToEnd);
+    public ICommand ConnectToRemoteEngineCommand => this.WrapEngineInteractCommand(this.InitializeUcciEngine);
 
-    public ICommand ConnectToRemoteEngineCommand => this.WrapClickCommand(this.InitializeUcciEngine);
-
-    public ICommand InvokeBestMovementCommand => this.WrapClickCommand(this.InvokeBestMovement);
+    public ICommand InvokeBestMovementCommand => this.WrapEngineInteractCommand(this.InvokeBestMovement);
 
     #endregion
 
@@ -86,7 +86,9 @@ public class ChessBoardViewModel : ChessModel, IChessBoardContext, INotifyProper
     private CancellationTokenSource GoCancellationTokenSource;
 
     private uint LastEngineRequestId = 0;
-    
+
+    private Task EngineExecutionTask;
+
     public HistoryManager HistoryManager { get; }
 
     public ChessBoardViewModel(
@@ -110,7 +112,8 @@ public class ChessBoardViewModel : ChessModel, IChessBoardContext, INotifyProper
             Chess chess = this.GetChessAtPosition(position);
             ChessButton chessButton = new ChessButton(chess, position);
 
-            chessButton.Clicked += this.OnButtonSelectEvent;
+            // chessButton.Released += this.WrapEventHandler(this.OnChessSelected);
+            chessButton.Command = this.WrapClickCommand(() => { this.OnChessSelected(chessButton, null); });
             Matrix[position.Y][position.X] = chessButton;
         });
 
@@ -160,21 +163,23 @@ public class ChessBoardViewModel : ChessModel, IChessBoardContext, INotifyProper
 
             Logger.LogInformation($"Execute movement {movement}");
 
+            StopEngineRunner();
+
             this.ApplyMovement(movement);
             HistoryManager.InsertMovement(movement);
 
             SelectedChess = null;
             CursorSelector.Position = clickedButton.Position;
 
-            BlockingRefreshEngineFeedback();
+            NotifyRefreshEngineFeedback();
         }
     }
 
     private void HandleInfoFeedback(InfoFeedback feedback)
     {
-        Logger.LogInformation("[HandleInfoFeedback]");
+        Logger.LogDebug("[HandleInfoFeedback] {}", feedback);
 
-        int score = 0;
+        int score = 0, depth = -1;
 
         if (feedback.Info.ContainsKey("score") &&
             int.TryParse(feedback.Info["score"], out score))
@@ -184,7 +189,12 @@ public class ChessBoardViewModel : ChessModel, IChessBoardContext, INotifyProper
                 score = -score;
             }
 
-            this.Score = score;
+            this.DispatchAction(() => { this.Score = score; });
+        }
+
+        if (feedback.Info.ContainsKey("depth"))
+        {
+            int.TryParse(feedback.Info["depth"], out depth);
         }
 
         if (feedback.Pv?.Count > 0)
@@ -192,43 +202,66 @@ public class ChessBoardViewModel : ChessModel, IChessBoardContext, INotifyProper
             StringBuilder predict = new StringBuilder();
 
             ChessModel chessModel = new ChessModel(ServiceProvider.GetRequiredService<ILogger<ChessModel>>(), this);
-            
-            foreach (var pv in feedback.Pv)
+
+            for (int i = 0; i < feedback.Pv.Count; i++)
             {
-                if (!MovementExtension.ParseMovementFromUnifyString(pv, out Movement movement))
+                if (!MovementExtension.ParseMovementFromUnifyString(feedback.Pv[i], out Movement movement))
                 {
-                    Logger.LogError("Error parsing movement {}", pv);
+                    Logger.LogError("Error parsing movement {}", feedback.Pv[i]);
                     break;
                 }
 
                 chessModel.PopulateMovement(movement);
+
+                if (i == 0 && MovementIndicator.Movement?.ToUnifyString() != movement.ToUnifyString()) // best movement
+                {
+                    this.DispatchAction(() => MovementIndicator.SetMovement(movement));
+                }
+
                 predict.Append(" ").Append(movement.ChineseViewableString);
                 chessModel.ApplyMovement(movement);
             }
 
-            EngineSuggestedMovements.Insert(0, new PredictMovementTrace()
+            this.DispatchAction(() => EngineSuggestedMovements.Insert(0, new PredictMovementTrace()
             {
                             Score = score,
+                            Depth = depth,
                             Movements = predict.ToString(),
-            });
-            
+            }));
+
             Logger.LogInformation("Engine suggest: {} {}", score, predict);
         }
 
         Logger.LogInformation("Finished HandleInfoFeedback");
     }
 
-    private void BlockingRefreshEngineFeedback()
+    public void StopEngineRunner()
+    {
+        GoCancellationTokenSource?.Cancel();
+        EngineExecutionTask?.Wait();
+    }
+
+    public void NotifyRefreshEngineFeedback()
     {
         uint requestId = Interlocked.Increment(ref LastEngineRequestId);
+        Logger.LogDebug("Start NotifyRefreshEngineFeedback {}", requestId);
 
         EngineSuggestedMovements.Clear();
+        MovementIndicator.ClearMovement();
 
-        GoCancellationTokenSource?.Cancel();
         GoCancellationTokenSource = new CancellationTokenSource();
+        EngineExecutionTask = Task.Factory.StartNew(
+                        () => this.BlockingNotifyRefreshEngineFeedback(requestId, GoCancellationTokenSource.Token));
 
-        Engine?.Position(this, GoCancellationTokenSource.Token);
-        var bestMove = Engine?.Go(new GoOption() {Depth = 10}, GoCancellationTokenSource.Token,
+        Logger.LogDebug("End NotifyRefreshEngineFeedback {}", requestId);
+    }
+
+    private void BlockingNotifyRefreshEngineFeedback(uint requestId, CancellationToken cancellationToken)
+    {
+        Logger.LogDebug("Start BlockingNotifyRefreshEngineFeedback {}", requestId);
+
+        Engine?.Position(this, cancellationToken);
+        var bestMove = Engine?.Go(new GoOption() {Depth = -1}, cancellationToken,
                         delegate(object sender, InfoFeedback feedback)
                         {
                             // there may be multiple thread running in the same time
@@ -239,26 +272,33 @@ public class ChessBoardViewModel : ChessModel, IChessBoardContext, INotifyProper
                             }
                         });
 
-        if (bestMove != null)
+        if (bestMove != null && !cancellationToken.IsCancellationRequested && requestId == LastEngineRequestId)
         {
             if (MovementExtension.ParseMovementFromUnifyString(bestMove.BestMovement, out Movement bestMovement))
             {
-                this.PopulateMovement(bestMovement);
-                Logger.LogInformation("Best move {} {}, {}", bestMove.BestMovement,
-                                bestMovement.ChineseViewableString, bestMovement);
+                Logger.LogInformation("{} Received Best move {}", requestId, bestMove.BestMovement);
 
-                // there may be multiple thread running in the same time
-                // only up\\date UI for the last engine request
-                if (requestId == LastEngineRequestId)
-                {
-                    MovementIndicator.SetMovement(bestMovement);
-                }
+                this.PopulateMovement(bestMovement);
+                this.DispatchAction(() => { MovementIndicator.SetMovement(bestMovement); });
             }
             else
             {
                 Logger.LogError($"Unable to parse best movement {bestMove.BestMovement}");
             }
         }
+
+        Logger.LogDebug("End BlockingNotifyRefreshEngineFeedback {}", requestId);
+    }
+
+    private void DispatchAction(Action action)
+    {
+        if (Application.Current == null || Application.Current.MainPage == null)
+        {
+            Logger.LogError("Null application context");
+            return;
+        }
+
+        Application.Current.MainPage.Dispatcher.Dispatch(action);
     }
 
     public override void SetChessAtPosition(Chess chess, Position position, out Chess removedChess)
@@ -288,8 +328,6 @@ public class ChessBoardViewModel : ChessModel, IChessBoardContext, INotifyProper
         {
             Logger.LogInformation($"init engine success");
         }
-
-        BlockingRefreshEngineFeedback();
     }
 
     public override void Reset()
@@ -303,7 +341,6 @@ public class ChessBoardViewModel : ChessModel, IChessBoardContext, INotifyProper
         });
 
         this.SelectedChess = null;
-        BlockingRefreshEngineFeedback();
     }
 
     public void MoveForward()
@@ -313,8 +350,6 @@ public class ChessBoardViewModel : ChessModel, IChessBoardContext, INotifyProper
         {
             this.ApplyMovement(movement);
         }
-
-        BlockingRefreshEngineFeedback();
     }
 
     public void MoveBackward()
@@ -324,8 +359,6 @@ public class ChessBoardViewModel : ChessModel, IChessBoardContext, INotifyProper
         {
             this.RevertMovement(movement);
         }
-
-        BlockingRefreshEngineFeedback();
     }
 
     public void MoveToStart()
@@ -335,8 +368,6 @@ public class ChessBoardViewModel : ChessModel, IChessBoardContext, INotifyProper
         {
             this.RevertMovement(movement);
         }
-
-        BlockingRefreshEngineFeedback();
     }
 
     public void MoveToEnd()
@@ -347,8 +378,6 @@ public class ChessBoardViewModel : ChessModel, IChessBoardContext, INotifyProper
         {
             this.ApplyMovement(movement);
         }
-
-        BlockingRefreshEngineFeedback();
     }
 
     public void InvokeBestMovement()
@@ -356,28 +385,48 @@ public class ChessBoardViewModel : ChessModel, IChessBoardContext, INotifyProper
         Movement movement = this.MovementIndicator?.Movement;
         if (movement != null)
         {
+            Logger.LogInformation("[InvokeBestMovement] {}", movement);
+
             this.ApplyMovement(movement);
             HistoryManager.InsertMovement(movement);
-
-            BlockingRefreshEngineFeedback();
         }
     }
 
-    private ICommand WrapClickCommand(Action action, [CallerMemberName] string commandName = "")
+    private ICommand WrapEngineInteractCommand(Action action, Func<object, bool> canExecute = null,
+                    [CallerMemberName] string commandName = "")
     {
-        return new Command<object>((object Object) =>
+        return new Command<object>(_ =>
         {
             try
             {
                 Logger.LogInformation($"Received command {commandName}");
+
+                StopEngineRunner();
                 action();
-                Logger.LogInformation($"Finished command {commandName}");
+                NotifyRefreshEngineFeedback();
             }
             catch (Exception e)
             {
                 Logger.LogError(e, "MilkChess click Event error");
             }
-        }, canExecute: (object o) => true);
+        }, canExecute ?? (o => true));
+    }
+
+    private ICommand WrapClickCommand(Action action, Func<object, bool> canExecute = null,
+                    [CallerMemberName] string commandName = "")
+    {
+        return new Command<object>(_ =>
+        {
+            try
+            {
+                Logger.LogInformation($"Received command {commandName}");
+                action();
+            }
+            catch (Exception e)
+            {
+                Logger.LogError(e, "MilkChess click Event error");
+            }
+        }, canExecute ?? (o => true));
     }
 
     private EventHandler WrapEventHandler(EventHandler handler, [CallerMemberName] string eventName = "")
@@ -400,6 +449,9 @@ public class ChessBoardViewModel : ChessModel, IChessBoardContext, INotifyProper
     public class PredictMovementTrace
     {
         public int Score { get; set; }
+
+        public int Depth { get; set; }
+
         public string Movements { get; set; }
     }
 }

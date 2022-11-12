@@ -39,15 +39,15 @@ public static class Command
 
     public const string IsReady = "isready";
 
-    public const string SetOption = "SetOption";
+    public const string SetOption = "setOption";
 
     public const string Position = "position";
 
     public const string Go = "go";
     
-    public const string Stop = "Stop";
+    public const string Stop = "stop";
 
-    public const string Quit = "Quit";
+    public const string Quit = "quit";
 }
 
 public static class ChessName

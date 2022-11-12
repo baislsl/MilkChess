@@ -10,7 +10,7 @@ namespace MilkChess
     {
         private const string LocalExecutableFile =
                         "/Users/baislsl/go/src/github.com/baislsl/UcciProxy/client/remote_engine";
-        
+
         private static Collection<string> Arguments = new Collection<string>
         {
                         "-addr", "192.168.31.7:7890",
@@ -34,7 +34,11 @@ namespace MilkChess
                                 fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
                             });
 
-            builder.Services.AddLogging(configure => { configure.AddConsole(); });
+            builder.Services.AddLogging(configure =>
+            {
+                configure.AddConsole();
+                configure.SetMinimumLevel(LogLevel.Debug);
+            });
             builder.Services.AddTransient<MainPage>();
             builder.Services.AddTransient<ChessBoardViewModel>();
             builder.Services.AddSingleton<HistoryManager>(x =>

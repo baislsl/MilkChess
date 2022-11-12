@@ -39,6 +39,8 @@
                                     <FormattedString>
                                         <Span Text="Score: " TextColor="Black" />
                                         <Span Text="{Binding Score}" TextColor="Black" FontAttributes="Bold" />
+                                        <Span Text=" Depth: " TextColor="Yellow" />
+                                        <Span Text="{Binding Depth}" TextColor="Yellow" FontAttributes="Bold" />
                                         <Span Text="{Binding Path=Movements, StringFormat='  {0}' }" TextColor="Black"
                                               FontAttributes="Italic" />
                                     </FormattedString>

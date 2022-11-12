@@ -35,26 +35,21 @@ public class UcciEngine : IUcciEngine
         UciFeedback feedback = new UciFeedback();
         while (!cancellationToken.IsCancellationRequested && !feedback.ReceivedUcciOk)
         {
-            Task t = Task.Factory.StartNew(() =>
+            UcciFeedback ucciFeedback = this.ReceiveFeedback(cancellationToken);
+            if (ucciFeedback == null) continue;
+
+            if (ucciFeedback.Command == FeedbackCommand.UciOk)
             {
-                UcciFeedback ucciFeedback = this.ReceiveFeedback();
-                if (ucciFeedback == null) return;
-
-                if (ucciFeedback.Command == FeedbackCommand.UciOk)
-                {
-                    feedback.ReceivedUcciOk = true;
-                }
-                else if (ucciFeedback.Command == FeedbackCommand.Id)
-                {
-                    feedback.ID[ucciFeedback.IdName] = ucciFeedback.IdValue;
-                }
-                else if (ucciFeedback.Command == FeedbackCommand.Info)
-                {
-                    // TODO: skip
-                }
-            });
-
-            t.Wait(cancellationToken);
+                feedback.ReceivedUcciOk = true;
+            }
+            else if (ucciFeedback.Command == FeedbackCommand.Id)
+            {
+                feedback.ID[ucciFeedback.IdName] = ucciFeedback.IdValue;
+            }
+            else if (ucciFeedback.Command == FeedbackCommand.Info)
+            {
+                // TODO: skip
+            }
         }
 
         return feedback;
@@ -62,17 +57,13 @@ public class UcciEngine : IUcciEngine
 
     public void WaitToReady(CancellationToken cancellationToken)
     {
-        Task task = Task.Factory.StartNew(() =>
+        this.DiscardBufferData();
+        this.SendCommand(Command.IsReady);
+        UcciFeedback ucciFeedback = this.ReceiveFeedback(cancellationToken);
+        if (ucciFeedback.Command != FeedbackCommand.ReadyOk)
         {
-            this.DiscardBufferData();
-            this.SendCommand(Command.IsReady);
-            UcciFeedback ucciFeedback = this.ReceiveFeedback();
-            if (ucciFeedback.Command != FeedbackCommand.ReadyOk)
-            {
-                Logger.LogError($"IsReady receive incorrect feedback {ucciFeedback}");
-            }
-        });
-        task.Wait(cancellationToken);
+            Logger.LogError($"IsReady receive incorrect feedback {ucciFeedback}");
+        }
     }
 
     public void SetOption(string option, string config, CancellationToken cancellationToken)
@@ -95,11 +86,13 @@ public class UcciEngine : IUcciEngine
         BestMove bestMove = null;
 
         this.DiscardBufferData();
+        
+        cancellationToken.Register(() => this.SendCommand(Command.Stop));
         this.SendCommand(this.BuildGoCommand(option));
 
-        while (!cancellationToken.IsCancellationRequested && bestMove == null)
+        while (bestMove == null)
         {
-            UcciFeedback feedback = this.ReceiveFeedback();
+            UcciFeedback feedback = this.ReceiveFeedback(CancellationToken.None);
 
             if (feedback == null) continue;
 
@@ -123,11 +116,7 @@ public class UcciEngine : IUcciEngine
             }
         }
 
-        if (cancellationToken.IsCancellationRequested && bestMove != null)
-        {
-            this.SendCommand(Command.Stop);
-        }
-
+        Logger.LogInformation("Finished Go command");
         return bestMove;
     }
 
@@ -189,17 +178,22 @@ public class UcciEngine : IUcciEngine
         this.NativeUcciEngine.SendCommand(command);
     }
 
-    private UcciFeedback ReceiveFeedback()
+    private UcciFeedback ReceiveFeedback(CancellationToken cancellationToken)
     {
-        var feedback = this.NativeUcciEngine.GetFeedback();
-        if (!UcciFeedback.TryParse(feedback, out UcciFeedback ucciFeedback))
+        Task<UcciFeedback> task = Task.Factory.StartNew(() =>
         {
-            Logger.LogError($"Can't parse feedback: {feedback}");
-            return null;
-        }
+            var feedback = this.NativeUcciEngine.GetFeedback();
+            if (!UcciFeedback.TryParse(feedback, out UcciFeedback ucciFeedback))
+            {
+                Logger.LogError($"Can't parse feedback: {feedback}");
+                return null;
+            }
 
-        Logger.LogInformation($"[Received] {feedback}");
-        return ucciFeedback;
+            Logger.LogInformation($"[Received] {feedback}");
+            return ucciFeedback;
+        }, cancellationToken);
+
+        return task.GetAwaiter().GetResult();
     }
 
     private void DiscardBufferData()
