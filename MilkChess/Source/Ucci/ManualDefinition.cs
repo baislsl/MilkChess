@@ -64,6 +64,12 @@ public static class MovementExtension
         movement.ChineseViewableString = movement.ToChineseViewableString(chessBoard);
     }
 
+    public static void PopulateMovementWithContext(this IChessBoardContext chessBoardContext, Movement movement)
+    {
+        chessBoardContext.PopulateMovement(movement);
+        movement.ActionCount = chessBoardContext.HistoryManager.Cursor / 2 + 1;
+    }
+
     public static bool ParseMovementFromUnifyString(string unifyString, out Movement movement)
     {
         movement = null;

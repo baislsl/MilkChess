@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Windows.Input;
@@ -28,8 +29,8 @@ public class ChessBoardViewModel : ChessModel, IChessBoardContext, INotifyProper
         set
         {
             this._score = value;
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Score"));
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ScoreColor"));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Score)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ScoreColor)));
         }
     }
 
@@ -40,6 +41,22 @@ public class ChessBoardViewModel : ChessModel, IChessBoardContext, INotifyProper
     public int ChessBoardWidth => UIConstants.ChessBoardWidth;
 
     public ObservableCollection<Movement> HistoryMovements => (ObservableCollection<Movement>) HistoryManager.Movements;
+
+    public Color SwitchToAnalyzeModeColor => this.InteractiveMode == EngineInteractiveMode.AnalyzeMode
+                    ? ActiveInteractiveModeColor
+                    : InactiveInteractiveModeColor;
+
+    public Color SwitchToBlackAutoModeColor => this.InteractiveMode == EngineInteractiveMode.BlackAutoMode
+                    ? ActiveInteractiveModeColor
+                    : InactiveInteractiveModeColor;
+
+    public Color SwitchToRedAutoModeColor => this.InteractiveMode == EngineInteractiveMode.RedAutoMode
+                    ? ActiveInteractiveModeColor
+                    : InactiveInteractiveModeColor;
+
+    public Color SwitchToAutoModeColor => this.InteractiveMode == EngineInteractiveMode.AutoMode
+                    ? ActiveInteractiveModeColor
+                    : InactiveInteractiveModeColor;
 
     // Compiler will throw error result if I remove this unused fields.
     // This seems to be the compiler bug.
@@ -60,9 +77,23 @@ public class ChessBoardViewModel : ChessModel, IChessBoardContext, INotifyProper
 
     public ICommand ConnectToRemoteEngineCommand => this.WrapEngineInteractCommand(this.InitializeUcciEngine);
 
+    public ICommand DisconnectEngineCommand => this.WrapEngineInteractCommand(this.DisconnectEngine);
+
     public ICommand InvokeBestMovementCommand => this.WrapEngineInteractCommand(this.InvokeBestMovement);
 
     public ICommand ReverseBoardCommand => this.WrapClickCommand(this.ReverseBoard);
+
+    public ICommand SwitchToAnalyzeMode =>
+                    this.WrapEngineInteractCommand(() => this.SwitchInteractMode(EngineInteractiveMode.AnalyzeMode));
+
+    public ICommand SwitchToBlackAutoMode =>
+                    this.WrapEngineInteractCommand(() => this.SwitchInteractMode(EngineInteractiveMode.BlackAutoMode));
+
+    public ICommand SwitchToRedAutoMode =>
+                    this.WrapEngineInteractCommand(() => this.SwitchInteractMode(EngineInteractiveMode.RedAutoMode));
+
+    public ICommand SwitchToAutoMode =>
+                    this.WrapEngineInteractCommand(() => this.SwitchInteractMode(EngineInteractiveMode.AutoMode));
 
     #endregion
 
@@ -91,6 +122,12 @@ public class ChessBoardViewModel : ChessModel, IChessBoardContext, INotifyProper
     private uint LastEngineRequestId = 0;
 
     private Task EngineExecutionTask;
+
+    private EngineInteractiveMode InteractiveMode = EngineInteractiveMode.AnalyzeMode;
+
+    private static Color ActiveInteractiveModeColor = Colors.LightBlue;
+
+    private static Color InactiveInteractiveModeColor = Colors.White;
 
     public HistoryManager HistoryManager { get; }
 
@@ -170,7 +207,7 @@ public class ChessBoardViewModel : ChessModel, IChessBoardContext, INotifyProper
             movement.ChineseViewableString =
                             movement.ToChineseViewableString(this);
 
-            Logger.LogInformation($"Execute movement {movement}");
+            Logger.LogInformation("Execute movement {}", movement);
 
             StopEngineRunner();
 
@@ -268,33 +305,101 @@ public class ChessBoardViewModel : ChessModel, IChessBoardContext, INotifyProper
     private void BlockingNotifyRefreshEngineFeedback(uint requestId, CancellationToken cancellationToken)
     {
         Logger.LogDebug("Start BlockingNotifyRefreshEngineFeedback {}", requestId);
+        bool recursiveQueryEngine;
+        int queryCount = 0;
 
-        Engine?.Position(this, cancellationToken);
-        var bestMove = Engine?.Go(new GoOption() {Depth = -1}, cancellationToken,
-                        delegate(object sender, InfoFeedback feedback)
-                        {
-                            // there may be multiple thread running in the same time
-                            // only update UI for the last engine request
-                            if (requestId == LastEngineRequestId)
-                            {
-                                HandleInfoFeedback(feedback);
-                            }
-                        });
-
-        if (bestMove != null && !cancellationToken.IsCancellationRequested && requestId == LastEngineRequestId)
+        do
         {
-            if (MovementExtension.ParseMovementFromUnifyString(bestMove.BestMovement, out Movement bestMovement))
-            {
-                Logger.LogInformation("{} Received Best move {}", requestId, bestMove.BestMovement);
+            recursiveQueryEngine = false;
+            queryCount++;
 
-                this.PopulateMovement(bestMovement);
-                this.DispatchAction(() => { MovementIndicator.SetMovement(bestMovement); });
+            int depth;
+            bool immediateInvokeBestMove;
+
+            if (InteractiveMode == EngineInteractiveMode.AnalyzeMode
+                || (InteractiveMode == EngineInteractiveMode.BlackAutoMode &&
+                    HistoryManager.ExecutionTurn == Model.Color.RED)
+                || (InteractiveMode == EngineInteractiveMode.RedAutoMode &&
+                    HistoryManager.ExecutionTurn == Model.Color.BLACK))
+            {
+                depth = -1;
+                immediateInvokeBestMove = false;
             }
             else
             {
-                Logger.LogError($"Unable to parse best movement {bestMove.BestMovement}");
+                depth = Globals.Config.GetValue<int>(Keys.EngineGoDepth);
+                immediateInvokeBestMove = true;
             }
-        }
+
+
+            Engine?.Position(this, cancellationToken);
+            var bestMove = Engine?.Go(new GoOption()
+                            {
+                                            Depth = depth,
+                            },
+                            cancellationToken,
+                            delegate(object sender, InfoFeedback feedback)
+                            {
+                                // there may be multiple thread running in the same time
+                                // only update UI for the last engine request
+                                if (requestId == LastEngineRequestId)
+                                {
+                                    HandleInfoFeedback(feedback);
+                                }
+                            });
+
+            if (bestMove != null && !cancellationToken.IsCancellationRequested && requestId == LastEngineRequestId)
+            {
+                if (MovementExtension.ParseMovementFromUnifyString(bestMove.BestMovement, out Movement bestMovement))
+                {
+                    Logger.LogInformation("{} Received Best move {}", requestId, bestMove.BestMovement);
+
+                    this.PopulateMovementWithContext(bestMovement);
+
+                    if (immediateInvokeBestMove)
+                    {
+                        int count = queryCount;
+                        CountdownEvent dispatchCountDownEvent = new CountdownEvent(1);
+
+                        this.DispatchAction(() =>
+                        {
+                            this.ApplyMovement(bestMovement);
+                            HistoryManager.InsertMovement(bestMovement);
+                            SelectedChess = null;
+                            Logger.LogDebug("{requestId}.{queryCount} Executed movement {}, turn {}", requestId, count,
+                                            bestMovement,
+                                            HistoryManager.ExecutionTurn);
+
+                            EngineSuggestedMovements.Clear();
+                            MovementIndicator.ClearMovement();
+
+                            dispatchCountDownEvent.Signal();
+                        });
+
+                        // wait for the dispatch action to finished
+                        try
+                        {
+                            dispatchCountDownEvent.Wait(cancellationToken);
+                        }
+                        catch (OperationCanceledException e)
+                        {
+                        }
+
+                        // indicates to query engine again
+                        recursiveQueryEngine = true;
+                    }
+                    else
+                    {
+                        this.DispatchAction(() => { MovementIndicator.SetMovement(bestMovement); });
+                    }
+                }
+                else
+                {
+                    Logger.LogError($"Unable to parse best movement {bestMove.BestMovement}");
+                }
+            }
+        } while (recursiveQueryEngine && !cancellationToken.IsCancellationRequested);
+
 
         Logger.LogDebug("End BlockingNotifyRefreshEngineFeedback {}", requestId);
     }
@@ -394,6 +499,32 @@ public class ChessBoardViewModel : ChessModel, IChessBoardContext, INotifyProper
         }
     }
 
+    private void SwitchInteractMode(EngineInteractiveMode mode)
+    {
+        if (this.InteractiveMode != mode)
+        {
+            Logger.LogInformation("Current interactive mode");
+
+            StopEngineRunner();
+            this.InteractiveMode = mode;
+
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SwitchToAnalyzeModeColor)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SwitchToAutoModeColor)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SwitchToBlackAutoModeColor)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SwitchToRedAutoModeColor)));
+
+            NotifyRefreshEngineFeedback();
+        }
+    }
+
+    private void DisconnectEngine()
+    {
+        this.StopEngineRunner();
+        Engine.Quit();
+
+        Engine = null;
+    }
+
     private void ReverseBoard()
     {
         Globals.Config[Keys.LayoutIsRotated] = (!Globals.Config.GetValue<bool>(Keys.LayoutIsRotated, false)).ToString();
@@ -476,5 +607,13 @@ public class ChessBoardViewModel : ChessModel, IChessBoardContext, INotifyProper
         public int Depth { get; set; }
 
         public string Movements { get; set; }
+    }
+
+    private enum EngineInteractiveMode
+    {
+        AnalyzeMode,
+        AutoMode,
+        RedAutoMode,
+        BlackAutoMode,
     }
 }

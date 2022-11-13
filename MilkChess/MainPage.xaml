@@ -61,9 +61,10 @@
             Margin="10"
             WidthRequest="300"
             HeightRequest="200"
-            BackgroundColor="LightBlue"
             x:Name="CommonFunction">
             <Grid.RowDefinitions>
+                <RowDefinition />
+                <RowDefinition />
                 <RowDefinition />
                 <RowDefinition />
                 <RowDefinition />
@@ -83,13 +84,32 @@
             <Button Grid.Row="2" Grid.Column="0" Text="To Start" Command="{Binding MoveToStartCommand}" />
             <Button Grid.Row="2" Grid.Column="1" Text="To End" Command="{Binding  MoveToEndCommand}" />
 
-            <Button Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Text="ConnectEngine"
-                    Command="{Binding ConnectToRemoteEngineCommand}" />
+            <Button Grid.Row="3" Grid.Column="0" Text="ConnectEngine" Command="{Binding ConnectToRemoteEngineCommand}" />
+            <Button Grid.Row="3" Grid.Column="1" Text="DisconnectEngine" Command="{Binding DisconnectEngineCommand }" />
 
-            <Button Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Text="UseBestMovement"
+            <Button Grid.Row="4" Grid.Column="0"
+                    BackgroundColor="{Binding SwitchToAnalyzeModeColor}"
+                    Text="AnalyzeMode"
+                    Command="{Binding SwitchToAnalyzeMode }" />
+            <Button Grid.Row="4" Grid.Column="1"
+                    BackgroundColor="{Binding SwitchToAutoModeColor}"
+                    Text="AutoMode"
+                    Command="{Binding SwitchToAutoMode }" />
+
+            <Button Grid.Row="5" Grid.Column="0"
+                    BackgroundColor="{Binding SwitchToRedAutoModeColor}"
+                    Text="RedAutoMode"
+                    Command="{Binding SwitchToRedAutoMode}" />
+
+            <Button Grid.Row="5" Grid.Column="1"
+                    BackgroundColor="{Binding SwitchToBlackAutoModeColor}"
+                    Text="BlackAutoMode"
+                    Command="{Binding SwitchToBlackAutoMode}" />
+
+            <Button Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2" Text="UseBestMovement"
                     Command="{Binding InvokeBestMovementCommand}" />
 
-            <Button Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" Text="RotateBoard"
+            <Button Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="2" Text="RotateBoard"
                     Command="{Binding ReverseBoardCommand}" />
         </Grid>
         <ListView

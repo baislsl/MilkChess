@@ -10,4 +10,6 @@ public static class Globals
 public class Keys
 {
     public const string LayoutIsRotated = "Layout:IsRotated";
+
+    public const string EngineGoDepth = "Engine:GoDepth";
 }
