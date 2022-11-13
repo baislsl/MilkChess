@@ -1,6 +1,9 @@
 ﻿using System.Collections.ObjectModel;
+using System.Reflection;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using MilkChess.Engine;
+using MilkChess.Helper;
 using MilkChess.Model;
 using MilkChess.UserInterface;
 
@@ -16,6 +19,8 @@ namespace MilkChess
                         "-addr", "192.168.31.7:7890",
                         "-output", "/private/tmp/remote_engine.log"
         };
+
+        private const string ConfigResourcePath = "MilkChess.Resources.Config.appsettings.ini";
 
 
 #if !(IOS || ANDROID || MACCATALYST || WINDOWS)
@@ -51,6 +56,14 @@ namespace MilkChess
                                             Arguments = Arguments,
                             });
             builder.Services.AddTransient<UcciEngine>();
+
+            using var stream = Assembly.GetExecutingAssembly()
+                            .GetManifestResourceStream(ConfigResourcePath);
+            var config = new ConfigurationBuilder().AddIniStream(stream).Build();
+            Globals.Config = config;
+
+            builder.Configuration.AddConfiguration(config);
+
             return builder.Build();
         }
     }

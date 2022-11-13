@@ -69,6 +69,7 @@
                 <RowDefinition />
                 <RowDefinition />
                 <RowDefinition />
+                <RowDefinition />
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition />
@@ -87,6 +88,9 @@
 
             <Button Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Text="UseBestMovement"
                     Command="{Binding InvokeBestMovementCommand}" />
+
+            <Button Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" Text="RotateBoard"
+                    Command="{Binding ReverseBoardCommand}" />
         </Grid>
         <ListView
             WidthRequest="200"

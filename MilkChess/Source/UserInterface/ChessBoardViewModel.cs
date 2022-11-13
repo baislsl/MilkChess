@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Windows.Input;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using MilkChess.Engine;
 using MilkChess.Helper;
@@ -61,6 +62,8 @@ public class ChessBoardViewModel : ChessModel, IChessBoardContext, INotifyProper
 
     public ICommand InvokeBestMovementCommand => this.WrapEngineInteractCommand(this.InvokeBestMovement);
 
+    public ICommand ReverseBoardCommand => this.WrapClickCommand(this.ReverseBoard);
+
     #endregion
 
     #region binding component
@@ -100,6 +103,12 @@ public class ChessBoardViewModel : ChessModel, IChessBoardContext, INotifyProper
         Logger = logger;
         HistoryManager = historyManager;
         ServiceProvider = serviceProvider;
+
+        var config = serviceProvider.GetRequiredService<IConfiguration>();
+        foreach (var kv in config.AsEnumerable())
+        {
+            Logger.LogInformation("Config  {} -> {}", kv.Key, kv.Value);
+        }
 
         Matrix = new List<List<ChessButton>>(ChessBoardHeight);
         for (int i = 0; i < ChessBoardHeight; i++)
@@ -330,6 +339,11 @@ public class ChessBoardViewModel : ChessModel, IChessBoardContext, INotifyProper
         }
     }
 
+    private ChessButton GetChessButtonAt(Position position)
+    {
+        return Matrix[position.Y][position.X];
+    }
+
     public override void Reset()
     {
         base.Reset();
@@ -378,6 +392,15 @@ public class ChessBoardViewModel : ChessModel, IChessBoardContext, INotifyProper
         {
             this.ApplyMovement(movement);
         }
+    }
+
+    private void ReverseBoard()
+    {
+        Globals.Config[Keys.LayoutIsRotated] = (!Globals.Config.GetValue<bool>(Keys.LayoutIsRotated, false)).ToString();
+
+        Iterator.IterateOverChessBoard(position => { GetChessButtonAt(position).Refresh(); });
+        CursorSelector.Refresh();
+        MovementIndicator?.Refresh();
     }
 
     public void InvokeBestMovement()

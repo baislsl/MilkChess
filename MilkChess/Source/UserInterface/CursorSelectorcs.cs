@@ -14,13 +14,7 @@ public class CursorSelector : Image
         set
         {
             this._position = value;
-
-            AbsoluteLayout.SetLayoutBounds(this, new Rect(
-                value.GetAbsoluteCoordinateX(),
-                value.GetAbsoluteCoordinateY(),
-                AbsoluteLayout.AutoSize,
-                AbsoluteLayout.AutoSize));
-            AbsoluteLayout.SetLayoutFlags(this, AbsoluteLayoutFlags.None);
+            Refresh();
         }
     }
 
@@ -28,5 +22,15 @@ public class CursorSelector : Image
     {
         this.Source = source;
         this.Position = position;
+    }
+
+    public void Refresh()
+    {
+        AbsoluteLayout.SetLayoutBounds(this, new Rect(
+                        _position.GetAbsoluteCoordinateX(),
+                        _position.GetAbsoluteCoordinateY(),
+                        AbsoluteLayout.AutoSize,
+                        AbsoluteLayout.AutoSize));
+        AbsoluteLayout.SetLayoutFlags(this, AbsoluteLayoutFlags.None);
     }
 }

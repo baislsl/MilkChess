@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Configuration;
+using MilkChess.Helper;
 using MilkChess.Model;
 
 namespace MilkChess.UserInterface;
@@ -25,7 +27,14 @@ internal static class UserInterfaceHelper
 
     public static int GetAbsoluteCoordinateY(this Position position)
     {
-        return (9 - position.Y) * UIConstants.ChessSize + UIConstants.VerticalOffset;
+        if (Globals.Config.GetValue<bool>(Keys.LayoutIsRotated, false))
+        {
+            return position.Y * UIConstants.ChessSize + UIConstants.VerticalOffset;
+        }
+        else
+        {
+            return (9 - position.Y) * UIConstants.ChessSize + UIConstants.VerticalOffset;
+        }
     }
 
     public static string DrawableResource(this Chess chess)

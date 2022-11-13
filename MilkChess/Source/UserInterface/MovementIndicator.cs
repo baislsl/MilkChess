@@ -49,4 +49,10 @@ public class MovementIndicator
         To.IsEnabled = false;
         this.Movement = null;
     }
+
+    public void Refresh()
+    {
+        From.Refresh();
+        To.Refresh();
+    }
 }

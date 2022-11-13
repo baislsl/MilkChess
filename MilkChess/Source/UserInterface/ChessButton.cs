@@ -26,14 +26,18 @@ public class ChessButton : ImageButton
         this.BackgroundColor = Color.FromRgba(0, 0, 0, 0);
         this.Position = position;
         this._chess = chess;
-        this.Source = chess?.DrawableResource();
-        
+
+        Refresh();
+    }
+
+    public void Refresh()
+    {
+        this.Source = _chess?.DrawableResource();
         AbsoluteLayout.SetLayoutBounds(this, new Rect(
-            position.GetAbsoluteCoordinateX(),
-            position.GetAbsoluteCoordinateY(),
-            UIConstants.ChessSize,
-            UIConstants.ChessSize));
+                        Position.GetAbsoluteCoordinateX(),
+                        Position.GetAbsoluteCoordinateY(),
+                        UIConstants.ChessSize,
+                        UIConstants.ChessSize));
         AbsoluteLayout.SetLayoutFlags(this, AbsoluteLayoutFlags.None);
-        
     }
 }
