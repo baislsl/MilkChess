@@ -34,6 +34,26 @@ public class ChessBoardViewModel : ChessModel, IChessBoardContext, INotifyProper
         }
     }
 
+    private bool _IsEngineAutoMoving;
+
+    private bool IsEngineAutoMoving
+    {
+        get => _IsEngineAutoMoving;
+        set
+        {
+            if (value != _IsEngineAutoMoving)
+            {
+                _IsEngineAutoMoving = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ResetCommand)));
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(MoveBackwardCommand)));
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(MoveForwardCommand)));
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(MoveToStartCommand)));
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(MoveToEndCommand)));
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ResetCommand)));
+            }
+        }
+    }
+
     public ObservableCollection<PredictMovementTrace> EngineSuggestedMovements { get; set; }
 
     public int ChessBoardHeight => UIConstants.ChessBoardHeight;
@@ -65,21 +85,22 @@ public class ChessBoardViewModel : ChessModel, IChessBoardContext, INotifyProper
     public string Movements => default;
     public string Depth => default;
 
-    public ICommand ResetCommand => this.WrapEngineInteractCommand(this.Reset);
+    public ICommand ResetCommand => this.WrapEngineInteractCommand(this.Reset, _ => !IsEngineAutoMoving);
 
-    public ICommand MoveBackwardCommand => this.WrapEngineInteractCommand(this.MoveBackward);
+    public ICommand MoveBackwardCommand => this.WrapEngineInteractCommand(this.MoveBackward, _ => !IsEngineAutoMoving);
 
-    public ICommand MoveForwardCommand => this.WrapEngineInteractCommand(this.MoveForward);
+    public ICommand MoveForwardCommand => this.WrapEngineInteractCommand(this.MoveForward, _ => !IsEngineAutoMoving);
 
-    public ICommand MoveToStartCommand => this.WrapEngineInteractCommand(this.MoveToStart);
+    public ICommand MoveToStartCommand => this.WrapEngineInteractCommand(this.MoveToStart, _ => !IsEngineAutoMoving);
 
-    public ICommand MoveToEndCommand => this.WrapEngineInteractCommand(this.MoveToEnd);
+    public ICommand MoveToEndCommand => this.WrapEngineInteractCommand(this.MoveToEnd, _ => !IsEngineAutoMoving);
 
     public ICommand ConnectToRemoteEngineCommand => this.WrapEngineInteractCommand(this.InitializeUcciEngine);
 
     public ICommand DisconnectEngineCommand => this.WrapEngineInteractCommand(this.DisconnectEngine);
 
-    public ICommand InvokeBestMovementCommand => this.WrapEngineInteractCommand(this.InvokeBestMovement);
+    public ICommand InvokeBestMovementCommand =>
+                    this.WrapEngineInteractCommand(this.InvokeBestMovement, _ => !IsEngineAutoMoving);
 
     public ICommand ReverseBoardCommand => this.WrapClickCommand(this.ReverseBoard);
 
@@ -125,9 +146,9 @@ public class ChessBoardViewModel : ChessModel, IChessBoardContext, INotifyProper
 
     private EngineInteractiveMode InteractiveMode = EngineInteractiveMode.AnalyzeMode;
 
-    private static Color ActiveInteractiveModeColor = Colors.LightBlue;
+    private static readonly Color ActiveInteractiveModeColor = Colors.LightBlue;
 
-    private static Color InactiveInteractiveModeColor = Colors.White;
+    private static readonly Color InactiveInteractiveModeColor = Colors.White;
 
     public HistoryManager HistoryManager { get; }
 
@@ -329,6 +350,7 @@ public class ChessBoardViewModel : ChessModel, IChessBoardContext, INotifyProper
             {
                 depth = Globals.Config.GetValue<int>(Keys.EngineGoDepth);
                 immediateInvokeBestMove = true;
+                IsEngineAutoMoving = true;
             }
 
 
@@ -400,6 +422,7 @@ public class ChessBoardViewModel : ChessModel, IChessBoardContext, INotifyProper
             }
         } while (recursiveQueryEngine && !cancellationToken.IsCancellationRequested);
 
+        IsEngineAutoMoving = false;
 
         Logger.LogDebug("End BlockingNotifyRefreshEngineFeedback {}", requestId);
     }
@@ -549,7 +572,7 @@ public class ChessBoardViewModel : ChessModel, IChessBoardContext, INotifyProper
     private ICommand WrapEngineInteractCommand(Action action, Func<object, bool> canExecute = null,
                     [CallerMemberName] string commandName = "")
     {
-        return new Command<object>(_ =>
+        return new Command<object>(obj =>
         {
             try
             {
