@@ -109,7 +109,7 @@ public class ChessBoardViewModel : ChessModel, IChessBoardContext, INotifyProper
 
     public ICommand SwitchToBlackAutoMode =>
                     this.WrapEngineInteractCommand(() => this.SwitchInteractMode(EngineInteractiveMode.BlackAutoMode));
-
+    
     public ICommand SwitchToRedAutoMode =>
                     this.WrapEngineInteractCommand(() => this.SwitchInteractMode(EngineInteractiveMode.RedAutoMode));
 
@@ -403,7 +403,7 @@ public class ChessBoardViewModel : ChessModel, IChessBoardContext, INotifyProper
                         {
                             dispatchCountDownEvent.Wait(cancellationToken);
                         }
-                        catch (OperationCanceledException e)
+                        catch (OperationCanceledException)
                         {
                         }
 
@@ -448,8 +448,7 @@ public class ChessBoardViewModel : ChessModel, IChessBoardContext, INotifyProper
     {
         if (Engine != null) return;
 
-        Logger.LogInformation("Initailzing engine...")
-                        ;
+        Logger.LogInformation("Initailzing engine...");
         Engine = ServiceProvider.GetService<UcciEngine>();
 
         CancellationTokenSource cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(15));

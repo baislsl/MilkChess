@@ -6,138 +6,144 @@
              x:DataType="userInterface:ChessBoardViewModel"
              x:Class="MilkChess.MainPage">
 
-    <HorizontalStackLayout
-        BackgroundColor="YellowGreen"
-        Margin="20">
-        <VerticalStackLayout
-            Margin="100">
-            <Label Text="{Binding Path = Score,
-                                StringFormat='Score: {0}'}"
-                   HeightRequest="30"
-                   TextColor="{Binding ScoreColor}"
-                   FontSize="20"
-                   FontAttributes="Bold" />
+    <VerticalStackLayout
+        MinimumWidthRequest="900"
+        BackgroundColor="DarkGray">
 
-            <Label Text=""
-                   HeightRequest="30" />
-            <Label Text="Predict Movements:" FontAttributes="Bold" FontSize="18" />
-            <ListView
-                WidthRequest="400"
-                RowHeight="60"
-                Margin="4"
-                BackgroundColor="LightBlue"
-                ItemsSource="{Binding  EngineSuggestedMovements}">
-                <ListView.ItemTemplate>
-                    <DataTemplate>
-                        <ViewCell>
-                            <Label
-                                LineBreakMode="WordWrap"
-                                MaxLines="3"
-                                TextColor="Black"
-                                FontSize="18">
-                                <Label.FormattedText>
-                                    <FormattedString>
-                                        <Span Text="Score: " TextColor="Black" />
-                                        <Span Text="{Binding Score}" TextColor="Black" FontAttributes="Bold" />
-                                        <Span Text=" Depth: " TextColor="Yellow" />
-                                        <Span Text="{Binding Depth}" TextColor="Yellow" FontAttributes="Bold" />
-                                        <Span Text="{Binding Path=Movements, StringFormat='  {0}' }" TextColor="Black"
-                                              FontAttributes="Italic" />
-                                    </FormattedString>
-                                </Label.FormattedText>
-                            </Label>
+        <HorizontalStackLayout>
+            <VerticalStackLayout
+                WidthRequest="{Binding ChessBoardWidth}">
+                <AbsoluteLayout
+                    WidthRequest="{Binding ChessBoardWidth}"
+                    HeightRequest="{Binding ChessBoardHeight}"
+                    x:Name="ChessBoardLayout">
+                </AbsoluteLayout>
+            </VerticalStackLayout>
+            <VerticalStackLayout
+                WidthRequest="300">
+                <Grid
+                    Margin="5"
+                    x:Name="CommonFunction">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="40" />
+                        <RowDefinition Height="40" />
+                        <RowDefinition Height="40" />
+                        <RowDefinition Height="40" />
+                        <RowDefinition Height="40" />
+                        <RowDefinition Height="40" />
+                        <RowDefinition Height="40" />
+                        <RowDefinition Height="40" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+                    <Button Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Text="Reset"
+                            Command="{Binding ResetCommand}" />
 
-                        </ViewCell>
-                    </DataTemplate>
-                </ListView.ItemTemplate>
-            </ListView>
-        </VerticalStackLayout>
-        <AbsoluteLayout
-            WidthRequest="{Binding ChessBoardWidth}"
-            HeightRequest="{Binding ChessBoardHeight}"
-            x:Name="ChessBoardLayout">
-        </AbsoluteLayout>
-        <Grid
-            Margin="10"
-            WidthRequest="300"
-            HeightRequest="200"
-            x:Name="CommonFunction">
-            <Grid.RowDefinitions>
-                <RowDefinition />
-                <RowDefinition />
-                <RowDefinition />
-                <RowDefinition />
-                <RowDefinition />
-                <RowDefinition />
-                <RowDefinition />
-                <RowDefinition />
-            </Grid.RowDefinitions>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition />
-                <ColumnDefinition />
-            </Grid.ColumnDefinitions>
-            <Button Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Text="Reset" Command="{Binding ResetCommand}" />
+                    <Button Grid.Row="1" Grid.Column="0" Text="Go back" Command="{Binding MoveBackwardCommand}" />
+                    <Button Grid.Row="1" Grid.Column="1" Text="Move forward" Command="{Binding MoveForwardCommand}" />
 
-            <Button Grid.Row="1" Grid.Column="0" Text="Go back" Command="{Binding MoveBackwardCommand}" />
-            <Button Grid.Row="1" Grid.Column="1" Text="Move forward" Command="{Binding MoveForwardCommand}" />
+                    <Button Grid.Row="2" Grid.Column="0" Text="To Start" Command="{Binding MoveToStartCommand}" />
+                    <Button Grid.Row="2" Grid.Column="1" Text="To End" Command="{Binding  MoveToEndCommand}" />
 
-            <Button Grid.Row="2" Grid.Column="0" Text="To Start" Command="{Binding MoveToStartCommand}" />
-            <Button Grid.Row="2" Grid.Column="1" Text="To End" Command="{Binding  MoveToEndCommand}" />
+                    <Button Grid.Row="3" Grid.Column="0" Text="ConnectEngine"
+                            Command="{Binding ConnectToRemoteEngineCommand}" />
+                    <Button Grid.Row="3" Grid.Column="1" Text="DisconnectEngine"
+                            Command="{Binding DisconnectEngineCommand }" />
 
-            <Button Grid.Row="3" Grid.Column="0" Text="ConnectEngine" Command="{Binding ConnectToRemoteEngineCommand}" />
-            <Button Grid.Row="3" Grid.Column="1" Text="DisconnectEngine" Command="{Binding DisconnectEngineCommand }" />
+                    <Button Grid.Row="4" Grid.Column="0"
+                            BackgroundColor="{Binding SwitchToAnalyzeModeColor}"
+                            Text="AnalyzeMode"
+                            Command="{Binding SwitchToAnalyzeMode }" />
+                    <Button Grid.Row="4" Grid.Column="1"
+                            BackgroundColor="{Binding SwitchToAutoModeColor}"
+                            Text="AutoMode"
+                            Command="{Binding SwitchToAutoMode }" />
 
-            <Button Grid.Row="4" Grid.Column="0"
-                    BackgroundColor="{Binding SwitchToAnalyzeModeColor}"
-                    Text="AnalyzeMode"
-                    Command="{Binding SwitchToAnalyzeMode }" />
-            <Button Grid.Row="4" Grid.Column="1"
-                    BackgroundColor="{Binding SwitchToAutoModeColor}"
-                    Text="AutoMode"
-                    Command="{Binding SwitchToAutoMode }" />
+                    <Button Grid.Row="5" Grid.Column="0"
+                            BackgroundColor="{Binding SwitchToRedAutoModeColor}"
+                            Text="RedAutoMode"
+                            Command="{Binding SwitchToRedAutoMode}" />
 
-            <Button Grid.Row="5" Grid.Column="0"
-                    BackgroundColor="{Binding SwitchToRedAutoModeColor}"
-                    Text="RedAutoMode"
-                    Command="{Binding SwitchToRedAutoMode}" />
+                    <Button Grid.Row="5" Grid.Column="1"
+                            BackgroundColor="{Binding SwitchToBlackAutoModeColor}"
+                            Text="BlackAutoMode"
+                            Command="{Binding SwitchToBlackAutoMode}" />
 
-            <Button Grid.Row="5" Grid.Column="1"
-                    BackgroundColor="{Binding SwitchToBlackAutoModeColor}"
-                    Text="BlackAutoMode"
-                    Command="{Binding SwitchToBlackAutoMode}" />
+                    <Button Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2" Text="UseBestMovement"
+                            Command="{Binding InvokeBestMovementCommand}" />
 
-            <Button Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2" Text="UseBestMovement"
-                    Command="{Binding InvokeBestMovementCommand}" />
-
-            <Button Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="2" Text="RotateBoard"
-                    Command="{Binding ReverseBoardCommand}" />
-        </Grid>
+                    <Button Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="2" Text="RotateBoard"
+                            Command="{Binding ReverseBoardCommand}" />
+                </Grid>
+                <Label Text="History Movements:"
+                       FontAttributes="Bold"
+                       Margin="2"
+                       FontSize="18" />
+                <ListView
+                    WidthRequest="300"
+                    HeightRequest="250"
+                    RowHeight="20"
+                    BackgroundColor="LightBlue"
+                    ItemsSource="{Binding HistoryMovements}">
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <ViewCell>
+                                <Label Margin="1"
+                                       TextColor="Black"
+                                       FontSize="18"
+                                       FontAttributes="Bold">
+                                    <Label.Text>
+                                        <MultiBinding StringFormat="{}{0}. {1}">
+                                            <Binding Path="ActionCount" />
+                                            <Binding Path="ChineseViewableString" />
+                                        </MultiBinding>
+                                    </Label.Text>
+                                </Label>
+                            </ViewCell>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </VerticalStackLayout>
+        </HorizontalStackLayout>
+        
+        <Label Text="{Binding Path = Score,
+                            StringFormat='Score: {0}  '}"
+               TextColor="{Binding ScoreColor}"
+               FontSize="26"
+               Margin="2"
+               FontAttributes="Bold" />
         <ListView
-            WidthRequest="200"
-            RowHeight="20"
-            Margin="4"
+            Margin="2"
+            MinimumHeightRequest="100"
+            RowHeight="100"
             BackgroundColor="LightBlue"
-            ItemsSource="{Binding HistoryMovements}">
+            ItemsSource="{Binding  EngineSuggestedMovements}">
             <ListView.ItemTemplate>
                 <DataTemplate>
-                    <ViewCell
-                        Height="20">
-                        <Label HeightRequest="20"
+                    <ViewCell>
+                        <Label Margin="1"
+                               LineBreakMode="WordWrap"
+                               MaxLines="5"
                                TextColor="Black"
-                               FontSize="18"
-                               FontAttributes="Bold">
-                            <Label.Text>
-                                <MultiBinding StringFormat="{}{0}. {1}">
-                                    <Binding Path="ActionCount" />
-                                    <Binding Path="ChineseViewableString" />
-                                </MultiBinding>
-                            </Label.Text>
+                               FontSize="18">
+                            <Label.FormattedText>
+                                <FormattedString>
+                                    <Span Text="Score: " TextColor="Black" />
+                                    <Span Text="{Binding Score}" TextColor="Black" FontAttributes="Bold" />
+                                    <Span Text=" Depth: " TextColor="Black" />
+                                    <Span Text="{Binding Depth}" TextColor="Black" FontAttributes="Bold" />
+                                    <Span Text="{Binding Path=Movements, StringFormat='  {0}' }"
+                                          TextColor="Black"
+                                          FontAttributes="Italic" />
+                                </FormattedString>
+                            </Label.FormattedText>
                         </Label>
-
                     </ViewCell>
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>
+    </VerticalStackLayout>
 
-    </HorizontalStackLayout>
 </ContentPage>
