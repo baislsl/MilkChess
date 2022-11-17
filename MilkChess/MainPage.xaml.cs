@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System.Windows.Input;
+using Microsoft.Extensions.Logging;
 using Microsoft.Maui.Layouts;
 using MilkChess.Helper;
 using MilkChess.Model;
@@ -10,7 +11,7 @@ namespace MilkChess
     public partial class MainPage : ContentPage
     {
         private readonly ILogger Logger;
-        private readonly ChessBoardViewModel ChessBoardViewModel;
+        public ChessBoardViewModel ChessBoardViewModel { get; set; }
         private readonly HistoryManager HistoryManager;
 
         public MainPage(ChessBoardViewModel chessBoardViewModel,
@@ -45,7 +46,7 @@ namespace MilkChess
             ChessBoardLayout.Add(backgroundImage);
 
             ChessBoardViewModel.AddToAbsoluteLayout(ChessBoardLayout);
-            
+
             ExecutionTurnNotifier executionTurnNotifier = new ExecutionTurnNotifier();
             AbsoluteLayout.SetLayoutBounds(executionTurnNotifier,
                             new Rect(UIConstants.HorizontalOffset / 2.0, UIConstants.ChessBoardHeight / 2.0,
@@ -58,5 +59,10 @@ namespace MilkChess
             });
             ChessBoardLayout.Add(executionTurnNotifier);
         }
+
+        // After multiple tries, I don't know how to bind within the list view to ChessBoardViewModel property
+        public ICommand SwitchToSelectedMovementCommand => ChessBoardViewModel.SwitchToSelectedMovementCommand;
+
+        public int CurrentHistoryManagerCursor => HistoryManager.GetCursor();
     }
 }

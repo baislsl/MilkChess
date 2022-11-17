@@ -9,7 +9,7 @@ public class HistoryManager
     private EventHandler ExecutionTurnEventHandler;
 
     private Color _executionTurn;
-    
+
     public Color ExecutionTurn
     {
         get => _executionTurn;
@@ -22,8 +22,8 @@ public class HistoryManager
 
     public IList<Movement> Movements { get; private set; }
 
-    public int Cursor;
-
+    private int Cursor;
+    
     private readonly ILogger Logger;
 
     public Movement LastMovement
@@ -46,7 +46,7 @@ public class HistoryManager
     {
         this.ExecutionTurn = this.ExecutionTurn.Reverse();
 
-        movement.ActionCount = this.Cursor / 2 + 1;
+        movement.ActionCount = this.Cursor + 1;
 
         while (Movements.Any() && Movements.Count != Cursor)
         {
@@ -77,6 +77,19 @@ public class HistoryManager
         this.ExecutionTurn = this.ExecutionTurn.Reverse();
         this.Cursor++;
         return this.Movements[this.Cursor - 1];
+    }
+
+    public int GetCursor()
+    {
+        return this.Cursor;
+    }
+
+    public void SetCursor(int cursor)
+    {
+        while (this.LastMovement.ActionCount != cursor)
+        {
+            MoveBackward();
+        }
     }
 
     public IEnumerable<Movement> GetMovementHistory()

@@ -4,8 +4,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:userInterface="clr-namespace:MilkChess.UserInterface"
              x:DataType="userInterface:ChessBoardViewModel"
+             x:Name="ChessBoardPage"
              x:Class="MilkChess.MainPage">
-
     <HorizontalStackLayout
         BackgroundColor="DarkGray">
         <VerticalStackLayout>
@@ -117,24 +117,44 @@
                    Margin="2"
                    FontSize="18" />
             <ListView
+                x:Name="MovementView"
                 RowHeight="20"
                 MinimumHeightRequest="{Binding ChessBoardHeight}"
                 BackgroundColor="LightBlue"
+                xmlns:local="clr-namespace:MilkChess.Model"
                 ItemsSource="{Binding HistoryMovements}">
+                <ListView.Resources>
+                    <local:MovementColorConvertor x:Key="MovementColorConvertor" />
+                </ListView.Resources>
                 <ListView.ItemTemplate>
                     <DataTemplate>
                         <ViewCell>
-                            <Label Margin="1"
-                                   TextColor="Black"
-                                   FontSize="18"
-                                   FontAttributes="Bold">
-                                <Label.Text>
+                            <Button
+                                Command="{Binding Source={x:Reference ChessBoardPage}, Path=SwitchToSelectedMovementCommand}"
+                                CommandParameter="{Binding}"
+                                VerticalOptions="Fill"
+                                HorizontalOptions="Start"
+                                BorderWidth="0"
+                                CornerRadius="1"
+                                Margin="1"
+                                BackgroundColor="LightGray"
+                                FontSize="18"
+                                FontAttributes="Bold">
+                                <Button.TextColor>
+                                    <Color>Black</Color>
+                                    <!-- <MultiBinding Converter="{StaticResource MovementColorConvertor}"> -->
+                                    <!--     <Binding  /> -->
+                                    <!--     <Binding Source="{x:Reference ChessBoardPage}" -->
+                                    <!--              Path="CurrentHistoryManagerCursor" /> -->
+                                    <!-- </MultiBinding> -->
+                                </Button.TextColor>
+                                <Button.Text>
                                     <MultiBinding StringFormat="{}{0}. {1}">
                                         <Binding Path="ActionCount" />
                                         <Binding Path="ChineseViewableString" />
                                     </MultiBinding>
-                                </Label.Text>
-                            </Label>
+                                </Button.Text>
+                            </Button>
                         </ViewCell>
                     </DataTemplate>
                 </ListView.ItemTemplate>

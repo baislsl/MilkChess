@@ -109,12 +109,14 @@ public class ChessBoardViewModel : ChessModel, IChessBoardContext, INotifyProper
 
     public ICommand SwitchToBlackAutoMode =>
                     this.WrapEngineInteractCommand(() => this.SwitchInteractMode(EngineInteractiveMode.BlackAutoMode));
-    
+
     public ICommand SwitchToRedAutoMode =>
                     this.WrapEngineInteractCommand(() => this.SwitchInteractMode(EngineInteractiveMode.RedAutoMode));
 
     public ICommand SwitchToAutoMode =>
                     this.WrapEngineInteractCommand(() => this.SwitchInteractMode(EngineInteractiveMode.AutoMode));
+
+    public ICommand SwitchToSelectedMovementCommand => new Command<object>(o => { this.SwitchToSelectedMovement(o); });
 
     #endregion
 
@@ -221,7 +223,7 @@ public class ChessBoardViewModel : ChessModel, IChessBoardContext, INotifyProper
                             RemovedChess = clickedButton.Chess,
                             From = SelectedChess.Position,
                             To = clickedButton.Position,
-                            ActionCount = HistoryManager.Cursor / 2 + 1,
+                            ActionCount = HistoryManager.GetCursor() + 1,
             };
 
             // 存下招法中文表示
@@ -353,7 +355,6 @@ public class ChessBoardViewModel : ChessModel, IChessBoardContext, INotifyProper
                 IsEngineAutoMoving = true;
             }
 
-
             Engine?.Position(this, cancellationToken);
             var bestMove = Engine?.Go(new GoOption()
                             {
@@ -364,7 +365,7 @@ public class ChessBoardViewModel : ChessModel, IChessBoardContext, INotifyProper
                             {
                                 // there may be multiple thread running in the same time
                                 // only update UI for the last engine request
-                                if (requestId == LastEngineRequestId)
+                                if (requestId == LastEngineRequestId && !cancellationToken.IsCancellationRequested)
                                 {
                                     HandleInfoFeedback(feedback);
                                 }
@@ -484,7 +485,7 @@ public class ChessBoardViewModel : ChessModel, IChessBoardContext, INotifyProper
         this.SelectedChess = null;
     }
 
-    public void MoveForward()
+    private void MoveForward()
     {
         Movement movement = HistoryManager.MoveForward();
         if (movement != null)
@@ -493,7 +494,7 @@ public class ChessBoardViewModel : ChessModel, IChessBoardContext, INotifyProper
         }
     }
 
-    public void MoveBackward()
+    private void MoveBackward()
     {
         Movement movement = HistoryManager.MoveBackward();
         if (movement != null)
@@ -502,20 +503,17 @@ public class ChessBoardViewModel : ChessModel, IChessBoardContext, INotifyProper
         }
     }
 
-    public void MoveToStart()
+    private void MoveToStart()
     {
-        Movement movement;
-        while ((movement = HistoryManager.MoveBackward()) != null)
+        while (HistoryManager.MoveBackward() is { } movement)
         {
             this.RevertMovement(movement);
         }
     }
 
-    public void MoveToEnd()
+    private void MoveToEnd()
     {
-        Movement movement;
-
-        while ((movement = HistoryManager.MoveForward()) != null)
+        while (HistoryManager.MoveForward() is { } movement)
         {
             this.ApplyMovement(movement);
         }
@@ -556,7 +554,7 @@ public class ChessBoardViewModel : ChessModel, IChessBoardContext, INotifyProper
         MovementIndicator?.Refresh();
     }
 
-    public void InvokeBestMovement()
+    private void InvokeBestMovement()
     {
         Movement movement = this.MovementIndicator?.Movement;
         if (movement != null)
@@ -565,6 +563,29 @@ public class ChessBoardViewModel : ChessModel, IChessBoardContext, INotifyProper
 
             this.ApplyMovement(movement);
             HistoryManager.InsertMovement(movement);
+        }
+    }
+
+    private void SwitchToSelectedMovement(object sender)
+    {
+        Logger.LogDebug("[SwitchToSelectedMovement] {}", sender);
+
+        Movement senderMovement = (Movement) sender;
+        int cursor = senderMovement.ActionCount;
+
+        if (cursor < HistoryManager.LastMovement.ActionCount)
+        {
+            while (HistoryManager.LastMovement.ActionCount != cursor)
+            {
+                MoveBackward();
+            }
+        }
+        else
+        {
+            while (HistoryManager.LastMovement.ActionCount != cursor)
+            {
+                MoveForward();
+            }
         }
     }
 

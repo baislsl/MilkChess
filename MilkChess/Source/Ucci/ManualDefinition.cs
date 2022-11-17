@@ -67,7 +67,7 @@ public static class MovementExtension
     public static void PopulateMovementWithContext(this IChessBoardContext chessBoardContext, Movement movement)
     {
         chessBoardContext.PopulateMovement(movement);
-        movement.ActionCount = chessBoardContext.HistoryManager.Cursor / 2 + 1;
+        movement.ActionCount = chessBoardContext.HistoryManager.GetCursor() + 1;
     }
 
     public static bool ParseMovementFromUnifyString(string unifyString, out Movement movement)
