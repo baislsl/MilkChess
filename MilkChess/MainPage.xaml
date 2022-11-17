@@ -6,21 +6,15 @@
              x:DataType="userInterface:ChessBoardViewModel"
              x:Class="MilkChess.MainPage">
 
-    <VerticalStackLayout
-        MinimumWidthRequest="900"
+    <HorizontalStackLayout
         BackgroundColor="DarkGray">
-
-        <HorizontalStackLayout>
-            <VerticalStackLayout
-                WidthRequest="{Binding ChessBoardWidth}">
+        <VerticalStackLayout>
+            <HorizontalStackLayout>
                 <AbsoluteLayout
                     WidthRequest="{Binding ChessBoardWidth}"
                     HeightRequest="{Binding ChessBoardHeight}"
                     x:Name="ChessBoardLayout">
                 </AbsoluteLayout>
-            </VerticalStackLayout>
-            <VerticalStackLayout
-                WidthRequest="300">
                 <Grid
                     Margin="5"
                     x:Name="CommonFunction">
@@ -77,73 +71,76 @@
                     <Button Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="2" Text="RotateBoard"
                             Command="{Binding ReverseBoardCommand}" />
                 </Grid>
-                <Label Text="History Movements:"
-                       FontAttributes="Bold"
-                       Margin="2"
-                       FontSize="18" />
-                <ListView
-                    WidthRequest="300"
-                    HeightRequest="250"
-                    RowHeight="20"
-                    BackgroundColor="LightBlue"
-                    ItemsSource="{Binding HistoryMovements}">
-                    <ListView.ItemTemplate>
-                        <DataTemplate>
-                            <ViewCell>
-                                <Label Margin="1"
-                                       TextColor="Black"
-                                       FontSize="18"
-                                       FontAttributes="Bold">
-                                    <Label.Text>
-                                        <MultiBinding StringFormat="{}{0}. {1}">
-                                            <Binding Path="ActionCount" />
-                                            <Binding Path="ChineseViewableString" />
-                                        </MultiBinding>
-                                    </Label.Text>
-                                </Label>
-                            </ViewCell>
-                        </DataTemplate>
-                    </ListView.ItemTemplate>
-                </ListView>
-            </VerticalStackLayout>
-        </HorizontalStackLayout>
-        
-        <Label Text="{Binding Path = Score,
+            </HorizontalStackLayout>
+
+            <Label Text="{Binding Path = Score,
                             StringFormat='Score: {0}  '}"
-               TextColor="{Binding ScoreColor}"
-               FontSize="26"
-               Margin="2"
-               FontAttributes="Bold" />
-        <ListView
-            Margin="2"
-            MinimumHeightRequest="100"
-            RowHeight="100"
-            BackgroundColor="LightBlue"
-            ItemsSource="{Binding  EngineSuggestedMovements}">
-            <ListView.ItemTemplate>
-                <DataTemplate>
-                    <ViewCell>
-                        <Label Margin="1"
-                               LineBreakMode="WordWrap"
-                               MaxLines="5"
-                               TextColor="Black"
-                               FontSize="18">
-                            <Label.FormattedText>
-                                <FormattedString>
-                                    <Span Text="Score: " TextColor="Black" />
-                                    <Span Text="{Binding Score}" TextColor="Black" FontAttributes="Bold" />
-                                    <Span Text=" Depth: " TextColor="Black" />
-                                    <Span Text="{Binding Depth}" TextColor="Black" FontAttributes="Bold" />
-                                    <Span Text="{Binding Path=Movements, StringFormat='  {0}' }"
-                                          TextColor="Black"
-                                          FontAttributes="Italic" />
-                                </FormattedString>
-                            </Label.FormattedText>
-                        </Label>
-                    </ViewCell>
-                </DataTemplate>
-            </ListView.ItemTemplate>
-        </ListView>
-    </VerticalStackLayout>
+                   TextColor="{Binding ScoreColor}"
+                   FontSize="26"
+                   Margin="2"
+                   FontAttributes="Bold" />
+            <ListView
+                Margin="2"
+                MinimumHeightRequest="100"
+                RowHeight="100"
+                BackgroundColor="LightBlue"
+                ItemsSource="{Binding  EngineSuggestedMovements}">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <ViewCell>
+                            <Label Margin="1"
+                                   LineBreakMode="WordWrap"
+                                   MaxLines="5"
+                                   TextColor="Black"
+                                   FontSize="18">
+                                <Label.FormattedText>
+                                    <FormattedString>
+                                        <Span Text="Score: " TextColor="Black" />
+                                        <Span Text="{Binding Score}" TextColor="Black" FontAttributes="Bold" />
+                                        <Span Text=" Depth: " TextColor="Black" />
+                                        <Span Text="{Binding Depth}" TextColor="Black" FontAttributes="Bold" />
+                                        <Span Text="{Binding Path=Movements, StringFormat='  {0}' }"
+                                              TextColor="Black"
+                                              FontAttributes="Italic" />
+                                    </FormattedString>
+                                </Label.FormattedText>
+                            </Label>
+                        </ViewCell>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </VerticalStackLayout>
+        <VerticalStackLayout
+            WidthRequest="300">
+            <Label Text="History Movements:"
+                   FontAttributes="Bold"
+                   Margin="2"
+                   FontSize="18" />
+            <ListView
+                RowHeight="20"
+                MinimumHeightRequest="{Binding ChessBoardHeight}"
+                BackgroundColor="LightBlue"
+                ItemsSource="{Binding HistoryMovements}">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <ViewCell>
+                            <Label Margin="1"
+                                   TextColor="Black"
+                                   FontSize="18"
+                                   FontAttributes="Bold">
+                                <Label.Text>
+                                    <MultiBinding StringFormat="{}{0}. {1}">
+                                        <Binding Path="ActionCount" />
+                                        <Binding Path="ChineseViewableString" />
+                                    </MultiBinding>
+                                </Label.Text>
+                            </Label>
+                        </ViewCell>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </VerticalStackLayout>
+    </HorizontalStackLayout>
+
 
 </ContentPage>
