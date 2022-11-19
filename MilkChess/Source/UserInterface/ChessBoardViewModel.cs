@@ -104,19 +104,21 @@ public class ChessBoardViewModel : ChessModel, IChessBoardContext, INotifyProper
 
     public ICommand ReverseBoardCommand => this.WrapClickCommand(this.ReverseBoard);
 
-    public ICommand SwitchToAnalyzeMode =>
+    public ICommand SwitchToAnalyzeModeCommand =>
                     this.WrapEngineInteractCommand(() => this.SwitchInteractMode(EngineInteractiveMode.AnalyzeMode));
 
-    public ICommand SwitchToBlackAutoMode =>
+    public ICommand SwitchToBlackAutoModeCommand =>
                     this.WrapEngineInteractCommand(() => this.SwitchInteractMode(EngineInteractiveMode.BlackAutoMode));
 
-    public ICommand SwitchToRedAutoMode =>
+    public ICommand SwitchToRedAutoModeCommand =>
                     this.WrapEngineInteractCommand(() => this.SwitchInteractMode(EngineInteractiveMode.RedAutoMode));
 
-    public ICommand SwitchToAutoMode =>
+    public ICommand SwitchToAutoModeCommand =>
                     this.WrapEngineInteractCommand(() => this.SwitchInteractMode(EngineInteractiveMode.AutoMode));
 
-    public ICommand SwitchToSelectedMovementCommand => new Command<object>(o => { this.SwitchToSelectedMovement(o); });
+    public ICommand SaveChessManualCommand => this.WrapClickCommand(this.SaveChessManual);
+
+    public ICommand SwitchToSelectedMovementCommand => new Command<object>(this.SwitchToSelectedMovement);
 
     #endregion
 
@@ -132,7 +134,7 @@ public class ChessBoardViewModel : ChessModel, IChessBoardContext, INotifyProper
 
     public readonly List<List<ChessButton>> Matrix;
 
-    public new readonly ILogger Logger;
+    public readonly ILogger Logger;
 
     private readonly IServiceProvider ServiceProvider;
 
@@ -158,7 +160,7 @@ public class ChessBoardViewModel : ChessModel, IChessBoardContext, INotifyProper
                     IServiceProvider serviceProvider,
                     ILogger<ChessBoardViewModel> logger,
                     HistoryManager historyManager)
-                    : base(serviceProvider.GetService<ILogger<ChessModel>>())
+                    : base()
     {
         Logger = logger;
         HistoryManager = historyManager;
@@ -175,16 +177,29 @@ public class ChessBoardViewModel : ChessModel, IChessBoardContext, INotifyProper
         {
             Matrix.Add(new List<ChessButton>(new ChessButton[ChessBoardWidth]));
         }
-
+        
         Iterator.IterateOverChessBoard(position =>
         {
-            Chess chess = this.GetChessAtPosition(position);
-            ChessButton chessButton = new ChessButton(chess, position);
+            ChessButton chessButton = new ChessButton(null, position);
 
             // chessButton.Released += this.WrapEventHandler(this.OnChessSelected);
             chessButton.Command = this.WrapClickCommand(() => { this.OnChessSelected(chessButton, null); });
             Matrix[position.Y][position.X] = chessButton;
         });
+
+        if (!LoadChessManual())
+        {
+            Logger.LogInformation("Use default chess position");
+            // If init manual not loaded successfully, refresh with the default chess position
+            Iterator.IterateOverChessBoard(position =>
+            {
+                this.SetChessAtPosition(GetChessAtPosition(position), position, out _);
+            });
+        }
+        else
+        {
+            Logger.LogInformation("Use chess position from previous execution");
+        }
 
         CursorSelector = new CursorSelector(new Position(0, 0), UIConstants.CursorBackgroundResource);
         MovementIndicator = new MovementIndicator();
@@ -270,7 +285,7 @@ public class ChessBoardViewModel : ChessModel, IChessBoardContext, INotifyProper
         {
             StringBuilder predict = new StringBuilder();
 
-            ChessModel chessModel = new ChessModel(ServiceProvider.GetRequiredService<ILogger<ChessModel>>(), this);
+            ChessModel chessModel = new ChessModel(this);
 
             for (int i = 0; i < feedback.Pv.Count; i++)
             {
@@ -535,6 +550,62 @@ public class ChessBoardViewModel : ChessModel, IChessBoardContext, INotifyProper
 
             NotifyRefreshEngineFeedback();
         }
+    }
+
+    private string GetDataDirectory()
+    {
+        return Path.Combine(FileSystem.Current.AppDataDirectory,
+                        Globals.Config.GetValue<string>(Keys.PathRoot),
+                        Globals.Config.GetValue<string>(Keys.DataPath));
+    }
+
+    private string GetChessManualFile()
+    {
+        return Path.Combine(GetDataDirectory(), "Chess.txt");
+    }
+
+    private void SaveChessManual()
+    {
+        string targetDirectory = GetDataDirectory();
+        if (!Directory.Exists(targetDirectory))
+        {
+            Directory.CreateDirectory(targetDirectory);
+        }
+
+        string targetFile = GetChessManualFile();
+        if (File.Exists(targetFile))
+        {
+            File.Delete(targetFile);
+        }
+
+        Logger.LogInformation("Saving chess manual to {}", targetFile);
+        using FileStream outputStream = File.OpenWrite(targetFile);
+
+        ForsythEdwardsNotationManualTranslator translator = new ForsythEdwardsNotationManualTranslator();
+        translator.SaveToStream(outputStream, this);
+        
+        Logger.LogInformation("Saved chess manual to {}", targetFile);
+    }
+
+    private bool LoadChessManual()
+    {
+        string targetFile = GetChessManualFile();
+        if (File.Exists(targetFile))
+        {
+            try
+            {
+                ForsythEdwardsNotationManualTranslator translator = new ForsythEdwardsNotationManualTranslator();
+                using FileStream inputStream = File.OpenRead(targetFile);
+                translator.LoadFromStream(inputStream, this);
+                return true;
+            }
+            catch (Exception e)
+            {
+                Logger.LogError(e, "LoadChessManual exception");
+            }
+        }
+
+        return false;
     }
 
     private void DisconnectEngine()

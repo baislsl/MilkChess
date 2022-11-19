@@ -27,6 +27,7 @@
                         <RowDefinition Height="40" />
                         <RowDefinition Height="40" />
                         <RowDefinition Height="40" />
+                        <RowDefinition Height="40" />
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition />
@@ -49,27 +50,30 @@
                     <Button Grid.Row="4" Grid.Column="0"
                             BackgroundColor="{Binding SwitchToAnalyzeModeColor}"
                             Text="AnalyzeMode"
-                            Command="{Binding SwitchToAnalyzeMode }" />
+                            Command="{Binding SwitchToAnalyzeModeCommand }" />
                     <Button Grid.Row="4" Grid.Column="1"
                             BackgroundColor="{Binding SwitchToAutoModeColor}"
                             Text="AutoMode"
-                            Command="{Binding SwitchToAutoMode }" />
+                            Command="{Binding SwitchToAutoModeCommand }" />
 
                     <Button Grid.Row="5" Grid.Column="0"
                             BackgroundColor="{Binding SwitchToRedAutoModeColor}"
                             Text="RedAutoMode"
-                            Command="{Binding SwitchToRedAutoMode}" />
+                            Command="{Binding SwitchToRedAutoModeCommand}" />
 
                     <Button Grid.Row="5" Grid.Column="1"
                             BackgroundColor="{Binding SwitchToBlackAutoModeColor}"
                             Text="BlackAutoMode"
-                            Command="{Binding SwitchToBlackAutoMode}" />
+                            Command="{Binding SwitchToBlackAutoModeCommand}" />
 
                     <Button Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2" Text="UseBestMovement"
                             Command="{Binding InvokeBestMovementCommand}" />
 
                     <Button Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="2" Text="RotateBoard"
                             Command="{Binding ReverseBoardCommand}" />
+                    
+                    <Button Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="2" Text="SaveLayout"
+                            Command="{Binding SaveChessManualCommand}" />
                 </Grid>
             </HorizontalStackLayout>
 

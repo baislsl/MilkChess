@@ -47,7 +47,7 @@ namespace MilkChess
 
             ChessBoardViewModel.AddToAbsoluteLayout(ChessBoardLayout);
 
-            ExecutionTurnNotifier executionTurnNotifier = new ExecutionTurnNotifier();
+            ExecutionTurnNotifier executionTurnNotifier = new ExecutionTurnNotifier(HistoryManager.ExecutionTurn);
             AbsoluteLayout.SetLayoutBounds(executionTurnNotifier,
                             new Rect(UIConstants.HorizontalOffset / 2.0, UIConstants.ChessBoardHeight / 2.0,
                                             AbsoluteLayout.AutoSize,

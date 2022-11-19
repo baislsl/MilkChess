@@ -59,7 +59,7 @@ public class ForsythEdwardsNotation
                         Moves = move,
                         ActiveColor = data[1] == "w" ? Color.RED : Color.BLACK,
         };
-        
+
         return true;
     }
 
@@ -75,6 +75,31 @@ public class ForsythEdwardsNotation
         }
 
         return ret;
+    }
+}
+
+public class ForsythEdwardsNotationManualTranslator : IChessManualTranslator
+{
+    public void LoadFromStream(Stream file, IChessBoardContext chessBoardContext)
+    {
+        using StreamReader reader = new StreamReader(file);
+
+        string fen = reader.ReadToEnd().Trim();
+
+        if (ForsythEdwardsNotation.ParseString(fen, out ForsythEdwardsNotation forsythEdwardsNotation))
+        {
+            chessBoardContext.AdoptForsythEdwardsNotation(forsythEdwardsNotation);
+        }
+        else
+        {
+            throw new ArgumentException($"Invalid fen string {fen}");
+        }
+    }
+
+    public void SaveToStream(Stream file, IChessBoardContext chessBoardContext)
+    {
+        using StreamWriter writer = new StreamWriter(file);
+        writer.WriteLine(chessBoardContext.BuildForsythEdwardsNotation().GetFenString());
     }
 }
 

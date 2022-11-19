@@ -10,17 +10,14 @@ public class ChessModel : IChessBoard
 {
     public List<List<Chess>> board { get; set; }
 
-    public readonly ILogger Logger;
 
-    public ChessModel(ILogger<ChessModel> logger)
+    public ChessModel()
     {
-        this.Logger = logger;
         this.InternalReset();
     }
 
-    public ChessModel(ILogger<ChessModel> logger, IChessBoard chessBoard)
+    public ChessModel(IChessBoard chessBoard)
     {
-        this.Logger = logger;
         this.board = new List<List<Chess>>(Constants.ChessBoardHeight);
         for (int i = 0; i < this.board.Capacity; i++)
         {
@@ -69,10 +66,7 @@ public class ChessModel : IChessBoard
 
     public bool ValidateMovement(Position from, Position to)
     {
-        this.Logger?.LogInformation($"ValidateMovement {from} {to}");
         var ret = InternalValidateMovement(from, to);
-        this.Logger?.LogInformation(
-                        $"{ret} {from}->{to} | {this.GetChessAtPosition(from)}->{this.GetChessAtPosition(to)} ");
         return ret;
     }
 

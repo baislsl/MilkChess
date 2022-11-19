@@ -17,11 +17,11 @@ public class ExecutionTurnNotifier : BoxView
         }
     }
 
-    public ExecutionTurnNotifier()
+    public ExecutionTurnNotifier(Color color)
     {
         WidthRequest = 20;
         HeightRequest = 20;
         CornerRadius = 10;
-        ExecutionTurn = Model.Color.RED;
+        ExecutionTurn = color;
     }
 }

@@ -12,7 +12,7 @@ public class ChessModelTest
     public void TestInitialize()
     {
         var app = MauiProgram.CreateMauiApp();
-        ChessModel chessModel = new ChessModel(app.Services.GetRequiredService<ILogger<ChessModel>>());
+        ChessModel chessModel = new ChessModel();
 
         Assert.AreEqual(chessModel.board.Count, Constants.ChessBoardHeight);
         Assert.AreEqual(chessModel.board[0].Count, Constants.ChessBoardWidth);
