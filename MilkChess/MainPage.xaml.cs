@@ -1,9 +1,7 @@
 ﻿using System.Windows.Input;
 using Microsoft.Extensions.Logging;
 using Microsoft.Maui.Layouts;
-using MilkChess.Helper;
 using MilkChess.Model;
-using MilkChess.Ucci;
 using MilkChess.UserInterface;
 
 namespace MilkChess

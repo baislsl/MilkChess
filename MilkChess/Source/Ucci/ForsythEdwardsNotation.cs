@@ -28,26 +28,30 @@ public class ForsythEdwardsNotation
 
         string[] data = fen.Split(" ");
 
-        if (data.Length < 6) return false;
+        if (data.Length < 2) return false;
 
         string[] piecePalcement = data[0].Split("/");
         if (piecePalcement.Length != 10) return false;
 
         if (data[1] != "w" && data[1] != "b") return false;
 
-        if (data[2] != "-" || data[3] != "-") return false;
-
-        if (!int.TryParse(data[4], out var halfmoveClock)) return false;
-        if (!int.TryParse(data[5], out var fullmoveNumber)) return false;
-
         List<string> move = new List<string>();
+        int halfmoveClock = 0, fullmoveNumber = 0;
 
-        if (data.Length > 6)
+        if (data.Length > 2)
         {
-            if (data[6] != "moves") return false;
-            for (int i = 7; i < data.Length; i++)
+            if (data.Length > 3 && (data[2] != "-" || data[3] != "-")) return false;
+
+            if (data.Length > 4 && !int.TryParse(data[4], out halfmoveClock)) return false;
+            if (data.Length > 5 && !int.TryParse(data[5], out fullmoveNumber)) return false;
+
+            if (data.Length > 6)
             {
-                move.Add(data[i]);
+                if (data[6] != "moves") return false;
+                for (int i = 7; i < data.Length; i++)
+                {
+                    move.Add(data[i]);
+                }
             }
         }
 

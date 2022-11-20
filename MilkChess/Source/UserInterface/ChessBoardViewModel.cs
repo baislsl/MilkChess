@@ -15,113 +15,8 @@ using Color = Microsoft.Maui.Graphics.Color;
 
 namespace MilkChess.UserInterface;
 
-public class ChessBoardViewModel : ChessModel, IChessBoardContext, INotifyPropertyChanged
+public partial class ChessBoardViewModel : ChessModel, IChessBoardContext, INotifyPropertyChanged
 {
-    #region view model definition
-
-    public Color ScoreColor => this.Score > 0 ? Colors.Red : Colors.Black;
-
-    private int _score;
-
-    public int Score
-    {
-        get => _score;
-        set
-        {
-            this._score = value;
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Score)));
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ScoreColor)));
-        }
-    }
-
-    private bool _IsEngineAutoMoving;
-
-    private bool IsEngineAutoMoving
-    {
-        get => _IsEngineAutoMoving;
-        set
-        {
-            if (value != _IsEngineAutoMoving)
-            {
-                _IsEngineAutoMoving = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ResetCommand)));
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(MoveBackwardCommand)));
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(MoveForwardCommand)));
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(MoveToStartCommand)));
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(MoveToEndCommand)));
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ResetCommand)));
-            }
-        }
-    }
-
-    public ObservableCollection<PredictMovementTrace> EngineSuggestedMovements { get; set; }
-
-    public int ChessBoardHeight => UIConstants.ChessBoardHeight;
-
-    public int ChessBoardWidth => UIConstants.ChessBoardWidth;
-
-    public ObservableCollection<Movement> HistoryMovements => (ObservableCollection<Movement>) HistoryManager.Movements;
-
-    public Color SwitchToAnalyzeModeColor => this.InteractiveMode == EngineInteractiveMode.AnalyzeMode
-                    ? ActiveInteractiveModeColor
-                    : InactiveInteractiveModeColor;
-
-    public Color SwitchToBlackAutoModeColor => this.InteractiveMode == EngineInteractiveMode.BlackAutoMode
-                    ? ActiveInteractiveModeColor
-                    : InactiveInteractiveModeColor;
-
-    public Color SwitchToRedAutoModeColor => this.InteractiveMode == EngineInteractiveMode.RedAutoMode
-                    ? ActiveInteractiveModeColor
-                    : InactiveInteractiveModeColor;
-
-    public Color SwitchToAutoModeColor => this.InteractiveMode == EngineInteractiveMode.AutoMode
-                    ? ActiveInteractiveModeColor
-                    : InactiveInteractiveModeColor;
-
-    // Compiler will throw error result if I remove this unused fields.
-    // This seems to be the compiler bug.
-    public string ChineseViewableString => default;
-    public string ActionCount => default;
-    public string Movements => default;
-    public string Depth => default;
-
-    public ICommand ResetCommand => this.WrapEngineInteractCommand(this.Reset, _ => !IsEngineAutoMoving);
-
-    public ICommand MoveBackwardCommand => this.WrapEngineInteractCommand(this.MoveBackward, _ => !IsEngineAutoMoving);
-
-    public ICommand MoveForwardCommand => this.WrapEngineInteractCommand(this.MoveForward, _ => !IsEngineAutoMoving);
-
-    public ICommand MoveToStartCommand => this.WrapEngineInteractCommand(this.MoveToStart, _ => !IsEngineAutoMoving);
-
-    public ICommand MoveToEndCommand => this.WrapEngineInteractCommand(this.MoveToEnd, _ => !IsEngineAutoMoving);
-
-    public ICommand ConnectToRemoteEngineCommand => this.WrapEngineInteractCommand(this.InitializeUcciEngine);
-
-    public ICommand DisconnectEngineCommand => this.WrapEngineInteractCommand(this.DisconnectEngine);
-
-    public ICommand InvokeBestMovementCommand =>
-                    this.WrapEngineInteractCommand(this.InvokeBestMovement, _ => !IsEngineAutoMoving);
-
-    public ICommand ReverseBoardCommand => this.WrapClickCommand(this.ReverseBoard);
-
-    public ICommand SwitchToAnalyzeModeCommand =>
-                    this.WrapEngineInteractCommand(() => this.SwitchInteractMode(EngineInteractiveMode.AnalyzeMode));
-
-    public ICommand SwitchToBlackAutoModeCommand =>
-                    this.WrapEngineInteractCommand(() => this.SwitchInteractMode(EngineInteractiveMode.BlackAutoMode));
-
-    public ICommand SwitchToRedAutoModeCommand =>
-                    this.WrapEngineInteractCommand(() => this.SwitchInteractMode(EngineInteractiveMode.RedAutoMode));
-
-    public ICommand SwitchToAutoModeCommand =>
-                    this.WrapEngineInteractCommand(() => this.SwitchInteractMode(EngineInteractiveMode.AutoMode));
-
-    public ICommand SaveChessManualCommand => this.WrapClickCommand(this.SaveChessManual);
-
-    public ICommand SwitchToSelectedMovementCommand => new Command<object>(this.SwitchToSelectedMovement);
-
-    #endregion
-
     #region binding component
 
     public event PropertyChangedEventHandler PropertyChanged;
@@ -177,7 +72,7 @@ public class ChessBoardViewModel : ChessModel, IChessBoardContext, INotifyProper
         {
             Matrix.Add(new List<ChessButton>(new ChessButton[ChessBoardWidth]));
         }
-        
+
         Iterator.IterateOverChessBoard(position =>
         {
             ChessButton chessButton = new ChessButton(null, position);
@@ -328,7 +223,7 @@ public class ChessBoardViewModel : ChessModel, IChessBoardContext, INotifyProper
     public void NotifyRefreshEngineFeedback()
     {
         uint requestId = Interlocked.Increment(ref LastEngineRequestId);
-        Logger.LogDebug("Start NotifyRefreshEngineFeedback {}", requestId);
+        Logger.LogTrace("Start NotifyRefreshEngineFeedback {}", requestId);
 
         EngineSuggestedMovements.Clear();
         MovementIndicator.ClearMovement();
@@ -337,12 +232,12 @@ public class ChessBoardViewModel : ChessModel, IChessBoardContext, INotifyProper
         EngineExecutionTask = Task.Factory.StartNew(
                         () => this.BlockingNotifyRefreshEngineFeedback(requestId, GoCancellationTokenSource.Token));
 
-        Logger.LogDebug("End NotifyRefreshEngineFeedback {}", requestId);
+        Logger.LogTrace("End NotifyRefreshEngineFeedback {}", requestId);
     }
 
     private void BlockingNotifyRefreshEngineFeedback(uint requestId, CancellationToken cancellationToken)
     {
-        Logger.LogDebug("Start BlockingNotifyRefreshEngineFeedback {}", requestId);
+        Logger.LogTrace("Start BlockingNotifyRefreshEngineFeedback {}", requestId);
         bool recursiveQueryEngine;
         int queryCount = 0;
 
@@ -423,6 +318,8 @@ public class ChessBoardViewModel : ChessModel, IChessBoardContext, INotifyProper
                         {
                         }
 
+                        this.SaveChessManual();
+
                         // indicates to query engine again
                         recursiveQueryEngine = true;
                     }
@@ -440,7 +337,7 @@ public class ChessBoardViewModel : ChessModel, IChessBoardContext, INotifyProper
 
         IsEngineAutoMoving = false;
 
-        Logger.LogDebug("End BlockingNotifyRefreshEngineFeedback {}", requestId);
+        Logger.LogTrace("End BlockingNotifyRefreshEngineFeedback {}", requestId);
     }
 
     private void DispatchAction(Action action)
@@ -467,8 +364,10 @@ public class ChessBoardViewModel : ChessModel, IChessBoardContext, INotifyProper
         Logger.LogInformation("Initailzing engine...");
         Engine = ServiceProvider.GetService<UcciEngine>();
 
-        CancellationTokenSource cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(15));
+        CancellationTokenSource cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(10));
         var startUciFeedback = Engine.StartUci(cancellationTokenSource.Token);
+
+        Logger.LogInformation("Finished Uci");
 
         Engine.WaitToReady(cancellationTokenSource.Token);
 
@@ -538,7 +437,7 @@ public class ChessBoardViewModel : ChessModel, IChessBoardContext, INotifyProper
     {
         if (this.InteractiveMode != mode)
         {
-            Logger.LogInformation("Current interactive mode");
+            Logger.LogInformation("Switch interactive mode {} -> {}", this.InteractiveMode, mode);
 
             StopEngineRunner();
             this.InteractiveMode = mode;
@@ -578,13 +477,12 @@ public class ChessBoardViewModel : ChessModel, IChessBoardContext, INotifyProper
             File.Delete(targetFile);
         }
 
-        Logger.LogInformation("Saving chess manual to {}", targetFile);
         using FileStream outputStream = File.OpenWrite(targetFile);
 
         ForsythEdwardsNotationManualTranslator translator = new ForsythEdwardsNotationManualTranslator();
         translator.SaveToStream(outputStream, this);
-        
-        Logger.LogInformation("Saved chess manual to {}", targetFile);
+
+        Logger.LogTrace("Saved chess manual to {}", targetFile);
     }
 
     private bool LoadChessManual()

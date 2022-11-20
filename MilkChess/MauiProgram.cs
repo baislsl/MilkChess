@@ -49,7 +49,7 @@ namespace MilkChess
             builder.Services.AddSingleton<HistoryManager>(x =>
                             new HistoryManager(x.GetRequiredService<ILogger<HistoryManager>>(),
                                             new ObservableCollection<Movement>()));
-            builder.Services.AddTransient<UcciEngineConfig>(x =>
+            builder.Services.AddTransient<UcciEngineConfig>(_ =>
                             new UcciEngineConfig()
                             {
                                             LocalExecutableFile = LocalExecutableFile,

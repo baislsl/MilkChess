@@ -29,12 +29,12 @@ public class UcciEngine : IUcciEngine
     {
         NativeUcciEngine.Initialize();
 
-        this.DiscardBufferData();
         this.SendCommand(Command.Ucci);
-
+        
         UciFeedback feedback = new UciFeedback();
         while (!cancellationToken.IsCancellationRequested && !feedback.ReceivedUcciOk)
         {
+            Logger.LogInformation("Loop");
             UcciFeedback ucciFeedback = this.ReceiveFeedback(cancellationToken);
             if (ucciFeedback == null) continue;
 
@@ -86,7 +86,7 @@ public class UcciEngine : IUcciEngine
         BestMove bestMove = null;
 
         this.DiscardBufferData();
-        
+
         cancellationToken.Register(() => this.SendCommand(Command.Stop));
         this.SendCommand(this.BuildGoCommand(option));
 
@@ -193,7 +193,8 @@ public class UcciEngine : IUcciEngine
             return ucciFeedback;
         }, cancellationToken);
 
-        return task.GetAwaiter().GetResult();
+        task.Wait(cancellationToken);
+        return task.Result;
     }
 
     private void DiscardBufferData()
