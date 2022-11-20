@@ -11,6 +11,16 @@ namespace MilkChess.UserInterface;
 
 public partial class ChessBoardViewModel
 {
+    #region binding component
+
+    public event PropertyChangedEventHandler PropertyChanged;
+
+    public readonly CursorSelector CursorSelector;
+
+    public ChessButton SelectedChess;
+
+    #endregion
+
     #region view model definition
 
     public Color ScoreColor => this.Score > 0 ? Colors.Red : Colors.Black;
