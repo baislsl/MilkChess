@@ -226,7 +226,6 @@ public partial class ChessBoardViewModel
                 {
                     Logger.LogInformation($"Received command {commandName}");
                     command.Execute(_);
-                    Logger.LogInformation($"Received command {commandName}");
                 }
                 catch (Exception e)
                 {
