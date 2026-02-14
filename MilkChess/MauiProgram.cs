@@ -12,12 +12,12 @@ namespace MilkChess
     public static class MauiProgram
     {
         private const string LocalExecutableFile =
-                        "/Users/baislsl/go/src/github.com/baislsl/UcciProxy/client/remote_engine";
+                        "/Users/baislsl/go/src/github.com/baislsl/UcciProxy/listener/listener";
 
         private static Collection<string> Arguments = new Collection<string>
         {
-                        "-addr", "192.168.31.7:7890",
-                        "-output", "/private/tmp/remote_engine.log"
+                        // "-addr", "192.168.31.6:8123",
+                        //"-output", "/private/tmp/remote_engine.log"
         };
 
         private const string ConfigResourcePath = "MilkChess.Resources.Config.appsettings.ini";

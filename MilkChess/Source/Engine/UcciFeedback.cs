@@ -64,6 +64,11 @@ public class UcciFeedback
     {
         feedback = new UcciFeedback();
 
+        if (string.IsNullOrEmpty(s))
+        {
+            return false;
+        }
+
         s = s.Trim();
         var list = s.Split(' ');
 

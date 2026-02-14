@@ -199,6 +199,8 @@ public class UcciEngine : IUcciEngine
 
     private void DiscardBufferData()
     {
+        // TODO:
+        return;
         foreach (var feedback in this.NativeUcciEngine.DiscardBufferData())
         {
             Logger.LogInformation($"[Discard] {feedback}");
