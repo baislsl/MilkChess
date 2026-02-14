@@ -55,6 +55,7 @@ namespace MilkChess
                                             LocalExecutableFile = LocalExecutableFile,
                                             Arguments = Arguments,
                             });
+            builder.Services.AddTransient<UcciLogger>();
             builder.Services.AddTransient<UcciEngine>();
 
             using var stream = Assembly.GetExecutingAssembly()

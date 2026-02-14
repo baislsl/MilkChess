@@ -19,10 +19,10 @@ public class UcciEngine : IUcciEngine
     private readonly INativeUcciEngine NativeUcciEngine;
     private readonly ILogger Logger;
 
-    public UcciEngine(ILogger<UcciEngine> logger, UcciEngineConfig config)
+    public UcciEngine(ILogger<UcciEngine> logger, UcciEngineConfig config, UcciLogger ucciLogger)
     {
         this.Logger = logger;
-        this.NativeUcciEngine = new LocalExecutableEngine(config.LocalExecutableFile, config.Arguments);
+        this.NativeUcciEngine = new LocalExecutableEngine(config.LocalExecutableFile, config.Arguments, ucciLogger);
     }
 
     public UciFeedback StartUci(CancellationToken cancellationToken)

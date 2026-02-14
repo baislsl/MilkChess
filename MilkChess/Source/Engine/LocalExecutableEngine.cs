@@ -8,13 +8,15 @@ public class LocalExecutableEngine : INativeUcciEngine
 {
     private readonly string ExecutableFile;
     private readonly Collection<string> Arguments;
+    private readonly UcciLogger logger;
 
     private Process Process;
 
-    public LocalExecutableEngine(string executableFile, Collection<string> arguments)
+    public LocalExecutableEngine(string executableFile, Collection<string> arguments, UcciLogger logger)
     {
         this.ExecutableFile = executableFile;
         this.Arguments = arguments;
+        this.logger = logger;
     }
 
     public void Initialize()
@@ -40,12 +42,15 @@ public class LocalExecutableEngine : INativeUcciEngine
 
     public void SendCommand(string command)
     {
+        this.logger.WriteCommand(command);
         this.Process.StandardInput.WriteLine(command);
     }
 
     public string GetFeedback()
     {
-        return this.Process.StandardOutput.ReadLine();
+        string feedback = this.Process.StandardOutput.ReadLine();
+        this.logger.WriteFeedback(feedback);
+        return feedback;
     }
 
     public IEnumerable<string> DiscardBufferData()
@@ -55,6 +60,8 @@ public class LocalExecutableEngine : INativeUcciEngine
             yield return this.GetFeedback();
         }
     }
+
+
 
     public void Dispose()
     {
