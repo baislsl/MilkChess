@@ -16,8 +16,6 @@ public class Movement
 
     public int ActionCount { get; set; }
 
-    public int BindingActionCount => ActionCount;
-
     public Color ExecutedColor => MovedChess.Color;
 
     // 因为棋盘变化时动态确定棋子 前/后 比较麻烦，这里直接缓存招法的名称，比如前马二进三

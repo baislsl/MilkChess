@@ -18,7 +18,7 @@ public partial class ChessBoardViewModel
 
     private Task EngineExecutionTask;
 
-    private EngineInteractiveMode InteractiveMode = EngineInteractiveMode.AnalyzeMode;
+    private EngineInteractiveMode InteractiveMode = EngineInteractiveMode.StopMode;
 
 
     private void HandleInfoFeedback(InfoFeedback feedback)
@@ -70,9 +70,9 @@ public partial class ChessBoardViewModel
 
             this.DispatchAction(() => EngineSuggestedMovements.Insert(0, new PredictMovementTrace()
             {
-                            Score = score,
-                            Depth = depth,
-                            Movements = predict.ToString(),
+                Score = score,
+                Depth = depth,
+                Movements = predict.ToString(),
             }));
 
             Logger.LogInformation("Engine suggest: {} {}", score, predict);
@@ -86,23 +86,36 @@ public partial class ChessBoardViewModel
         this.GoCancellationTokenSource?.Cancel(false);
         this.GoCancellationTokenSource = null;
 
-        this.EngineExecutionTask?.Wait();
-        this.EngineExecutionTask = null;
+        try
+        {
+            this.EngineExecutionTask?.Wait();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error stopping engin task");
+        }
+        finally
+        {
+            this.EngineExecutionTask = null;
+        }
     }
 
     public void NotifyRefreshEngineFeedback()
     {
-        uint requestId = Interlocked.Increment(ref LastEngineRequestId);
-        Logger.LogTrace("Start NotifyRefreshEngineFeedback {}", requestId);
+        if (this.InteractiveMode != EngineInteractiveMode.StopMode && this.EngineExecutionTask == null)
+        {
+            uint requestId = Interlocked.Increment(ref LastEngineRequestId);
+            Logger.LogInformation("Start NotifyRefreshEngineFeedback {}", requestId);
 
-        EngineSuggestedMovements.Clear();
-        MovementIndicator.ClearMovement();
+            EngineSuggestedMovements.Clear();
+            MovementIndicator.ClearMovement();
 
-        GoCancellationTokenSource = new CancellationTokenSource();
-        EngineExecutionTask = Task.Factory.StartNew(
-                        () => this.BlockingNotifyRefreshEngineFeedback(requestId, GoCancellationTokenSource.Token));
+            GoCancellationTokenSource = new CancellationTokenSource();
+            EngineExecutionTask = Task.Factory.StartNew(() =>
+                this.BlockingNotifyRefreshEngineFeedback(requestId, GoCancellationTokenSource.Token));
 
-        Logger.LogTrace("End NotifyRefreshEngineFeedback {}", requestId);
+            Logger.LogTrace("End NotifyRefreshEngineFeedback {}", requestId);
+        }
     }
 
     private void BlockingNotifyRefreshEngineFeedback(uint requestId, CancellationToken cancellationToken)
@@ -137,19 +150,19 @@ public partial class ChessBoardViewModel
 
             Engine?.Position(this, cancellationToken);
             var bestMove = Engine?.Go(new GoOption()
-                            {
-                                            Depth = depth,
-                            },
-                            cancellationToken,
-                            delegate(object sender, InfoFeedback feedback)
-                            {
-                                // there may be multiple thread running in the same time
-                                // only update UI for the last engine request
-                                if (requestId == LastEngineRequestId && !cancellationToken.IsCancellationRequested)
-                                {
-                                    HandleInfoFeedback(feedback);
-                                }
-                            });
+                {
+                    Depth = depth,
+                },
+                cancellationToken,
+                delegate(object sender, InfoFeedback feedback)
+                {
+                    // there may be multiple thread running in the same time
+                    // only update UI for the last engine request
+                    if (requestId == LastEngineRequestId && !cancellationToken.IsCancellationRequested)
+                    {
+                        HandleInfoFeedback(feedback);
+                    }
+                });
 
             if (bestMove != null && !cancellationToken.IsCancellationRequested && requestId == LastEngineRequestId)
             {
@@ -170,8 +183,8 @@ public partial class ChessBoardViewModel
                             HistoryManager.InsertMovement(bestMovement);
                             SelectedChess = null;
                             Logger.LogDebug("{requestId}.{queryCount} Executed movement {}, turn {}", requestId, count,
-                                            bestMovement,
-                                            HistoryManager.ExecutionTurn);
+                                bestMovement,
+                                HistoryManager.ExecutionTurn);
 
                             EngineSuggestedMovements.Clear();
                             MovementIndicator.ClearMovement();
@@ -255,6 +268,7 @@ public partial class ChessBoardViewModel
 
     private enum EngineInteractiveMode
     {
+        StopMode,
         AnalyzeMode,
         AutoMode,
         RedAutoMode,

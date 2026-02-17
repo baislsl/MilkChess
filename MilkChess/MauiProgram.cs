@@ -44,6 +44,7 @@ namespace MilkChess
                 configure.AddConsole();
                 configure.SetMinimumLevel(LogLevel.Debug);
             });
+            builder.Services.AddTransient<ChessModel>();
             builder.Services.AddTransient<MainPage>();
             builder.Services.AddTransient<ChessBoardViewModel>();
             builder.Services.AddSingleton<HistoryManager>(x =>

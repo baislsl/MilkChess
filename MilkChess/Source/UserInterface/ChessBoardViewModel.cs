@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
+using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using MilkChess.Helper;
@@ -11,8 +12,10 @@ using Color = Microsoft.Maui.Graphics.Color;
 
 namespace MilkChess.UserInterface;
 
-public partial class ChessBoardViewModel : ChessModel, IChessBoardContext, INotifyPropertyChanged
+public partial class ChessBoardViewModel : ObservableObject, IChessBoardContext
 {
+    private readonly ChessModel ChessModel;
+
     public readonly List<List<ChessButton>> Matrix;
 
     public readonly ILogger Logger;
@@ -21,18 +24,19 @@ public partial class ChessBoardViewModel : ChessModel, IChessBoardContext, INoti
 
     public readonly MovementIndicator MovementIndicator;
 
-    private static readonly Color ActiveInteractiveModeColor = Colors.LightBlue;
+    private static readonly Color ActiveInteractiveModeColor = Colors.Blue;
 
-    private static readonly Color InactiveInteractiveModeColor = Colors.White;
+    private static readonly Color InactiveInteractiveModeColor = Colors.CornflowerBlue;
 
     public HistoryManager HistoryManager { get; }
 
     public ChessBoardViewModel(
-                    IServiceProvider serviceProvider,
-                    ILogger<ChessBoardViewModel> logger,
-                    HistoryManager historyManager)
-                    : base()
+        IServiceProvider serviceProvider,
+        ILogger<ChessBoardViewModel> logger,
+        HistoryManager historyManager,
+        ChessModel chessModel)
     {
+        ChessModel = chessModel;
         Logger = logger;
         HistoryManager = historyManager;
         ServiceProvider = serviceProvider;
@@ -64,7 +68,7 @@ public partial class ChessBoardViewModel : ChessModel, IChessBoardContext, INoti
             // If init manual not loaded successfully, refresh with the default chess position
             Iterator.IterateOverChessBoard(position =>
             {
-                this.SetChessAtPosition(GetChessAtPosition(position), position, out _);
+                this.SetChessAtPosition(ChessModel.GetChessAtPosition(position), position, out _);
             });
         }
         else
@@ -75,6 +79,7 @@ public partial class ChessBoardViewModel : ChessModel, IChessBoardContext, INoti
         CursorSelector = new CursorSelector(new Position(0, 0), UIConstants.CursorBackgroundResource);
         MovementIndicator = new MovementIndicator();
         EngineSuggestedMovements = new ObservableCollection<PredictMovementTrace>();
+        this.ResetEngineModeColor();
     }
 
     public void AddToAbsoluteLayout(AbsoluteLayout layout)
@@ -88,13 +93,13 @@ public partial class ChessBoardViewModel : ChessModel, IChessBoardContext, INoti
 
     public void OnChessSelected(object sender, EventArgs args)
     {
-        ChessButton clickedButton = (ChessButton) sender;
+        ChessButton clickedButton = (ChessButton)sender;
         Logger.LogInformation(
-                        $"Clicked {clickedButton.Position} {clickedButton.Chess}; Selected {SelectedChess?.Position}, {SelectedChess?.Chess}");
+            $"Clicked {clickedButton.Position} {clickedButton.Chess}; Selected {SelectedChess?.Position}, {SelectedChess?.Chess}");
 
         if (SelectedChess?.Chess == null
             || SelectedChess.Chess.Color != HistoryManager.ExecutionTurn
-            || !this.ValidateMovement(SelectedChess.Position, clickedButton.Position))
+            || !ChessModel.ValidateMovement(SelectedChess.Position, clickedButton.Position))
         {
             SelectedChess = clickedButton;
             CursorSelector.Position = clickedButton.Position;
@@ -105,16 +110,16 @@ public partial class ChessBoardViewModel : ChessModel, IChessBoardContext, INoti
         {
             Movement movement = new Movement
             {
-                            MovedChess = SelectedChess.Chess,
-                            RemovedChess = clickedButton.Chess,
-                            From = SelectedChess.Position,
-                            To = clickedButton.Position,
-                            ActionCount = HistoryManager.GetCursor() + 1,
+                MovedChess = SelectedChess.Chess,
+                RemovedChess = clickedButton.Chess,
+                From = SelectedChess.Position,
+                To = clickedButton.Position,
+                ActionCount = HistoryManager.GetCursor() + 1,
             };
 
             // 存下招法中文表示
             movement.ChineseViewableString =
-                            movement.ToChineseViewableString(this);
+                movement.ToChineseViewableString(this);
 
             Logger.LogInformation("Execute movement {}", movement);
 
@@ -130,9 +135,20 @@ public partial class ChessBoardViewModel : ChessModel, IChessBoardContext, INoti
         }
     }
 
-    public override void SetChessAtPosition(Chess chess, Position position, out Chess removedChess)
+    public virtual void ApplyMovement(Movement movement)
     {
-        base.SetChessAtPosition(chess, position, out removedChess);
+        SetChessAtPosition(null, movement.From, out _);
+        SetChessAtPosition(movement.MovedChess, movement.To, out _);
+    }
+
+    public virtual Chess GetChessAtPosition(Position position)
+    {
+        return ChessModel.GetChessAtPosition(position);
+    }
+
+    public virtual void SetChessAtPosition(Chess chess, Position position, out Chess removedChess)
+    {
+        ChessModel.SetChessAtPosition(chess, position, out removedChess);
         this.Matrix[position.Y][position.X].Chess = chess;
     }
 
@@ -141,9 +157,9 @@ public partial class ChessBoardViewModel : ChessModel, IChessBoardContext, INoti
         return Matrix[position.Y][position.X];
     }
 
-    public override void Reset()
+    public void Reset()
     {
-        base.Reset();
+        ChessModel.Reset();
         HistoryManager.Reset();
 
         Iterator.IterateOverChessBoard(position =>
@@ -168,7 +184,7 @@ public partial class ChessBoardViewModel : ChessModel, IChessBoardContext, INoti
         Movement movement = HistoryManager.MoveBackward();
         if (movement != null)
         {
-            this.RevertMovement(movement);
+            ChessModel.RevertMovement(movement);
         }
     }
 
@@ -176,7 +192,7 @@ public partial class ChessBoardViewModel : ChessModel, IChessBoardContext, INoti
     {
         while (HistoryManager.MoveBackward() is { } movement)
         {
-            this.RevertMovement(movement);
+            ChessModel.RevertMovement(movement);
         }
     }
 
@@ -188,6 +204,13 @@ public partial class ChessBoardViewModel : ChessModel, IChessBoardContext, INoti
         }
     }
 
+    private void ResetEngineModeColor()
+    {
+        SwitchToAnalyzeModeColor = SwitchToRedAutoModeColor =
+            SwitchToBlackAutoModeColor = SwitchToAutoModeColor = InactiveInteractiveModeColor;
+    }
+
+
     private void SwitchInteractMode(EngineInteractiveMode mode)
     {
         if (this.InteractiveMode != mode)
@@ -196,11 +219,24 @@ public partial class ChessBoardViewModel : ChessModel, IChessBoardContext, INoti
 
             StopEngineRunner();
             this.InteractiveMode = mode;
-
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SwitchToAnalyzeModeColor)));
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SwitchToAutoModeColor)));
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SwitchToBlackAutoModeColor)));
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SwitchToRedAutoModeColor)));
+            this.ResetEngineModeColor();
+            switch (this.InteractiveMode)
+            {
+                case EngineInteractiveMode.AnalyzeMode:
+                    SwitchToAnalyzeModeColor = ActiveInteractiveModeColor;
+                    break;
+                case EngineInteractiveMode.AutoMode:
+                    SwitchToAutoModeColor = ActiveInteractiveModeColor;
+                    break;
+                case EngineInteractiveMode.RedAutoMode:
+                    SwitchToRedAutoModeColor = ActiveInteractiveModeColor;
+                    break;
+                case EngineInteractiveMode.BlackAutoMode:
+                    SwitchToBlackAutoModeColor = ActiveInteractiveModeColor;
+                    break;
+                default:
+                    throw new ArgumentException($"Unknown interactive mode {this.InteractiveMode}");
+            }
 
             NotifyRefreshEngineFeedback();
         }
@@ -209,8 +245,8 @@ public partial class ChessBoardViewModel : ChessModel, IChessBoardContext, INoti
     private string GetDataDirectory()
     {
         return Path.Combine(FileSystem.Current.AppDataDirectory,
-                        Globals.Config.GetValue<string>(Keys.PathRoot),
-                        Globals.Config.GetValue<string>(Keys.DataPath));
+            Globals.Config.GetValue<string>(Keys.PathRoot),
+            Globals.Config.GetValue<string>(Keys.DataPath));
     }
 
     private string GetChessManualFile()
@@ -286,7 +322,7 @@ public partial class ChessBoardViewModel : ChessModel, IChessBoardContext, INoti
     {
         Logger.LogDebug("[SwitchToSelectedMovement] {}", sender);
 
-        Movement senderMovement = (Movement) sender;
+        Movement senderMovement = (Movement)sender;
         int cursor = senderMovement.ActionCount;
 
         if (cursor < HistoryManager.LastMovement.ActionCount)
@@ -306,7 +342,7 @@ public partial class ChessBoardViewModel : ChessModel, IChessBoardContext, INoti
     }
 
     private ICommand WrapClickCommand(Action action, Func<object, bool> canExecute = null,
-                    [CallerMemberName] string commandName = "")
+        [CallerMemberName] string commandName = "")
     {
         return new Command<object>(_ =>
         {

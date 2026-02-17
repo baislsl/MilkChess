@@ -4,5 +4,12 @@
       "commandName": "MsixPackage",
       "nativeDebugging": false
     }
+  },
+  "Logging": {
+    "LogLevel": {
+      "Default": "Trace",
+      "Microsoft": "Trace",
+      "Microsoft.AspNetCore.DataProtection": "Error"
+    }
   }
 }

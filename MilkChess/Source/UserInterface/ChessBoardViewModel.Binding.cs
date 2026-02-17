@@ -2,10 +2,13 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
+using CommunityToolkit.Mvvm;
+using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.Extensions.Logging;
 using MilkChess.Helper;
 using MilkChess.Model;
 using Color = Microsoft.Maui.Graphics.Color;
+
 
 namespace MilkChess.UserInterface;
 
@@ -64,23 +67,22 @@ public partial class ChessBoardViewModel
 
     public int ChessBoardWidth => UIConstants.ChessBoardWidth;
 
-    public ObservableCollection<Movement> HistoryMovements => (ObservableCollection<Movement>) HistoryManager.Movements;
+    public ObservableCollection<Movement> HistoryMovements => (ObservableCollection<Movement>)HistoryManager.Movements;
 
-    public Color SwitchToAnalyzeModeColor => this.InteractiveMode == EngineInteractiveMode.AnalyzeMode
-                    ? ActiveInteractiveModeColor
-                    : InactiveInteractiveModeColor;
+    [ObservableProperty]
+    private Color _switchToStopModeColor;
 
-    public Color SwitchToBlackAutoModeColor => this.InteractiveMode == EngineInteractiveMode.BlackAutoMode
-                    ? ActiveInteractiveModeColor
-                    : InactiveInteractiveModeColor;
+    [ObservableProperty]
+    private Color _switchToAnalyzeModeColor;
 
-    public Color SwitchToRedAutoModeColor => this.InteractiveMode == EngineInteractiveMode.RedAutoMode
-                    ? ActiveInteractiveModeColor
-                    : InactiveInteractiveModeColor;
+    [ObservableProperty]
+    private Color _switchToBlackAutoModeColor;
 
-    public Color SwitchToAutoModeColor => this.InteractiveMode == EngineInteractiveMode.AutoMode
-                    ? ActiveInteractiveModeColor
-                    : InactiveInteractiveModeColor;
+    [ObservableProperty]
+    private Color _switchToRedAutoModeColor;
+
+    [ObservableProperty]
+    private Color _switchToAutoModeColor;
 
     // Compiler will throw error result if I remove this unused fields.
     // This seems to be the compiler bug.
@@ -94,97 +96,96 @@ public partial class ChessBoardViewModel
     #region command definition
 
     public ICommand ResetCommand =>
-                    CommandMiddlewareHelper.BuildCommand(
-                                    new Command(this.Reset, () => !IsEngineAutoMoving),
-                                    this.RefreshEngineCommandMiddleware(),
-                                    this.LogAndCatchCommandMiddleware());
+        CommandMiddlewareHelper.BuildCommand(
+            new Command(this.Reset, () => !IsEngineAutoMoving),
+            this.RefreshEngineCommandMiddleware(),
+            this.CommonCommandMiddleware());
 
     public ICommand MoveBackwardCommand =>
-                    CommandMiddlewareHelper.BuildCommand(
-                                    new Command(this.MoveBackward, () => !IsEngineAutoMoving),
-                                    this.AutoSaveChessManualMiddleware(),
-                                    this.RefreshEngineCommandMiddleware(),
-                                    this.LogAndCatchCommandMiddleware());
+        CommandMiddlewareHelper.BuildCommand(
+            new Command(this.MoveBackward, () => !IsEngineAutoMoving),
+            this.AutoSaveChessManualMiddleware(),
+            this.RefreshEngineCommandMiddleware(),
+            this.CommonCommandMiddleware());
 
     public ICommand MoveForwardCommand =>
-                    CommandMiddlewareHelper.BuildCommand(
-                                    new Command(this.MoveForward, () => !IsEngineAutoMoving),
-                                    this.AutoSaveChessManualMiddleware(),
-                                    this.RefreshEngineCommandMiddleware(),
-                                    this.LogAndCatchCommandMiddleware());
+        CommandMiddlewareHelper.BuildCommand(
+            new Command(this.MoveForward, () => !IsEngineAutoMoving),
+            this.AutoSaveChessManualMiddleware(),
+            this.RefreshEngineCommandMiddleware(),
+            this.CommonCommandMiddleware());
 
     public ICommand MoveToStartCommand =>
-                    CommandMiddlewareHelper.BuildCommand(
-                                    new Command(this.MoveToStart, () => !IsEngineAutoMoving),
-                                    this.AutoSaveChessManualMiddleware(),
-                                    this.RefreshEngineCommandMiddleware(),
-                                    this.LogAndCatchCommandMiddleware());
+        CommandMiddlewareHelper.BuildCommand(
+            new Command(this.MoveToStart, () => !IsEngineAutoMoving),
+            this.AutoSaveChessManualMiddleware(),
+            this.RefreshEngineCommandMiddleware(),
+            this.CommonCommandMiddleware());
 
     public ICommand MoveToEndCommand =>
-                    CommandMiddlewareHelper.BuildCommand(
-                                    new Command(this.MoveToEnd, () => !IsEngineAutoMoving),
-                                    this.AutoSaveChessManualMiddleware(),
-                                    this.RefreshEngineCommandMiddleware(),
-                                    this.LogAndCatchCommandMiddleware());
+        CommandMiddlewareHelper.BuildCommand(
+            new Command(this.MoveToEnd, () => !IsEngineAutoMoving),
+            this.AutoSaveChessManualMiddleware(),
+            this.RefreshEngineCommandMiddleware(),
+            this.CommonCommandMiddleware());
 
     public ICommand ConnectToRemoteEngineCommand =>
-                    CommandMiddlewareHelper.BuildCommand(
-                                    this.InitializeUcciEngine,
-                                    this.RefreshEngineCommandMiddleware(),
-                                    this.LogAndCatchCommandMiddleware());
+        CommandMiddlewareHelper.BuildCommand(
+            this.InitializeUcciEngine,
+            this.CommonCommandMiddleware());
 
     public ICommand DisconnectEngineCommand =>
-                    CommandMiddlewareHelper.BuildCommand(
-                                    this.DisconnectEngine,
-                                    this.LogAndCatchCommandMiddleware());
+        CommandMiddlewareHelper.BuildCommand(
+            this.DisconnectEngine,
+            this.CommonCommandMiddleware());
 
     public ICommand InvokeBestMovementCommand =>
-                    CommandMiddlewareHelper.BuildCommand(
-                                    new Command(this.InvokeBestMovement, () => !IsEngineAutoMoving),
-                                    this.AutoSaveChessManualMiddleware(),
-                                    this.RefreshEngineCommandMiddleware(),
-                                    this.LogAndCatchCommandMiddleware());
+        CommandMiddlewareHelper.BuildCommand(
+            new Command(this.InvokeBestMovement, () => !IsEngineAutoMoving),
+            this.AutoSaveChessManualMiddleware(),
+            this.RefreshEngineCommandMiddleware(),
+            this.CommonCommandMiddleware());
 
     public ICommand ReverseBoardCommand =>
-                    CommandMiddlewareHelper.BuildCommand(
-                                    this.ReverseBoard,
-                                    this.LogAndCatchCommandMiddleware());
+        CommandMiddlewareHelper.BuildCommand(
+            this.ReverseBoard,
+            this.CommonCommandMiddleware());
 
 
     public ICommand SwitchToAnalyzeModeCommand =>
-                    CommandMiddlewareHelper.BuildCommand(
-                                    () => this.SwitchInteractMode(EngineInteractiveMode.AnalyzeMode),
-                                    this.RefreshEngineCommandMiddleware(),
-                                    this.LogAndCatchCommandMiddleware());
+        CommandMiddlewareHelper.BuildCommand(
+            () => this.SwitchInteractMode(EngineInteractiveMode.AnalyzeMode),
+            this.RefreshEngineCommandMiddleware(),
+            this.CommonCommandMiddleware());
 
     public ICommand SwitchToBlackAutoModeCommand =>
-                    CommandMiddlewareHelper.BuildCommand(
-                                    () => this.SwitchInteractMode(EngineInteractiveMode.BlackAutoMode),
-                                    this.RefreshEngineCommandMiddleware(),
-                                    this.LogAndCatchCommandMiddleware());
+        CommandMiddlewareHelper.BuildCommand(
+            () => this.SwitchInteractMode(EngineInteractiveMode.BlackAutoMode),
+            this.RefreshEngineCommandMiddleware(),
+            this.CommonCommandMiddleware());
 
     public ICommand SwitchToRedAutoModeCommand =>
-                    CommandMiddlewareHelper.BuildCommand(
-                                    () => this.SwitchInteractMode(EngineInteractiveMode.RedAutoMode),
-                                    this.RefreshEngineCommandMiddleware(),
-                                    this.LogAndCatchCommandMiddleware());
+        CommandMiddlewareHelper.BuildCommand(
+            () => this.SwitchInteractMode(EngineInteractiveMode.RedAutoMode),
+            this.RefreshEngineCommandMiddleware(),
+            this.CommonCommandMiddleware());
 
     public ICommand SwitchToAutoModeCommand =>
-                    CommandMiddlewareHelper.BuildCommand(
-                                    () => this.SwitchInteractMode(EngineInteractiveMode.AutoMode),
-                                    this.RefreshEngineCommandMiddleware(),
-                                    this.LogAndCatchCommandMiddleware());
+        CommandMiddlewareHelper.BuildCommand(
+            () => this.SwitchInteractMode(EngineInteractiveMode.AutoMode),
+            this.RefreshEngineCommandMiddleware(),
+            this.CommonCommandMiddleware());
 
     public ICommand SaveChessManualCommand =>
-                    CommandMiddlewareHelper.BuildCommand(
-                                    this.SaveChessManual,
-                                    this.LogAndCatchCommandMiddleware());
+        CommandMiddlewareHelper.BuildCommand(
+            this.SaveChessManual,
+            this.CommonCommandMiddleware());
 
     public ICommand SwitchToSelectedMovementCommand =>
-                    CommandMiddlewareHelper.BuildCommand(
-                                    new Command<object>(this.SwitchToSelectedMovement),
-                                    this.AutoSaveChessManualMiddleware(),
-                                    this.LogAndCatchCommandMiddleware());
+        CommandMiddlewareHelper.BuildCommand(
+            new Command<object>(this.SwitchToSelectedMovement),
+            this.AutoSaveChessManualMiddleware(),
+            this.CommonCommandMiddleware());
 
     #endregion
 
@@ -214,13 +215,15 @@ public partial class ChessBoardViewModel
         };
     }
 
-    private CommandMiddlewareHelper.CommandMiddleware LogAndCatchCommandMiddleware(
-                    [CallerMemberName] string commandName = "")
+    private CommandMiddlewareHelper.CommandMiddleware CommonCommandMiddleware(
+        [CallerMemberName] string commandName = "")
     {
         return delegate(ICommand command)
         {
             return new Command<object>(_ =>
             {
+                this.SelectedChess = null;
+
                 try
                 {
                     Logger.LogInformation($"Received command {commandName}");

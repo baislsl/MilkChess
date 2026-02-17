@@ -97,7 +97,7 @@
                         <DataTemplate>
                             <ViewCell>
                                 <Button
-                                    Command="{Binding Source={x:Reference ChessBoardPage}, Path=SwitchToSelectedMovementCommand}"
+                                    Command="{Binding Source={x:Reference ChessBoardPage}, Path=ChessBoardViewModel.SwitchToSelectedMovementCommand}"
                                     CommandParameter="{Binding}"
                                     VerticalOptions="Fill"
                                     HorizontalOptions="Start"

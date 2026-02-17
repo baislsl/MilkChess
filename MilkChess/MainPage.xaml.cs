@@ -58,9 +58,6 @@ namespace MilkChess
             ChessBoardLayout.Add(executionTurnNotifier);
         }
 
-        // After multiple tries, I don't know how to bind within the list view to ChessBoardViewModel property
-        public ICommand SwitchToSelectedMovementCommand => ChessBoardViewModel.SwitchToSelectedMovementCommand;
-
         public int CurrentHistoryManagerCursor => HistoryManager.GetCursor();
     }
 }
