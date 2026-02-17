@@ -136,7 +136,6 @@ public partial class ChessBoardViewModel
     public ICommand DisconnectEngineCommand =>
                     CommandMiddlewareHelper.BuildCommand(
                                     this.DisconnectEngine,
-                                    this.RefreshEngineCommandMiddleware(),
                                     this.LogAndCatchCommandMiddleware());
 
     public ICommand InvokeBestMovementCommand =>

@@ -6,77 +6,129 @@
              x:DataType="userInterface:ChessBoardViewModel"
              x:Name="ChessBoardPage"
              x:Class="MilkChess.MainPage">
-    <HorizontalStackLayout
-        BackgroundColor="DarkGray">
-        <VerticalStackLayout>
-            <HorizontalStackLayout>
-                <AbsoluteLayout
-                    WidthRequest="{Binding ChessBoardWidth}"
-                    HeightRequest="{Binding ChessBoardHeight}"
-                    x:Name="ChessBoardLayout">
-                </AbsoluteLayout>
-                <Grid
-                    Margin="5"
-                    x:Name="CommonFunction">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="40" />
-                        <RowDefinition Height="40" />
-                        <RowDefinition Height="40" />
-                        <RowDefinition Height="40" />
-                        <RowDefinition Height="40" />
-                        <RowDefinition Height="40" />
-                        <RowDefinition Height="40" />
-                        <RowDefinition Height="40" />
-                        <RowDefinition Height="40" />
-                    </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition />
-                        <ColumnDefinition />
-                    </Grid.ColumnDefinitions>
-                    <Button Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Text="Reset"
-                            Command="{Binding ResetCommand}" />
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="{Binding ChessBoardHeight}" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <HorizontalStackLayout Grid.Row="0">
+            <AbsoluteLayout
+                WidthRequest="{Binding ChessBoardWidth}"
+                HeightRequest="{Binding ChessBoardHeight}"
+                x:Name="ChessBoardLayout">
+            </AbsoluteLayout>
+            <Grid
+                Margin="5"
+                x:Name="CommonFunction">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="40" />
+                    <RowDefinition Height="40" />
+                    <RowDefinition Height="40" />
+                    <RowDefinition Height="40" />
+                    <RowDefinition Height="40" />
+                    <RowDefinition Height="40" />
+                    <RowDefinition Height="40" />
+                    <RowDefinition Height="40" />
+                    <RowDefinition Height="40" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <Button Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Text="Reset"
+                        Command="{Binding ResetCommand}" />
 
-                    <Button Grid.Row="1" Grid.Column="0" Text="Go back" Command="{Binding MoveBackwardCommand}" />
-                    <Button Grid.Row="1" Grid.Column="1" Text="Move forward" Command="{Binding MoveForwardCommand}" />
+                <Button Grid.Row="1" Grid.Column="0" Text="Go back" Command="{Binding MoveBackwardCommand}" />
+                <Button Grid.Row="1" Grid.Column="1" Text="Move forward" Command="{Binding MoveForwardCommand}" />
 
-                    <Button Grid.Row="2" Grid.Column="0" Text="To Start" Command="{Binding MoveToStartCommand}" />
-                    <Button Grid.Row="2" Grid.Column="1" Text="To End" Command="{Binding  MoveToEndCommand}" />
+                <Button Grid.Row="2" Grid.Column="0" Text="To Start" Command="{Binding MoveToStartCommand}" />
+                <Button Grid.Row="2" Grid.Column="1" Text="To End" Command="{Binding  MoveToEndCommand}" />
 
-                    <Button Grid.Row="3" Grid.Column="0" Text="ConnectEngine"
-                            Command="{Binding ConnectToRemoteEngineCommand}" />
-                    <Button Grid.Row="3" Grid.Column="1" Text="DisconnectEngine"
-                            Command="{Binding DisconnectEngineCommand }" />
+                <Button Grid.Row="3" Grid.Column="0" Text="ConnectEngine"
+                        Command="{Binding ConnectToRemoteEngineCommand}" />
+                <Button Grid.Row="3" Grid.Column="1" Text="DisconnectEngine"
+                        Command="{Binding DisconnectEngineCommand }" />
 
-                    <Button Grid.Row="4" Grid.Column="0"
-                            BackgroundColor="{Binding SwitchToAnalyzeModeColor}"
-                            Text="AnalyzeMode"
-                            Command="{Binding SwitchToAnalyzeModeCommand }" />
-                    <Button Grid.Row="4" Grid.Column="1"
-                            BackgroundColor="{Binding SwitchToAutoModeColor}"
-                            Text="AutoMode"
-                            Command="{Binding SwitchToAutoModeCommand }" />
+                <Button Grid.Row="4" Grid.Column="0"
+                        BackgroundColor="{Binding SwitchToAnalyzeModeColor}"
+                        Text="AnalyzeMode"
+                        Command="{Binding SwitchToAnalyzeModeCommand }" />
+                <Button Grid.Row="4" Grid.Column="1"
+                        BackgroundColor="{Binding SwitchToAutoModeColor}"
+                        Text="AutoMode"
+                        Command="{Binding SwitchToAutoModeCommand }" />
 
-                    <Button Grid.Row="5" Grid.Column="0"
-                            BackgroundColor="{Binding SwitchToRedAutoModeColor}"
-                            Text="RedAutoMode"
-                            Command="{Binding SwitchToRedAutoModeCommand}" />
+                <Button Grid.Row="5" Grid.Column="0"
+                        BackgroundColor="{Binding SwitchToRedAutoModeColor}"
+                        Text="RedAutoMode"
+                        Command="{Binding SwitchToRedAutoModeCommand}" />
 
-                    <Button Grid.Row="5" Grid.Column="1"
-                            BackgroundColor="{Binding SwitchToBlackAutoModeColor}"
-                            Text="BlackAutoMode"
-                            Command="{Binding SwitchToBlackAutoModeCommand}" />
+                <Button Grid.Row="5" Grid.Column="1"
+                        BackgroundColor="{Binding SwitchToBlackAutoModeColor}"
+                        Text="BlackAutoMode"
+                        Command="{Binding SwitchToBlackAutoModeCommand}" />
 
-                    <Button Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2" Text="UseBestMovement"
-                            Command="{Binding InvokeBestMovementCommand}" />
+                <Button Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2" Text="UseBestMovement"
+                        Command="{Binding InvokeBestMovementCommand}" />
 
-                    <Button Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="2" Text="RotateBoard"
-                            Command="{Binding ReverseBoardCommand}" />
-                    
-                    <Button Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="2" Text="SaveLayout"
-                            Command="{Binding SaveChessManualCommand}" />
-                </Grid>
-            </HorizontalStackLayout>
+                <Button Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="2" Text="RotateBoard"
+                        Command="{Binding ReverseBoardCommand}" />
 
+                <Button Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="2" Text="SaveLayout"
+                        Command="{Binding SaveChessManualCommand}" />
+            </Grid>
+            <VerticalStackLayout
+                WidthRequest="300">
+                <Label Text="History Movements:"
+                       FontAttributes="Bold"
+                       Margin="2"
+                       FontSize="18" />
+                <ListView
+                    x:Name="MovementView"
+                    RowHeight="20"
+                    MinimumHeightRequest="{Binding ChessBoardHeight}"
+                    BackgroundColor="LightBlue"
+                    xmlns:local="clr-namespace:MilkChess.Model"
+                    ItemsSource="{Binding HistoryMovements}">
+                    <ListView.Resources>
+                        <local:MovementColorConvertor x:Key="MovementColorConvertor" />
+                    </ListView.Resources>
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <ViewCell>
+                                <Button
+                                    Command="{Binding Source={x:Reference ChessBoardPage}, Path=SwitchToSelectedMovementCommand}"
+                                    CommandParameter="{Binding}"
+                                    VerticalOptions="Fill"
+                                    HorizontalOptions="Start"
+                                    BorderWidth="0"
+                                    CornerRadius="1"
+                                    Margin="1"
+                                    BackgroundColor="LightGray"
+                                    FontSize="18"
+                                    FontAttributes="Bold">
+                                    <Button.TextColor>
+                                        <Color>Black</Color>
+                                        <!-- <MultiBinding Converter="{StaticResource MovementColorConvertor}"> -->
+                                        <!--     <Binding  /> -->
+                                        <!--     <Binding Source="{x:Reference ChessBoardPage}" -->
+                                        <!--              Path="CurrentHistoryManagerCursor" /> -->
+                                        <!-- </MultiBinding> -->
+                                    </Button.TextColor>
+                                    <Button.Text>
+                                        <MultiBinding StringFormat="{}{0}. {1}">
+                                            <Binding Path="ActionCount" />
+                                            <Binding Path="ChineseViewableString" />
+                                        </MultiBinding>
+                                    </Button.Text>
+                                </Button>
+                            </ViewCell>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </VerticalStackLayout>
+        </HorizontalStackLayout>
+        <Grid Grid.Row="1" RowDefinitions="Auto,*">
             <Label Text="{Binding Path = Score,
                             StringFormat='Score: {0}  '}"
                    TextColor="{Binding ScoreColor}"
@@ -84,10 +136,11 @@
                    Margin="2"
                    FontAttributes="Bold" />
             <ListView
+                Grid.Row="1"
                 Margin="2"
                 MinimumHeightRequest="100"
-                RowHeight="100"
                 BackgroundColor="LightBlue"
+                HorizontalScrollBarVisibility="Default"
                 ItemsSource="{Binding  EngineSuggestedMovements}">
                 <ListView.ItemTemplate>
                     <DataTemplate>
@@ -104,7 +157,6 @@
                                         <Span Text=" Depth: " TextColor="Black" />
                                         <Span Text="{Binding Depth}" TextColor="Black" FontAttributes="Bold" />
                                         <Span Text="{Binding Path=Movements, StringFormat='  {0}' }"
-                                              TextColor="Black"
                                               FontAttributes="Italic" />
                                     </FormattedString>
                                 </Label.FormattedText>
@@ -113,58 +165,8 @@
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>
-        </VerticalStackLayout>
-        <VerticalStackLayout
-            WidthRequest="300">
-            <Label Text="History Movements:"
-                   FontAttributes="Bold"
-                   Margin="2"
-                   FontSize="18" />
-            <ListView
-                x:Name="MovementView"
-                RowHeight="20"
-                MinimumHeightRequest="{Binding ChessBoardHeight}"
-                BackgroundColor="LightBlue"
-                xmlns:local="clr-namespace:MilkChess.Model"
-                ItemsSource="{Binding HistoryMovements}">
-                <ListView.Resources>
-                    <local:MovementColorConvertor x:Key="MovementColorConvertor" />
-                </ListView.Resources>
-                <ListView.ItemTemplate>
-                    <DataTemplate>
-                        <ViewCell>
-                            <Button
-                                Command="{Binding Source={x:Reference ChessBoardPage}, Path=SwitchToSelectedMovementCommand}"
-                                CommandParameter="{Binding}"
-                                VerticalOptions="Fill"
-                                HorizontalOptions="Start"
-                                BorderWidth="0"
-                                CornerRadius="1"
-                                Margin="1"
-                                BackgroundColor="LightGray"
-                                FontSize="18"
-                                FontAttributes="Bold">
-                                <Button.TextColor>
-                                    <Color>Black</Color>
-                                    <!-- <MultiBinding Converter="{StaticResource MovementColorConvertor}"> -->
-                                    <!--     <Binding  /> -->
-                                    <!--     <Binding Source="{x:Reference ChessBoardPage}" -->
-                                    <!--              Path="CurrentHistoryManagerCursor" /> -->
-                                    <!-- </MultiBinding> -->
-                                </Button.TextColor>
-                                <Button.Text>
-                                    <MultiBinding StringFormat="{}{0}. {1}">
-                                        <Binding Path="ActionCount" />
-                                        <Binding Path="ChineseViewableString" />
-                                    </MultiBinding>
-                                </Button.Text>
-                            </Button>
-                        </ViewCell>
-                    </DataTemplate>
-                </ListView.ItemTemplate>
-            </ListView>
-        </VerticalStackLayout>
-    </HorizontalStackLayout>
+        </Grid>
+    </Grid>
 
 
 </ContentPage>

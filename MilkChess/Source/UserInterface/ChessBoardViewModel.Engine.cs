@@ -83,8 +83,11 @@ public partial class ChessBoardViewModel
 
     public void StopEngineRunner()
     {
-        GoCancellationTokenSource?.Cancel();
-        EngineExecutionTask?.Wait();
+        this.GoCancellationTokenSource?.Cancel(false);
+        this.GoCancellationTokenSource = null;
+
+        this.EngineExecutionTask?.Wait();
+        this.EngineExecutionTask = null;
     }
 
     public void NotifyRefreshEngineFeedback()
