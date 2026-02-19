@@ -62,9 +62,7 @@ namespace MilkChess
             using var stream = Assembly.GetExecutingAssembly()
                             .GetManifestResourceStream(ConfigResourcePath);
             var config = new ConfigurationBuilder().AddIniStream(stream).Build();
-            Globals.Config = config;
-
-            builder.Configuration.AddConfiguration(config);
+            builder.Services.Configure<MilkChessConfig>(config);
 
             return builder.Build();
         }

@@ -143,7 +143,7 @@ public partial class ChessBoardViewModel
             }
             else
             {
-                depth = Globals.Config.GetValue<int>(Keys.EngineGoDepth);
+                depth = this.Config.Engine.GoDepth;
                 immediateInvokeBestMove = true;
                 IsEngineAutoMoving = true;
             }

@@ -5,6 +5,7 @@ using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using MilkChess.Helper;
 using MilkChess.Model;
 using MilkChess.Ucci;
@@ -24,6 +25,8 @@ public partial class ChessBoardViewModel : ObservableObject, IChessBoardContext
 
     public readonly MovementIndicator MovementIndicator;
 
+    public readonly MilkChessConfig Config;
+
     private static readonly Color ActiveInteractiveModeColor = Colors.Blue;
 
     private static readonly Color InactiveInteractiveModeColor = Colors.CornflowerBlue;
@@ -34,18 +37,14 @@ public partial class ChessBoardViewModel : ObservableObject, IChessBoardContext
         IServiceProvider serviceProvider,
         ILogger<ChessBoardViewModel> logger,
         HistoryManager historyManager,
-        ChessModel chessModel)
+        ChessModel chessModel,
+        IOptions<MilkChessConfig> milkChessConfig)
     {
         ChessModel = chessModel;
         Logger = logger;
         HistoryManager = historyManager;
         ServiceProvider = serviceProvider;
-
-        var config = serviceProvider.GetRequiredService<IConfiguration>();
-        foreach (var kv in config.AsEnumerable())
-        {
-            Logger.LogInformation("Config  {} -> {}", kv.Key, kv.Value);
-        }
+        Config = milkChessConfig.Value;
 
         Matrix = new List<List<ChessButton>>(ChessBoardHeight);
         for (int i = 0; i < ChessBoardHeight; i++)
@@ -257,8 +256,8 @@ public partial class ChessBoardViewModel : ObservableObject, IChessBoardContext
     private string GetDataDirectory()
     {
         return Path.Combine(FileSystem.Current.AppDataDirectory,
-            Globals.Config.GetValue<string>(Keys.PathRoot),
-            Globals.Config.GetValue<string>(Keys.DataPath));
+            Config.PathDefinition.Root,
+            Config.PathDefinition.DataPath);
     }
 
     private string GetChessManualFile()
@@ -311,7 +310,7 @@ public partial class ChessBoardViewModel : ObservableObject, IChessBoardContext
 
     private void ReverseBoard()
     {
-        Globals.Config[Keys.LayoutIsRotated] = (!Globals.Config.GetValue<bool>(Keys.LayoutIsRotated, false)).ToString();
+        GlobalConfig.IsRotated = !GlobalConfig.IsRotated;
 
         Iterator.IterateOverChessBoard(position => { GetChessButtonAt(position).Refresh(); });
         CursorSelector.Refresh();
