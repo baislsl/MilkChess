@@ -152,12 +152,19 @@ public partial class ChessBoardViewModel : ObservableObject, IChessBoardContext
         this.Matrix[position.Y][position.X].Chess = chess;
     }
 
-    private ChessButton GetChessButtonAt(Position position)
+    public virtual void RevertMovement(Movement movement)
     {
-        return Matrix[position.Y][position.X];
+        SetChessAtPosition(movement.MovedChess, movement.From, out _);
+        SetChessAtPosition(movement.RemovedChess, movement.To, out _);
     }
 
-    public void Reset()
+    public virtual void MoveChess(Position from, Position to, out Chess removedChess)
+    {
+        Chess chess = this.GetChessAtPosition(from);
+        this.SetChessAtPosition(chess, to, out removedChess);
+    }
+
+    public virtual void Reset()
     {
         ChessModel.Reset();
         HistoryManager.Reset();
@@ -168,6 +175,11 @@ public partial class ChessBoardViewModel : ObservableObject, IChessBoardContext
         });
 
         this.SelectedChess = null;
+    }
+
+    private ChessButton GetChessButtonAt(Position position)
+    {
+        return Matrix[position.Y][position.X];
     }
 
     private void MoveForward()

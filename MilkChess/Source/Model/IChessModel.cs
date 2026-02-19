@@ -12,4 +12,10 @@ public interface IChessBoard
     public void SetChessAtPosition(Chess chess, Position position, out Chess removedChess);
 
     public void ApplyMovement(Movement movement);
+
+    public void RevertMovement(Movement movement);
+
+    public void MoveChess(Position from, Position to, out Chess removedChess);
+
+    public void Reset();
 }
