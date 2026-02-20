@@ -17,13 +17,13 @@ public partial class ChessBoardViewModel : ObservableObject, IChessBoardContext
 
     public readonly List<List<ChessButton>> Matrix;
 
-    public readonly ILogger Logger;
-
-    private readonly IServiceProvider ServiceProvider;
-
     public readonly CursorSelector CursorSelector;
 
     public readonly MovementIndicator MovementIndicator;
+
+    public readonly ILogger Logger;
+
+    private readonly IServiceProvider ServiceProvider;
 
     public readonly MilkChessConfig Config;
 

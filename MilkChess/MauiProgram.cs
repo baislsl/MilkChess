@@ -42,6 +42,7 @@ namespace MilkChess
                 new ObservableCollection<Movement>()));
             builder.Services.AddTransient<UcciLogger>();
             builder.Services.AddTransient<UcciEngine>();
+            builder.Services.AddTransient<IUcciEngineV2>();
 
             using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(ConfigResourcePath);
             var config = new ConfigurationBuilder().AddIniStream(stream).Build();

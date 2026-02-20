@@ -9,13 +9,6 @@ using Command = MilkChess.Ucci.Command;
 
 namespace MilkChess.Engine;
 
-public class UcciEngineConfig
-{
-    public string LocalExecutableFile { get; set; }
-
-    public Collection<string> Arguments;
-}
-
 public class UcciEngine : IUcciEngine
 {
     private readonly INativeUcciEngine NativeUcciEngine;
@@ -92,7 +85,7 @@ public class UcciEngine : IUcciEngine
         cancellationToken.Register(() => this.SendCommand(Command.Stop));
         this.SendCommand(this.BuildGoCommand(option));
 
-        while (bestMove == null)
+        while (bestMove == null && !cancellationToken.IsCancellationRequested)
         {
             UcciFeedback feedback = this.ReceiveFeedback(CancellationToken.None);
 
