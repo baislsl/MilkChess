@@ -1,6 +1,5 @@
-using Microsoft.Maui.Layouts;
-using Microsoft.Maui.Platform;
 using MilkChess.Model;
+using Color = MilkChess.Model.Color;
 
 namespace MilkChess.UserInterface;
 
@@ -16,8 +15,8 @@ public class MovementIndicator
     public MovementIndicator(IChessBoard chessBoard)
     {
         this.ChessBoard = chessBoard;
-        this.From = new CursorSelector(chessBoard, null, UIConstants.BaseMovementCursorResource);
-        this.To = new CursorSelector(chessBoard, null, UIConstants.BaseMovementCursorResource);
+        this.From = new CursorSelector(chessBoard, null, UIConstants.BlackMovementCursorResource);
+        this.To = new CursorSelector(chessBoard, null, UIConstants.BlackMovementCursorResource);
     }
 
     public void AddToAbsoluteLayout(AbsoluteLayout layout)
@@ -32,8 +31,13 @@ public class MovementIndicator
 
         if (movement != null)
         {
+            var uiSource = movement.ExecutedColor == Color.BLACK
+                ? UIConstants.BlackMovementCursorResource
+                : UIConstants.RedMovementCursorResource;
+
             From.Position = movement.From;
             To.Position = movement.To;
+            From.Source = To.Source = uiSource;
         }
         else
         {
