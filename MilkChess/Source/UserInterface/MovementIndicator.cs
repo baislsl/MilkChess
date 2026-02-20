@@ -6,18 +6,18 @@ namespace MilkChess.UserInterface;
 
 public class MovementIndicator
 {
+    private IChessBoard ChessBoard { get; set; }
+
     private readonly CursorSelector From;
     private readonly CursorSelector To;
 
     public Movement Movement { get; set; }
 
-    public MovementIndicator()
+    public MovementIndicator(IChessBoard chessBoard)
     {
-        this.From = new CursorSelector(new Position(0, 0), UIConstants.BaseMovementCursorResource);
-        this.To = new CursorSelector(new Position(0, 0), UIConstants.BaseMovementCursorResource);
-
-        this.From.IsEnabled = false;
-        this.To.IsEnabled = false;
+        this.ChessBoard = chessBoard;
+        this.From = new CursorSelector(chessBoard, null, UIConstants.BaseMovementCursorResource);
+        this.To = new CursorSelector(chessBoard, null, UIConstants.BaseMovementCursorResource);
     }
 
     public void AddToAbsoluteLayout(AbsoluteLayout layout)
@@ -34,8 +34,6 @@ public class MovementIndicator
         {
             From.Position = movement.From;
             To.Position = movement.To;
-            From.IsEnabled = true;
-            To.IsEnabled = true;
         }
         else
         {
@@ -45,8 +43,8 @@ public class MovementIndicator
 
     public void ClearMovement()
     {
-        From.IsEnabled = false;
-        To.IsEnabled = false;
+        From.Position = null;
+        To.Position = null;
         this.Movement = null;
     }
 

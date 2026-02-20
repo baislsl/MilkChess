@@ -18,10 +18,6 @@ public partial class ChessBoardViewModel
 
     public event PropertyChangedEventHandler PropertyChanged;
 
-    public readonly CursorSelector CursorSelector;
-
-    public ChessButton SelectedChess;
-
     #endregion
 
     #region view model definition
@@ -222,7 +218,7 @@ public partial class ChessBoardViewModel
         {
             return new Command<object>(_ =>
             {
-                this.SelectedChess = null;
+                this.CursorSelector.Position = null;
 
                 try
                 {

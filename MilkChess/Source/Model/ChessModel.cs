@@ -37,6 +37,11 @@ public class ChessModel : IChessBoard
 
     public virtual Chess GetChessAtPosition(Position position)
     {
+        if (position == null)
+        {
+            return null;
+        }
+
         return this.board[position.Y][position.X];
     }
 
@@ -66,12 +71,6 @@ public class ChessModel : IChessBoard
 
     public bool ValidateMovement(Position from, Position to)
     {
-        var ret = InternalValidateMovement(from, to);
-        return ret;
-    }
-
-    private bool InternalValidateMovement(Position from, Position to)
-    {
         if (from == to) return false;
 
         Chess moveChess = this.GetChessAtPosition(from);
@@ -93,8 +92,8 @@ public class ChessModel : IChessBoard
 
     public IEnumerable<Position> GetAvailableNextPosition(Position position)
     {
-        int[][] dir = new int[][] {new[] {0, 1}, new[] {1, 0}, new[] {0, -1}, new[] {-1, 0}};
-        int[][] xyDir = new int[][] {new[] {1, 1}, new[] {1, -1}, new[] {-1, 1}, new[] {-1, -1}};
+        int[][] dir = new int[][] { new[] { 0, 1 }, new[] { 1, 0 }, new[] { 0, -1 }, new[] { -1, 0 } };
+        int[][] xyDir = new int[][] { new[] { 1, 1 }, new[] { 1, -1 }, new[] { -1, 1 }, new[] { -1, -1 } };
 
         Chess moveChess = this.GetChessAtPosition(position);
         switch (moveChess.Name)
@@ -123,7 +122,7 @@ public class ChessModel : IChessBoard
                 foreach (var d in xyDir)
                 {
                     if (Position.IsLegalBiShopPositionXY(moveChess.Color, position.X + 2 * d[0],
-                                        position.Y + 2 * d[1])
+                            position.Y + 2 * d[1])
                         && !this.HasChessAtPosition(new Position(position.X + d[0], position.Y + d[1])))
                     {
                         yield return new Position(position.X + 2 * d[0], position.Y + 2 * d[1]);
@@ -176,20 +175,20 @@ public class ChessModel : IChessBoard
                 List<int[]> ds;
                 if (moveChess.Color == RED)
                 {
-                    ds = new List<int[]> {new[] {0, 1}};
+                    ds = new List<int[]> { new[] { 0, 1 } };
                     if (position.InColorArea(BLACK))
                     {
-                        ds.Add(new[] {-1, 0});
-                        ds.Add(new[] {1, 0});
+                        ds.Add(new[] { -1, 0 });
+                        ds.Add(new[] { 1, 0 });
                     }
                 }
                 else
                 {
-                    ds = new List<int[]> {new[] {0, -1}};
+                    ds = new List<int[]> { new[] { 0, -1 } };
                     if (position.InColorArea(RED))
                     {
-                        ds.Add(new[] {-1, 0});
-                        ds.Add(new[] {1, 0});
+                        ds.Add(new[] { -1, 0 });
+                        ds.Add(new[] { 1, 0 });
                     }
                 }
 
@@ -249,31 +248,31 @@ public class ChessModel : IChessBoard
 
         this.board[0] = new List<Chess>
         {
-                        new Rook(RED), new Knight(RED), new Bishop(RED), new Advisor(RED),
-                        new King(RED),
-                        new Advisor(RED), new Bishop(RED), new Knight(RED), new Rook(RED)
+            new Rook(RED), new Knight(RED), new Bishop(RED), new Advisor(RED),
+            new King(RED),
+            new Advisor(RED), new Bishop(RED), new Knight(RED), new Rook(RED)
         };
 
         this.board[2] = new List<Chess>
         {
-                        null, new Cannon(RED), null, null, null, null, null, new Cannon(RED), null
+            null, new Cannon(RED), null, null, null, null, null, new Cannon(RED), null
         };
 
         this.board[3] = new List<Chess>
         {
-                        new Pawn(RED), null, new Pawn(RED), null,
-                        new Pawn(RED),
-                        null, new Pawn(RED), null, new Pawn(RED)
+            new Pawn(RED), null, new Pawn(RED), null,
+            new Pawn(RED),
+            null, new Pawn(RED), null, new Pawn(RED)
         };
 
-        // Initialize BLACK by copying from RED chess 
+        // Initialize BLACK by copying from RED chess
         for (int i = 0; i < Constants.ChessBoardWidth; i++)
         {
             for (int red = 0, black = Constants.ChessBoardHeight - 1; red < black; red++, black--)
             {
                 if (this.board[red][i] != null)
                 {
-                    this.board[black][i] = (Chess) this.board[red][i].Clone();
+                    this.board[black][i] = (Chess)this.board[red][i].Clone();
                     this.board[black][i].Color = BLACK;
                 }
             }

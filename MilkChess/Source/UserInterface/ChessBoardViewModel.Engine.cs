@@ -181,7 +181,7 @@ public partial class ChessBoardViewModel
                         {
                             this.ApplyMovement(bestMovement);
                             HistoryManager.InsertMovement(bestMovement);
-                            SelectedChess = null;
+                            this.CursorSelector.Position = null;
                             Logger.LogDebug("{requestId}.{queryCount} Executed movement {}, turn {}", requestId, count,
                                 bestMovement,
                                 HistoryManager.ExecutionTurn);

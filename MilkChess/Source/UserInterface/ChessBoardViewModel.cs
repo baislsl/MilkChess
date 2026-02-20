@@ -23,6 +23,8 @@ public partial class ChessBoardViewModel : ObservableObject, IChessBoardContext
 
     private readonly IServiceProvider ServiceProvider;
 
+    public readonly CursorSelector CursorSelector;
+
     public readonly MovementIndicator MovementIndicator;
 
     public readonly MilkChessConfig Config;
@@ -67,7 +69,7 @@ public partial class ChessBoardViewModel : ObservableObject, IChessBoardContext
             // If init manual not loaded successfully, refresh with the default chess position
             Iterator.IterateOverChessBoard(position =>
             {
-                this.SetChessAtPosition(ChessModel.GetChessAtPosition(position), position, out _);
+                this.SetChessAtPosition(this.GetChessAtPosition(position), position, out _);
             });
         }
         else
@@ -75,8 +77,8 @@ public partial class ChessBoardViewModel : ObservableObject, IChessBoardContext
             Logger.LogInformation("Use chess position from previous execution");
         }
 
-        CursorSelector = new CursorSelector(new Position(0, 0), UIConstants.CursorBackgroundResource);
-        MovementIndicator = new MovementIndicator();
+        CursorSelector = new CursorSelector(this, null, UIConstants.CursorBackgroundResource);
+        MovementIndicator = new MovementIndicator(this);
         EngineSuggestedMovements = new ObservableCollection<PredictMovementTrace>();
         this.ResetEngineModeColor();
     }
@@ -94,24 +96,17 @@ public partial class ChessBoardViewModel : ObservableObject, IChessBoardContext
     {
         ChessButton clickedButton = (ChessButton)sender;
         Logger.LogInformation(
-            $"Clicked {clickedButton.Position} {clickedButton.Chess}; Selected {SelectedChess?.Position}, {SelectedChess?.Chess}");
+            $"Clicked {clickedButton.Position} {clickedButton.Chess}; Selected {CursorSelector.Position}, {CursorSelector.Chess}");
 
-        if (SelectedChess?.Chess == null
-            || SelectedChess.Chess.Color != HistoryManager.ExecutionTurn
-            || !ChessModel.ValidateMovement(SelectedChess.Position, clickedButton.Position))
-        {
-            SelectedChess = clickedButton;
-            CursorSelector.Position = clickedButton.Position;
-
-            Logger.LogInformation($"MoveSelector {SelectedChess.Chess} {CursorSelector.Position}");
-        }
-        else
+        if (CursorSelector.Chess != null
+            && CursorSelector.Chess.Color == HistoryManager.ExecutionTurn
+            && ChessModel.ValidateMovement(CursorSelector.Position, clickedButton.Position))
         {
             Movement movement = new Movement
             {
-                MovedChess = SelectedChess.Chess,
+                MovedChess = CursorSelector.Chess,
                 RemovedChess = clickedButton.Chess,
-                From = SelectedChess.Position,
+                From = CursorSelector.Position,
                 To = clickedButton.Position,
                 ActionCount = HistoryManager.GetCursor() + 1,
             };
@@ -127,10 +122,15 @@ public partial class ChessBoardViewModel : ObservableObject, IChessBoardContext
             this.ApplyMovement(movement);
             HistoryManager.InsertMovement(movement);
 
-            SelectedChess = null;
             CursorSelector.Position = clickedButton.Position;
 
             NotifyRefreshEngineFeedback();
+        }
+        else
+        {
+            CursorSelector.Position = clickedButton.Position;
+
+            Logger.LogInformation($"MoveSelector to {CursorSelector.Position}");
         }
     }
 
@@ -173,12 +173,7 @@ public partial class ChessBoardViewModel : ObservableObject, IChessBoardContext
             this.Matrix[position.Y][position.X].Chess = this.GetChessAtPosition(position);
         });
 
-        this.SelectedChess = null;
-    }
-
-    private ChessButton GetChessButtonAt(Position position)
-    {
-        return Matrix[position.Y][position.X];
+        this.CursorSelector.Position = null;
     }
 
     private void MoveForward()
@@ -195,7 +190,7 @@ public partial class ChessBoardViewModel : ObservableObject, IChessBoardContext
         Movement movement = HistoryManager.MoveBackward();
         if (movement != null)
         {
-            ChessModel.RevertMovement(movement);
+            this.RevertMovement(movement);
         }
     }
 
@@ -203,7 +198,7 @@ public partial class ChessBoardViewModel : ObservableObject, IChessBoardContext
     {
         while (HistoryManager.MoveBackward() is { } movement)
         {
-            ChessModel.RevertMovement(movement);
+            this.RevertMovement(movement);
         }
     }
 
@@ -312,7 +307,7 @@ public partial class ChessBoardViewModel : ObservableObject, IChessBoardContext
     {
         GlobalConfig.IsRotated = !GlobalConfig.IsRotated;
 
-        Iterator.IterateOverChessBoard(position => { GetChessButtonAt(position).Refresh(); });
+        Iterator.IterateOverChessBoard(position => { Matrix[position.Y][position.X].Refresh(); });
         CursorSelector.Refresh();
         MovementIndicator?.Refresh();
     }

@@ -12,12 +12,12 @@ namespace MilkChess
     public static class MauiProgram
     {
         private const string LocalExecutableFile =
-                        "/Users/baislsl/go/src/github.com/baislsl/UcciProxy/listener/listener";
+            "/Users/baislsl/go/src/github.com/baislsl/UcciProxy/listener/listener";
 
         private static Collection<string> Arguments = new Collection<string>
         {
-                        // "-addr", "192.168.31.6:8123",
-                        //"-output", "/private/tmp/remote_engine.log"
+            // "-addr", "192.168.31.6:8123",
+            //"-output", "/private/tmp/remote_engine.log"
         };
 
         private const string ConfigResourcePath = "MilkChess.Resources.Config.appsettings.ini";
@@ -30,14 +30,13 @@ namespace MilkChess
 #endif
         public static MauiApp CreateMauiApp()
         {
-            var builder = MauiApp.CreateBuilder();
-            builder
-                            .UseMauiApp<App>()
-                            .ConfigureFonts(fonts =>
-                            {
-                                fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
-                                fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
-                            });
+            var builder = MauiApp.CreateBuilder()
+                .UseMauiApp<App>()
+                .ConfigureFonts(fonts =>
+                {
+                    fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
+                    fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
+                });
 
             builder.Services.AddLogging(configure =>
             {
@@ -48,19 +47,19 @@ namespace MilkChess
             builder.Services.AddTransient<MainPage>();
             builder.Services.AddTransient<ChessBoardViewModel>();
             builder.Services.AddSingleton<HistoryManager>(x =>
-                            new HistoryManager(x.GetRequiredService<ILogger<HistoryManager>>(),
-                                            new ObservableCollection<Movement>()));
+                new HistoryManager(x.GetRequiredService<ILogger<HistoryManager>>(),
+                    new ObservableCollection<Movement>()));
             builder.Services.AddTransient<UcciEngineConfig>(_ =>
-                            new UcciEngineConfig()
-                            {
-                                            LocalExecutableFile = LocalExecutableFile,
-                                            Arguments = Arguments,
-                            });
+                new UcciEngineConfig()
+                {
+                    LocalExecutableFile = LocalExecutableFile,
+                    Arguments = Arguments,
+                });
             builder.Services.AddTransient<UcciLogger>();
             builder.Services.AddTransient<UcciEngine>();
 
             using var stream = Assembly.GetExecutingAssembly()
-                            .GetManifestResourceStream(ConfigResourcePath);
+                .GetManifestResourceStream(ConfigResourcePath);
             var config = new ConfigurationBuilder().AddIniStream(stream).Build();
             builder.Services.Configure<MilkChessConfig>(config);
 

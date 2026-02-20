@@ -4,6 +4,8 @@ namespace MilkChess.Model;
 
 public sealed class Position
 {
+    private static readonly Position Empty = new Position(-1, -1);
+
     public readonly int X;
     public readonly int Y;
 
@@ -48,7 +50,7 @@ public sealed class Position
         }
         else
         {
-            Position p = (Position) obj;
+            Position p = (Position)obj;
             return p.X == this.X && p.Y == this.Y;
         }
     }
@@ -92,7 +94,7 @@ public sealed class Position
     public bool IsLegalBiShopPosition(Color color)
     {
         if (!this.IsLegal()) return false;
-        
+
         if (color == Color.BLACK)
         {
             return this.Y >= 5
