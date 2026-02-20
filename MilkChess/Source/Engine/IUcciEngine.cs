@@ -8,11 +8,11 @@ internal interface INativeUcciEngine : IDisposable
 {
     void Initialize();
 
-    IEnumerable<string> DiscardBufferData();
-
     public void SendCommand(string command);
 
-    public string GetFeedback();
+    public UcciFeedback GetFeedback();
+
+    public Task<UcciFeedback> GetFeedbackAsync(CancellationToken cancellationToken);
 }
 
 internal interface IUcciEngine
@@ -59,10 +59,19 @@ public class InfoFeedback
     public List<string> Pv { get; set; }
     public Dictionary<string, string> Info { get; set; }
 
+    public int Score;
+
+    public int Depth;
+
+    public List<Movement> Movements;
+
+    public string ViewableMovementList;
+
     public InfoFeedback()
     {
         this.Pv = new List<string>();
         this.Info = new Dictionary<string, string>();
+        this.Movements = new List<Movement>();
     }
 
     public override string ToString()

@@ -115,14 +115,12 @@ public partial class ChessBoardViewModel : ObservableObject, IChessBoardContext
 
             Logger.LogInformation("Execute movement {}", movement);
 
-            StopEngineRunner();
-
             this.ApplyMovement(movement);
             HistoryManager.InsertMovement(movement);
 
             CursorSelector.Position = clickedButton.Position;
 
-            NotifyRefreshEngineFeedback();
+            RefreshUcciEngine();
         }
         else
         {
@@ -221,7 +219,6 @@ public partial class ChessBoardViewModel : ObservableObject, IChessBoardContext
         {
             Logger.LogInformation("Switch interactive mode {} -> {}", this.InteractiveMode, mode);
 
-            StopEngineRunner();
             this.InteractiveMode = mode;
             this.ResetEngineModeColor();
             switch (this.InteractiveMode)
@@ -241,8 +238,6 @@ public partial class ChessBoardViewModel : ObservableObject, IChessBoardContext
                 default:
                     throw new ArgumentException($"Unknown interactive mode {this.InteractiveMode}");
             }
-
-            NotifyRefreshEngineFeedback();
         }
     }
 

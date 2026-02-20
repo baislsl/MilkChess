@@ -63,6 +63,7 @@ public class UcciFeedback
     public static bool TryParse(string s, out UcciFeedback feedback)
     {
         feedback = new UcciFeedback();
+        feedback.RawCommand = s;
 
         if (string.IsNullOrEmpty(s))
         {

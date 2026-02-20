@@ -27,7 +27,7 @@ public class Movement
 
     public override string ToString()
     {
-        return $"{ActionCount}. {MovedChess.Symbol} {From}->{To} {ChineseViewableString}";
+        return $"{ActionCount}. {MovedChess?.Symbol} {From}->{To} {ChineseViewableString}";
     }
 }
 

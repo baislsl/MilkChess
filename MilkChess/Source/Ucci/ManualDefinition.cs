@@ -99,6 +99,25 @@ public static class MovementExtension
     // {Chess}{XCoordinate}{Action}{NewCoordinate}
     public static string ToChineseViewableString(this Movement movement, IChessBoard chessBoard)
     {
+        if (movement.MovedChess == null)
+        {
+            // TODO: fix
+            return $"??{movement}";
+        }
+        try
+        {
+            return movement.ToChineseViewableStringInternal(chessBoard);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return $"??{movement}";
+        }
+    }
+
+    // TODO: fix bug of ToChineseViewableStringInternal
+    public static string ToChineseViewableStringInternal(this Movement movement, IChessBoard chessBoard)
+    {
         string XCoordinate = GetChineseXColorNumber(movement.From.X, movement.ExecutedColor);
 
         // Action, NewCoordinate

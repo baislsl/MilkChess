@@ -199,9 +199,9 @@ public partial class ChessBoardViewModel
         {
             return new Command<object>(_ =>
             {
-                StopEngineRunner();
+                this.Engine.Stop();
                 command.Execute(_);
-                NotifyRefreshEngineFeedback();
+                RefreshUcciEngine();
             });
         };
     }

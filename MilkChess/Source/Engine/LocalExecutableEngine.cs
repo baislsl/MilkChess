@@ -1,36 +1,39 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using MilkChess.Helper;
 
 namespace MilkChess.Engine;
 
 public class LocalExecutableEngine : INativeUcciEngine
 {
-    private readonly string ExecutableFile;
-    private readonly List<string> Arguments;
-    private readonly UcciLogger Logger;
+    private readonly UcciLogger UcciLogger;
+    private readonly ILogger<LocalExecutableEngine> Logger;
+    private readonly MilkChessConfig Config;
 
     private Process Process;
 
-    public LocalExecutableEngine(string executableFile, List<string> arguments, UcciLogger logger)
+    public LocalExecutableEngine(IOptions<MilkChessConfig> config, ILogger<LocalExecutableEngine> logger,
+        UcciLogger ucciLogger)
     {
-        this.ExecutableFile = executableFile;
-        this.Arguments = arguments;
         this.Logger = logger;
+        this.UcciLogger = ucciLogger;
+        this.Config = config.Value;
     }
 
     public void Initialize()
     {
         var startInfo = new ProcessStartInfo()
         {
-            FileName = this.ExecutableFile,
+            FileName = this.Config.Engine.Path,
             RedirectStandardInput = true,
             RedirectStandardOutput = true,
         };
 
-        if (Arguments?.Count > 0)
+        if (this.Config.Engine.Arguments?.Count > 0)
         {
-            foreach (var argument in this.Arguments)
+            foreach (var argument in this.Config.Engine.Arguments)
             {
                 startInfo.ArgumentList.Add(argument);
             }
@@ -42,22 +45,39 @@ public class LocalExecutableEngine : INativeUcciEngine
 
     public void SendCommand(string command)
     {
-        this.Logger.WriteCommand(command);
+        this.UcciLogger.WriteCommand(command);
         this.Process.StandardInput.WriteLine(command);
     }
 
-    public string GetFeedback()
+    public async Task<UcciFeedback> GetFeedbackAsync(CancellationToken cancellationToken)
     {
-        string feedback = this.Process.StandardOutput.ReadLine();
-        this.Logger.WriteFeedback(feedback);
-        return feedback;
+        string feedback = await this.Process.StandardOutput.ReadLineAsync(cancellationToken).ConfigureAwait(false);
+        this.UcciLogger.WriteFeedback(feedback);
+
+        if (!UcciFeedback.TryParse(feedback, out UcciFeedback ucciFeedback))
+        {
+            Logger.LogError($"Can't parse feedback: {feedback}");
+            return null;
+        }
+        else
+        {
+            return ucciFeedback;
+        }
     }
 
-    public IEnumerable<string> DiscardBufferData()
+    public UcciFeedback GetFeedback()
     {
-        while (this.Process.StandardOutput.Peek() > -1)
+        string feedback = this.Process.StandardOutput.ReadLine();
+        this.UcciLogger.WriteFeedback(feedback);
+
+        if (!UcciFeedback.TryParse(feedback, out UcciFeedback ucciFeedback))
         {
-            yield return this.GetFeedback();
+            Logger.LogError($"Can't parse feedback: {feedback}");
+            return null;
+        }
+        else
+        {
+            return ucciFeedback;
         }
     }
 
@@ -65,6 +85,6 @@ public class LocalExecutableEngine : INativeUcciEngine
     public void Dispose()
     {
         this.Process?.Dispose();
-        this.Logger.Dispose();
+        this.UcciLogger.Dispose();
     }
 }
