@@ -8,8 +8,7 @@ public class UcciLogger
 {
     private readonly object obj = new();
 
-    private readonly FileStream fileStream =
-        new("app.log", FileMode.Append, FileAccess.Write, FileShare.Read);
+    private readonly FileStream fileStream;
 
     private readonly StreamWriter writer;
 
@@ -40,8 +39,8 @@ public class UcciLogger
         }
     }
 
-    public void Close()
+    public void Dispose()
     {
-        this.writer.Close();
+        this.writer.Dispose();
     }
 }

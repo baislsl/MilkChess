@@ -1,6 +1,8 @@
 using System.Collections.ObjectModel;
 using System.Text;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using MilkChess.Helper;
 using MilkChess.Model;
 using MilkChess.Ucci;
 using Command = MilkChess.Ucci.Command;
@@ -19,10 +21,10 @@ public class UcciEngine : IUcciEngine
     private readonly INativeUcciEngine NativeUcciEngine;
     private readonly ILogger Logger;
 
-    public UcciEngine(ILogger<UcciEngine> logger, UcciEngineConfig config, UcciLogger ucciLogger)
+    public UcciEngine(ILogger<UcciEngine> logger, IOptions<MilkChessConfig> config, UcciLogger ucciLogger)
     {
         this.Logger = logger;
-        this.NativeUcciEngine = new LocalExecutableEngine(config.LocalExecutableFile, config.Arguments, ucciLogger);
+        this.NativeUcciEngine = new LocalExecutableEngine(config.Value.Engine.Path, config.Value.Engine.Arguments, ucciLogger);
     }
 
     public UciFeedback StartUci(CancellationToken cancellationToken)
@@ -122,7 +124,7 @@ public class UcciEngine : IUcciEngine
 
     private string BuildGoCommand(GoOption option)
     {
-        StringBuilder cmd = new StringBuilder("go");
+        StringBuilder cmd = new StringBuilder(Command.Go);
 
         if (option.Ponder.HasValue)
         {
@@ -199,11 +201,12 @@ public class UcciEngine : IUcciEngine
 
     private void DiscardBufferData()
     {
-        // TODO:
         return;
-        foreach (var feedback in this.NativeUcciEngine.DiscardBufferData())
-        {
-            Logger.LogInformation($"[Discard] {feedback}");
-        }
+
+        // TODO:
+        // foreach (var feedback in this.NativeUcciEngine.DiscardBufferData())
+        // {
+        //     Logger.LogInformation($"[Discard] {feedback}");
+        // }
     }
 }

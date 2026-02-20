@@ -11,15 +11,6 @@ namespace MilkChess
 {
     public static class MauiProgram
     {
-        private const string LocalExecutableFile =
-            "/Users/baislsl/go/src/github.com/baislsl/UcciProxy/listener/listener";
-
-        private static Collection<string> Arguments = new Collection<string>
-        {
-            // "-addr", "192.168.31.6:8123",
-            //"-output", "/private/tmp/remote_engine.log"
-        };
-
         private const string ConfigResourcePath = "MilkChess.Resources.Config.appsettings.ini";
 
 
@@ -46,20 +37,13 @@ namespace MilkChess
             builder.Services.AddTransient<ChessModel>();
             builder.Services.AddTransient<MainPage>();
             builder.Services.AddTransient<ChessBoardViewModel>();
-            builder.Services.AddSingleton<HistoryManager>(x =>
-                new HistoryManager(x.GetRequiredService<ILogger<HistoryManager>>(),
-                    new ObservableCollection<Movement>()));
-            builder.Services.AddTransient<UcciEngineConfig>(_ =>
-                new UcciEngineConfig()
-                {
-                    LocalExecutableFile = LocalExecutableFile,
-                    Arguments = Arguments,
-                });
+            builder.Services.AddSingleton<HistoryManager>(service => new HistoryManager(
+                service.GetRequiredService<ILogger<HistoryManager>>(),
+                new ObservableCollection<Movement>()));
             builder.Services.AddTransient<UcciLogger>();
             builder.Services.AddTransient<UcciEngine>();
 
-            using var stream = Assembly.GetExecutingAssembly()
-                .GetManifestResourceStream(ConfigResourcePath);
+            using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(ConfigResourcePath);
             var config = new ConfigurationBuilder().AddIniStream(stream).Build();
             builder.Services.Configure<MilkChessConfig>(config);
 

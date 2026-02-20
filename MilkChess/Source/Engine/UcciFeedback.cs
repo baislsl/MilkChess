@@ -105,10 +105,18 @@ public class UcciFeedback
                 {
                     if (list[idx] != "pv")
                     {
+                        string key = list[idx];
                         if (list[idx] == "lowerbound" || list[idx] == "upperbound")
+                        {
                             idx++; // adapt for GGchess and XuanFeng
+                        }
+                        else if (list[idx] == "score" && idx + 1 < list.Length && list[idx + 1] == "cp")
+                        {
+                            idx++;
+                        }
+
                         if (idx + 1 >= list.Length) return false;
-                        feedback.InfoDict[list[idx]] = list[idx + 1];
+                        feedback.InfoDict[key] = list[idx + 1];
                         idx += 2;
                     }
                     else

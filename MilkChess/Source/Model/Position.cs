@@ -4,11 +4,9 @@ namespace MilkChess.Model;
 
 public sealed class Position
 {
-    private static readonly Position Empty = new Position(-1, -1);
-
     public readonly int X;
-    public readonly int Y;
 
+    public readonly int Y;
 
     public Position(int x, int y) : this(x, y, true)
     {

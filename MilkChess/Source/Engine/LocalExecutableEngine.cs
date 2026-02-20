@@ -7,16 +7,16 @@ namespace MilkChess.Engine;
 public class LocalExecutableEngine : INativeUcciEngine
 {
     private readonly string ExecutableFile;
-    private readonly Collection<string> Arguments;
-    private readonly UcciLogger logger;
+    private readonly List<string> Arguments;
+    private readonly UcciLogger Logger;
 
     private Process Process;
 
-    public LocalExecutableEngine(string executableFile, Collection<string> arguments, UcciLogger logger)
+    public LocalExecutableEngine(string executableFile, List<string> arguments, UcciLogger logger)
     {
         this.ExecutableFile = executableFile;
         this.Arguments = arguments;
-        this.logger = logger;
+        this.Logger = logger;
     }
 
     public void Initialize()
@@ -42,14 +42,14 @@ public class LocalExecutableEngine : INativeUcciEngine
 
     public void SendCommand(string command)
     {
-        this.logger.WriteCommand(command);
+        this.Logger.WriteCommand(command);
         this.Process.StandardInput.WriteLine(command);
     }
 
     public string GetFeedback()
     {
         string feedback = this.Process.StandardOutput.ReadLine();
-        this.logger.WriteFeedback(feedback);
+        this.Logger.WriteFeedback(feedback);
         return feedback;
     }
 
@@ -65,5 +65,6 @@ public class LocalExecutableEngine : INativeUcciEngine
     public void Dispose()
     {
         this.Process?.Dispose();
+        this.Logger.Dispose();
     }
 }
