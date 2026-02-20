@@ -30,7 +30,7 @@ public class UcciEngine : IUcciEngine
         NativeUcciEngine.Initialize();
 
         this.SendCommand(Command.Ucci);
-        
+
         UciFeedback feedback = new UciFeedback();
         while (!cancellationToken.IsCancellationRequested && !feedback.ReceivedUcciOk)
         {
@@ -100,18 +100,18 @@ public class UcciEngine : IUcciEngine
             {
                 onInfoReceived?.Invoke(this, new InfoFeedback()
                 {
-                                Pv = feedback.InfoPv,
-                                Info = feedback.InfoDict,
+                    Pv = feedback.InfoPv,
+                    Info = feedback.InfoDict,
                 });
             }
             else if (feedback.Command == FeedbackCommand.BestMove)
             {
                 bestMove = new BestMove()
                 {
-                                BestMovement = feedback.BestMoveBestMovement,
-                                Ponder = feedback.BestMovePonder,
-                                Draw = feedback.BestMoveDraw,
-                                Resign = feedback.BestMoveResign,
+                    BestMovement = feedback.BestMoveBestMovement,
+                    Ponder = feedback.BestMovePonder,
+                    Draw = feedback.BestMoveDraw,
+                    Resign = feedback.BestMoveResign,
                 };
             }
         }

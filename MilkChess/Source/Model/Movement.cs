@@ -42,9 +42,9 @@ public class MovementColorConvertor : IMultiValueConverter
 
         if (values[0] is int && values[1] is int)
         {
-            return (int) values[0] == (int) values[1]
-                            ? Colors.LightGray
-                            : Colors.LightBlue;
+            return (int)values[0] == (int)values[1]
+                ? Colors.LightGray
+                : Colors.LightBlue;
         }
 
         throw new ArgumentException($"invalid value {values[0]?.GetType()} - {values[1]?.GetType()}");

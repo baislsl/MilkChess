@@ -17,7 +17,7 @@ public static class Constants
 
     public static List<string> RedhorizontalCoordinate = new List<string>
     {
-                    "一", "二", "三", "四", "五", "六", "七", "八", "九",
+        "一", "二", "三", "四", "五", "六", "七", "八", "九",
     };
 
     public const string BlackHorizontalCoordinate = "123456789";
@@ -29,7 +29,7 @@ public static class Constants
     public const string ManualActionPan = "平";
 
     public const string PositionProportionalFirst = "前";
-    
+
     public const string PositionProportionalLast = "后";
 }
 
@@ -44,7 +44,7 @@ public static class Command
     public const string Position = "position";
 
     public const string Go = "go";
-    
+
     public const string Stop = "stop";
 
     public const string Quit = "quit";

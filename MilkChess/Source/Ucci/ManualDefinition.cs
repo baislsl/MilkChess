@@ -33,8 +33,8 @@ public static class MovementExtension
     private static string GetChineseXColorNumber(int x, Color color)
     {
         return color == Color.RED
-                        ? GetChineseColorNumber(8 - x, color)
-                        : GetChineseColorNumber(x, color);
+            ? GetChineseColorNumber(8 - x, color)
+            : GetChineseColorNumber(x, color);
     }
 
     public static string ToUnifyString(this Movement movement)
@@ -46,7 +46,7 @@ public static class MovementExtension
     {
         position = null;
         if (unifyString.Length != 2) return false;
-        
+
         int x = unifyString[0] - XArixs[0], y = unifyString[1] - YArixs[0];
         if (!Position.IsLegalXY(x, y)) return false;
 
@@ -88,8 +88,8 @@ public static class MovementExtension
 
         movement = new Movement()
         {
-                        From = from,
-                        To = to,
+            From = from,
+            To = to,
         };
 
         return true;
@@ -103,7 +103,7 @@ public static class MovementExtension
 
         // Action, NewCoordinate
         int dx = movement.To.X - movement.From.X,
-                        dy = movement.To.Y - movement.From.Y;
+            dy = movement.To.Y - movement.From.Y;
 
         if (movement.MovedChess.Color == Color.BLACK)
         {
@@ -167,12 +167,12 @@ public static class MovementExtension
 
             header = (rank == 0 && movement.ExecutedColor == Color.BLACK) ||
                      (rank == 1 && movement.ExecutedColor == Color.RED)
-                            ? PositionProportionalFirst
-                            : PositionProportionalLast;
+                ? PositionProportionalFirst
+                : PositionProportionalLast;
         }
 
         return string.IsNullOrEmpty(header)
-                        ? $"{chessName}{XCoordinate}{action}{newCoordinate}"
-                        : $"{header}{chessName}{action}{newCoordinate}";
+            ? $"{chessName}{XCoordinate}{action}{newCoordinate}"
+            : $"{header}{chessName}{action}{newCoordinate}";
     }
 }

@@ -9,8 +9,7 @@ namespace MilkChess.Model;
 public class ChessModel : IChessBoard
 {
     public List<List<Chess>> board { get; set; }
-
-
+    
     public ChessModel()
     {
         this.InternalReset();

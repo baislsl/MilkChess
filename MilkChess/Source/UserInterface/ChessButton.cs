@@ -7,7 +7,7 @@ namespace MilkChess.UserInterface;
 public class ChessButton : ImageButton
 {
     private Chess _chess;
-    
+
     public readonly Position Position;
 
     public Chess Chess
@@ -34,10 +34,10 @@ public class ChessButton : ImageButton
     {
         this.Source = _chess?.DrawableResource();
         AbsoluteLayout.SetLayoutBounds(this, new Rect(
-                        Position.GetAbsoluteCoordinateX(),
-                        Position.GetAbsoluteCoordinateY(),
-                        UIConstants.ChessSize,
-                        UIConstants.ChessSize));
+            Position.GetAbsoluteCoordinateX(),
+            Position.GetAbsoluteCoordinateY(),
+            UIConstants.ChessSize,
+            UIConstants.ChessSize));
         AbsoluteLayout.SetLayoutFlags(this, AbsoluteLayoutFlags.None);
     }
 }

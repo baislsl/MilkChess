@@ -7,7 +7,7 @@ public static class MiddlewareHelper<T>
     public delegate EventHandler<T> EventHandlerMiddleware(EventHandler<T> eventHandler);
 
     public static EventHandler<T> BuildEventHandler(EventHandler<T> eventHandler,
-                    params EventHandlerMiddleware[] middleware)
+        params EventHandlerMiddleware[] middleware)
     {
         for (int i = middleware.Length - 1; i >= 0; i--)
         {

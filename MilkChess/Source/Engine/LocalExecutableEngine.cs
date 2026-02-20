@@ -23,9 +23,9 @@ public class LocalExecutableEngine : INativeUcciEngine
     {
         var startInfo = new ProcessStartInfo()
         {
-                        FileName = this.ExecutableFile,
-                        RedirectStandardInput = true,
-                        RedirectStandardOutput = true,
+            FileName = this.ExecutableFile,
+            RedirectStandardInput = true,
+            RedirectStandardOutput = true,
         };
 
         if (Arguments?.Count > 0)
@@ -60,7 +60,6 @@ public class LocalExecutableEngine : INativeUcciEngine
             yield return this.GetFeedback();
         }
     }
-
 
 
     public void Dispose()

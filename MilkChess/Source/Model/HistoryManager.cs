@@ -23,7 +23,7 @@ public class HistoryManager
     public IList<Movement> Movements { get; private set; }
 
     private int Cursor;
-    
+
     private readonly ILogger Logger;
 
     public Movement LastMovement

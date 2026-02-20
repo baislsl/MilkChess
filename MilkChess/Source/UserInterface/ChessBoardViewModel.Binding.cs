@@ -65,20 +65,15 @@ public partial class ChessBoardViewModel
 
     public ObservableCollection<Movement> HistoryMovements => (ObservableCollection<Movement>)HistoryManager.Movements;
 
-    [ObservableProperty]
-    private Color _switchToStopModeColor;
+    [ObservableProperty] private Color _switchToStopModeColor;
 
-    [ObservableProperty]
-    private Color _switchToAnalyzeModeColor;
+    [ObservableProperty] private Color _switchToAnalyzeModeColor;
 
-    [ObservableProperty]
-    private Color _switchToBlackAutoModeColor;
+    [ObservableProperty] private Color _switchToBlackAutoModeColor;
 
-    [ObservableProperty]
-    private Color _switchToRedAutoModeColor;
+    [ObservableProperty] private Color _switchToRedAutoModeColor;
 
-    [ObservableProperty]
-    private Color _switchToAutoModeColor;
+    [ObservableProperty] private Color _switchToAutoModeColor;
 
     // Compiler will throw error result if I remove this unused fields.
     // This seems to be the compiler bug.

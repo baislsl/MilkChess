@@ -57,11 +57,11 @@ public class ForsythEdwardsNotation
 
         forsythEdwardsNotation = new ForsythEdwardsNotation()
         {
-                        PiecePlacement = new List<string>(piecePalcement),
-                        HalfmoveClock = halfmoveClock,
-                        FullmoveNumber = fullmoveNumber,
-                        Moves = move,
-                        ActiveColor = data[1] == "w" ? Color.RED : Color.BLACK,
+            PiecePlacement = new List<string>(piecePalcement),
+            HalfmoveClock = halfmoveClock,
+            FullmoveNumber = fullmoveNumber,
+            Moves = move,
+            ActiveColor = data[1] == "w" ? Color.RED : Color.BLACK,
         };
 
         return true;
@@ -114,13 +114,13 @@ public static class ForsythEdwardsNotationExtension
 {
     private static Dictionary<string, Type> SymbolToChess = new Dictionary<string, Type>
     {
-                    {ChessDefinition.Advisor.Symbol, typeof(Advisor)},
-                    {ChessDefinition.Pawn.Symbol, typeof(Pawn)},
-                    {ChessDefinition.Bishop.Symbol, typeof(Bishop)},
-                    {ChessDefinition.King.Symbol, typeof(King)},
-                    {ChessDefinition.Rook.Symbol, typeof(Rook)},
-                    {ChessDefinition.Knight.Symbol, typeof(Knight)},
-                    {ChessDefinition.Cannon.Symbol, typeof(Cannon)},
+        { ChessDefinition.Advisor.Symbol, typeof(Advisor) },
+        { ChessDefinition.Pawn.Symbol, typeof(Pawn) },
+        { ChessDefinition.Bishop.Symbol, typeof(Bishop) },
+        { ChessDefinition.King.Symbol, typeof(King) },
+        { ChessDefinition.Rook.Symbol, typeof(Rook) },
+        { ChessDefinition.Knight.Symbol, typeof(Knight) },
+        { ChessDefinition.Cannon.Symbol, typeof(Cannon) },
     };
 
     private static string ToFenSymbol(this Chess chess)
@@ -136,7 +136,7 @@ public static class ForsythEdwardsNotationExtension
     }
 
     public static bool AdoptForsythEdwardsNotation(this IChessBoardContext chessBoardContext,
-                    string forsythEdwardsNotation)
+        string forsythEdwardsNotation)
     {
         if (ForsythEdwardsNotation.ParseString(forsythEdwardsNotation, out var fen))
         {
@@ -147,7 +147,7 @@ public static class ForsythEdwardsNotationExtension
     }
 
     public static bool AdoptForsythEdwardsNotation(this IChessBoardContext chessBoardContext,
-                    ForsythEdwardsNotation forsythEdwardsNotation)
+        ForsythEdwardsNotation forsythEdwardsNotation)
     {
         for (int row = 0; row < ChessBoardHeight; row++)
         {
@@ -160,19 +160,19 @@ public static class ForsythEdwardsNotationExtension
                     for (var counter = '0'; counter < cc; counter++)
                     {
                         chessBoardContext.SetChessAtPosition(null, new Position(column++, ChessBoardHeight - 1 - row),
-                                        out _);
+                            out _);
                     }
                 }
                 else if (SymbolToChess.ContainsKey(cc.ToString().ToUpper()))
                 {
                     Color color = Char.IsLower(cc) ? Color.BLACK : Color.RED;
                     Type type = SymbolToChess[cc.ToString().ToUpper()];
-                    Chess chess = (Chess) type
-                                    .GetConstructor(new Type[] {typeof(Color)})
-                                    .Invoke(new object[] {color});
+                    Chess chess = (Chess)type
+                        .GetConstructor(new Type[] { typeof(Color) })
+                        .Invoke(new object[] { color });
 
                     chessBoardContext.SetChessAtPosition(chess, new Position(column++, ChessBoardHeight - 1 - row),
-                                    out _);
+                        out _);
                 }
                 else
                 {
@@ -222,8 +222,8 @@ public static class ForsythEdwardsNotationExtension
 
         return new ForsythEdwardsNotation
         {
-                        PiecePlacement = piecePlacement,
-                        ActiveColor = chessBoardContext.HistoryManager.ExecutionTurn
+            PiecePlacement = piecePlacement,
+            ActiveColor = chessBoardContext.HistoryManager.ExecutionTurn
         };
     }
 }

@@ -91,7 +91,7 @@ public class Bishop : Chess
     public override ChessDefinition ChessDefinition => ChessDefinition.Bishop;
 
     public Bishop(Color color)
-                    : base(color)
+        : base(color)
     {
     }
 }

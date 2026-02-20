@@ -11,7 +11,7 @@ public class JsonChessManualTranslator : IChessManualTranslator
         ChessModel chessModel = new ChessModel();
 
         XmlSerializer serializer = new XmlSerializer(typeof(UnifyChessHistory));
-        UnifyChessHistory chessHistory = (UnifyChessHistory) serializer.Deserialize(file);
+        UnifyChessHistory chessHistory = (UnifyChessHistory)serializer.Deserialize(file);
 
         chessBoardContext.HistoryManager.Reset();
 
@@ -31,7 +31,7 @@ public class JsonChessManualTranslator : IChessManualTranslator
         Iterator.IterateOverChessBoard(position =>
         {
             chessBoardContext.SetChessAtPosition(chessModel.GetChessAtPosition(position), position,
-                            out _);
+                out _);
         });
     }
 
@@ -47,9 +47,9 @@ public class JsonChessManualTranslator : IChessManualTranslator
             counter++;
             unifyChessHistory.records.Add(new Record()
             {
-                            Move = movement.ToUnifyString(),
-                            Count = counter,
-                            ViewableString = movement.ChineseViewableString
+                Move = movement.ToUnifyString(),
+                Count = counter,
+                ViewableString = movement.ChineseViewableString
             });
         }
 
