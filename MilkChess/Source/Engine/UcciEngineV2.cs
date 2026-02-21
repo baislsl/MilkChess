@@ -133,11 +133,9 @@ public partial class UcciEngineV2 : ObservableObject, IUcciEngineV2
                     .ListenEngineFeedbackAsync(cancellationToken, chessBoardContext, onInfoReceived)
                     .ConfigureAwait(false);
 
-                if (!cancellationToken.IsCancellationRequested)
-                {
-                    // !IsCancellationRequested means engine return best move and stop by itself
-                    onBestMovementReceived?.Invoke(bestmove);
-                }
+                cancellationToken.ThrowIfCancellationRequested();
+
+                onBestMovementReceived?.Invoke(bestmove);
             }
         }, cancellationToken);
     }
@@ -185,18 +183,19 @@ public partial class UcciEngineV2 : ObservableObject, IUcciEngineV2
             var bestmove = await this.ListenEngineFeedbackAsync(cancellationToken, chessBoardContext, onInfoReceived)
                 .ConfigureAwait(false);
 
-            if (!cancellationToken.IsCancellationRequested)
-            {
-                // !IsCancellationRequested means engine return best move and stop by itself
-                onBestMovementReceived?.Invoke(bestmove);
+            cancellationToken.ThrowIfCancellationRequested();
 
-                this.State = EngineState.Ready;
-                this.cancellationTokenSource = null;
-                this.thinkingTask = null;
-            }
+            // !IsCancellationRequested means engine return best move and stop by itself
+            onBestMovementReceived?.Invoke(bestmove);
+
+            this.State = EngineState.Ready;
+            this.cancellationTokenSource = null;
+            this.thinkingTask = null;
+
         }, cancellationToken);
     }
 
+    // return null if canceled
     public async Task<BestMove> ListenEngineFeedbackAsync(
         CancellationToken cancellationToken,
         IChessBoardContext chessBoardContext,
@@ -213,12 +212,6 @@ public partial class UcciEngineV2 : ObservableObject, IUcciEngineV2
             catch (Exception ex) when (ExceptionUtil.GetInnerMostException(ex) is TaskCanceledException)
             {
                 Logger.LogInformation("GetFeedbackAsync cancelled.");
-                break;
-            }
-            catch (Exception ex) when (ExceptionUtil.GetInnerMostException(ex) is InvalidOperationException)
-            {
-                // TODO: remove
-                Logger.LogWarning(ex, "Engine feedback possible reach to end");
                 break;
             }
             catch (Exception ex)
@@ -254,6 +247,7 @@ public partial class UcciEngineV2 : ObservableObject, IUcciEngineV2
         return null;
     }
 
+    // Stop from thinking state.
     public void Stop()
     {
         lock (this)
@@ -262,7 +256,6 @@ public partial class UcciEngineV2 : ObservableObject, IUcciEngineV2
         }
     }
 
-    // Stop from thinking state.
     private void StopInternal()
     {
         if (this.State != EngineState.Thinking)
@@ -271,6 +264,11 @@ public partial class UcciEngineV2 : ObservableObject, IUcciEngineV2
         }
 
         this.SendCommand(Command.Stop);
+
+        // Even if engine stop immediately after receiveing stop command, there may be remaing feedback in i/o.
+        // Wait for some time to ensure the remain output is flushed.
+        Thread.Sleep(this.Config.Engine.StopWaitingMilliseconds);
+
         this.cancellationTokenSource?.Cancel();
         try
         {
@@ -288,40 +286,7 @@ public partial class UcciEngineV2 : ObservableObject, IUcciEngineV2
         this.thinkingTask = null;
         this.cancellationTokenSource = null;
 
-        // Flush engine output.
-        // Even if engine stop immediately after receiveing stop command, there may be remaing feedback in i/o.
-        // Manually flush the feedback to ensure no buffer remained.
-        this.FlushEngineFeedback(TimeSpan.FromMilliseconds(this.Config.Engine.StopWaitingMilliseconds));
-
         this.State = EngineState.Ready;
-    }
-
-    private void FlushEngineFeedback(TimeSpan timeSpan)
-    {
-        CancellationTokenSource tokenSource = new CancellationTokenSource(timeSpan);
-
-        while (!tokenSource.IsCancellationRequested)
-        {
-            try
-            {
-                var feedback = this.NativeUcciEngine.GetFeedbackAsync(tokenSource.Token).Result;
-                Logger.LogInformation("Discard feedback {}.", feedback);
-            }
-            catch (Exception ex) when (ExceptionUtil.GetInnerMostException(ex) is TaskCanceledException)
-            {
-            }
-            catch (Exception ex) when (ExceptionUtil.GetInnerMostException(ex) is InvalidOperationException)
-            {
-                // TODO: remove
-                Logger.LogWarning(ex, "Engine feedback possible reach to end");
-                break;
-            }
-            catch (Exception ex)
-            {
-                Logger.LogError(ex, "Unexpected engine feedback error");
-                throw;
-            }
-        }
     }
 
     public void Quit()
