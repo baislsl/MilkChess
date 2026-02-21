@@ -134,7 +134,7 @@
                    Margin="2"
                    FontAttributes="Bold">
                 <Label.Text>
-                    <MultiBinding StringFormat="Score: {0}  EngineState: {1}">
+                    <MultiBinding StringFormat="Score: {0}  Engine: {1}">
                         <Binding Path="Score" />
                         <Binding Path="Engine.State" />
                     </MultiBinding>

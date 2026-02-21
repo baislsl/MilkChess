@@ -15,15 +15,19 @@ public class UcciLogger
     public UcciLogger(IOptions<MilkChessConfig> config)
     {
         string logFile = config.Value.Engine.Log;
-        this.fileStream = new FileStream(logFile, FileMode.Append, FileAccess.Write, FileShare.Read);
-        this.writer = new StreamWriter(fileStream) { AutoFlush = true };
+
+        if (!string.IsNullOrWhiteSpace(logFile))
+        {
+            this.fileStream = new FileStream(logFile, FileMode.Append, FileAccess.Write, FileShare.Read);
+            this.writer = new StreamWriter(fileStream) { AutoFlush = true };
+        }
     }
 
     public void WriteCommand(string message)
     {
         lock (obj)
         {
-            this.writer.WriteLine(
+            this.writer?.WriteLine(
                 $"{DateTime.Now:yyyy-MM-dd HH:mm:ss} [Command] {message}"
             );
         }
@@ -33,7 +37,7 @@ public class UcciLogger
     {
         lock (obj)
         {
-            this.writer.WriteLine(
+            this.writer?.WriteLine(
                 $"{DateTime.Now:yyyy-MM-dd HH:mm:ss} [Feedback] {message}"
             );
         }
@@ -41,6 +45,6 @@ public class UcciLogger
 
     public void Dispose()
     {
-        this.writer.Dispose();
+        this.writer?.Dispose();
     }
 }

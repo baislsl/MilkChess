@@ -58,10 +58,7 @@ public abstract class Chess : ICloneable
 
     public Color Color { get; set; }
 
-    public string ChineseName
-    {
-        get { return this.Color == Color.RED ? ChessDefinition.RName : ChessDefinition.BName; }
-    }
+    public string ChineseName => this.Color == Color.RED ? ChessDefinition.RName : ChessDefinition.BName;
 
     public Chess()
     {
@@ -81,6 +78,11 @@ public abstract class Chess : ICloneable
     {
         return this.MemberwiseClone();
     }
+
+    public virtual bool IsValidPosition(Position position)
+    {
+        return true;
+    }
 }
 
 /**
@@ -93,6 +95,11 @@ public class Bishop : Chess
     public Bishop(Color color)
         : base(color)
     {
+    }
+
+    public override bool IsValidPosition(Position position)
+    {
+        return position.IsLegalBiShopPosition(this.Color);
     }
 }
 
@@ -116,6 +123,11 @@ public class King : Chess
     public King(Color color) : base(color)
     {
     }
+
+    public override bool IsValidPosition(Position position)
+    {
+        return position.IsLegalKingPosition(this.Color);
+    }
 }
 
 // 马
@@ -135,6 +147,11 @@ public class Advisor : Chess
 
     public Advisor(Color color) : base(color)
     {
+    }
+
+    public override bool IsValidPosition(Position position)
+    {
+        return position.IsLegalAdvisorPosition(this.Color);
     }
 }
 

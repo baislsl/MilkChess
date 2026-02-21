@@ -20,6 +20,8 @@ public class Engine
     public string Log { get; set; }
 
     public int ConnectionTimeoutSeconds { get; set; }
+
+    public int StopWaitingMilliseconds { get; set; }
 }
 
 public class PathDefinition

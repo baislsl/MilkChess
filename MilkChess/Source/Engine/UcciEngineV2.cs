@@ -14,15 +14,18 @@ public partial class UcciEngineV2 : ObservableObject, IUcciEngineV2
     [ObservableProperty] private EngineState state = EngineState.Disconnected;
 
     private readonly INativeUcciEngine NativeUcciEngine;
+    private readonly MilkChessConfig Config;
     private readonly ILogger Logger;
 
     private CancellationTokenSource cancellationTokenSource;
     private Task thinkingTask;
 
-    public UcciEngineV2(ILogger<UcciEngineV2> logger, LocalExecutableEngine localExecutableEngine)
+    public UcciEngineV2(ILogger<UcciEngineV2> logger, LocalExecutableEngine localExecutableEngine,
+        IOptions<MilkChessConfig> config)
     {
         this.Logger = logger;
         this.NativeUcciEngine = localExecutableEngine;
+        this.Config = config.Value;
     }
 
     public UciFeedback StartUci(CancellationToken cancellationToken)
@@ -94,60 +97,140 @@ public partial class UcciEngineV2 : ObservableObject, IUcciEngineV2
         throw new NotImplementedException();
     }
 
-    public BestMove Eval(GoOption option, IChessBoard chessBoard, CancellationToken cancellationToken)
+    // Execute forever at a new thread.
+    public void ExecuteForever(
+        GoOption option,
+        IChessBoardContext chessBoardContext,
+        Action<InfoFeedback> onInfoReceived,
+        Action<BestMove> onBestMovementReceived)
     {
-        throw new NotImplementedException();
+        this.State = EngineState.Thinking;
+        this.cancellationTokenSource = new CancellationTokenSource();
+
+        var cancellationToken = this.cancellationTokenSource.Token;
+
+        this.thinkingTask = Task.Factory.StartNew(async () =>
+        {
+            while (!cancellationToken.IsCancellationRequested)
+            {
+                this.SetFenPosition(chessBoardContext);
+                this.SendCommand(this.BuildGoCommand(option));
+
+                var bestmove = await this
+                    .ListenEngineFeedbackAsync(cancellationToken, chessBoardContext, onInfoReceived)
+                    .ConfigureAwait(false);
+
+                if (!cancellationToken.IsCancellationRequested)
+                {
+                    // !IsCancellationRequested means engine return best move and stop by itself
+                    onBestMovementReceived?.Invoke(bestmove);
+                }
+            }
+        }, cancellationToken);
     }
 
+    // Execute one step at a new thread.
+    public void ExecuteOnce(
+        GoOption option,
+        IChessBoardContext chessBoardContext,
+        Action<InfoFeedback> onFeedbackReceived,
+        Action<BestMove> onBestMovementReceived)
+    {
+        this.GoInternal(option, chessBoardContext, onFeedbackReceived, onBestMovementReceived);
+    }
+
+    // Go infinite for current chess board at a new thread.
     public void GoInfinite(GoOption option,
         IChessBoardContext chessBoardContext,
-        Action<InfoFeedback> onInfoReceived)
+        Action<InfoFeedback> onFeedbackReceived)
     {
-        BestMove bestMove = null;
+        this.GoInternal(option, chessBoardContext, onFeedbackReceived, null);
+    }
 
+    private void GoInternal(GoOption option,
+        IChessBoardContext chessBoardContext,
+        Action<InfoFeedback> onInfoReceived,
+        Action<BestMove> onBestMovementReceived)
+    {
         this.SetFenPosition(chessBoardContext);
-
         this.SendCommand(this.BuildGoCommand(option));
 
         this.State = EngineState.Thinking;
         this.cancellationTokenSource = new CancellationTokenSource();
 
-        this.thinkingTask = Task.Factory.StartNew(() =>
+        var cancellationToken = this.cancellationTokenSource.Token;
+        this.thinkingTask = Task.Factory.StartNew(async () =>
         {
-            while (!cancellationTokenSource.IsCancellationRequested)
+            var bestmove = await this.ListenEngineFeedbackAsync(cancellationToken, chessBoardContext, onInfoReceived)
+                .ConfigureAwait(false);
+
+            if (!cancellationToken.IsCancellationRequested)
             {
-                UcciFeedback feedback;
-                try
-                {
-                    feedback = this.NativeUcciEngine.GetFeedbackAsync(this.cancellationTokenSource.Token).Result;
-                }
-                catch (TaskCanceledException)
-                {
-                    Logger.LogInformation("GetFeedbackAsync cancelled.");
-                    return;
-                }
+                // !IsCancellationRequested means engine return best move and stop by itself
+                onBestMovementReceived?.Invoke(bestmove);
 
-                if (feedback == null)
-                {
-                    // Received Invalid feedback, sleep to avoid stuck.
-                    Logger.LogWarning("Getting invalid feedback");
-                    Thread.Sleep(20);
-                    continue;
-                }
-
-                if (feedback.Command == FeedbackCommand.Info && feedback.InfoPv?.Count > 0)
-                {
-                    var infoFeedback = new InfoFeedback()
-                    {
-                        Pv = feedback.InfoPv,
-                        Info = feedback.InfoDict,
-                    };
-
-                    this.PopulateIntoFeedback(infoFeedback, chessBoardContext);
-                    onInfoReceived?.Invoke(infoFeedback);
-                }
+                this.State = EngineState.Ready;
+                this.cancellationTokenSource = null;
+                this.thinkingTask = null;
             }
-        }, this.cancellationTokenSource.Token);
+        }, cancellationToken);
+    }
+
+    public async Task<BestMove> ListenEngineFeedbackAsync(
+        CancellationToken cancellationToken,
+        IChessBoardContext chessBoardContext,
+        Action<InfoFeedback> onInfoReceived)
+    {
+        while (!cancellationToken.IsCancellationRequested)
+        {
+            UcciFeedback feedback;
+            try
+            {
+                feedback = await this.NativeUcciEngine.GetFeedbackAsync(cancellationToken)
+                    .ConfigureAwait(false);
+            }
+            catch (Exception ex) when (ExceptionUtil.GetInnerMostException(ex) is TaskCanceledException)
+            {
+                Logger.LogInformation("GetFeedbackAsync cancelled.");
+                break;
+            }
+            catch (Exception ex) when (ExceptionUtil.GetInnerMostException(ex) is InvalidOperationException)
+            {
+                // TODO: remove
+                Logger.LogWarning(ex, "Engine feedback possible reach to end");
+                break;
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "GetFeedbackAsync error");
+                throw;
+            }
+
+            if (feedback == null)
+            {
+                // Received Invalid feedback, sleep to avoid stuck.
+                Logger.LogWarning("Getting invalid feedback");
+                Thread.Sleep(20);
+                continue;
+            }
+
+            if (feedback.Command == FeedbackCommand.Info && feedback.InfoPv?.Count > 0)
+            {
+                onInfoReceived.Invoke(this.ParseIntoFeedback(feedback, chessBoardContext));
+            }
+            else if (feedback.Command == FeedbackCommand.BestMove)
+            {
+                return new BestMove()
+                {
+                    BestMovement = feedback.BestMoveBestMovement,
+                    Ponder = feedback.BestMovePonder,
+                    Draw = feedback.BestMoveDraw,
+                    Resign = feedback.BestMoveResign,
+                };
+            }
+        }
+
+        return null;
     }
 
     // Stop from thinking state.
@@ -164,20 +247,51 @@ public partial class UcciEngineV2 : ObservableObject, IUcciEngineV2
         {
             this.thinkingTask?.Wait();
         }
-        catch (Exception e)
+        catch (Exception ex) when (ExceptionUtil.GetInnerMostException(ex) is TaskCanceledException)
         {
-            if (!(e is TaskCanceledException ||
-                  (e is AggregateException && ((AggregateException)e).InnerExceptions.Count == 1 &&
-                   ((AggregateException)e).InnerExceptions[0].InnerException is TaskCanceledException)))
-            {
-                Logger.LogError(e, "Unexpected engine stop error");
-            }
         }
-        finally
+        catch (Exception ex)
         {
-            this.thinkingTask = null;
-            this.cancellationTokenSource = null;
-            this.State = EngineState.Ready;
+            Logger.LogError(ex, "Unexpected engine stop error");
+            throw;
+        }
+
+        this.thinkingTask = null;
+        this.cancellationTokenSource = null;
+
+        // Flush engine output.
+        // Even if engine stop immediately after receiveing stop command, there may be remaing feedback in i/o.
+        // Manually flush the feedback to ensure no buffer remained.
+        this.FlushEngineFeedback(TimeSpan.FromMilliseconds(this.Config.Engine.StopWaitingMilliseconds));
+
+        this.State = EngineState.Ready;
+    }
+
+    private void FlushEngineFeedback(TimeSpan timeSpan)
+    {
+        CancellationTokenSource tokenSource = new CancellationTokenSource(timeSpan);
+
+        while (!tokenSource.IsCancellationRequested)
+        {
+            try
+            {
+                var feedback = this.NativeUcciEngine.GetFeedbackAsync(tokenSource.Token).Result;
+                Logger.LogInformation("Discard feedback {}.", feedback);
+            }
+            catch (Exception ex) when (ExceptionUtil.GetInnerMostException(ex) is TaskCanceledException)
+            {
+            }
+            catch (Exception ex) when (ExceptionUtil.GetInnerMostException(ex) is InvalidOperationException)
+            {
+                // TODO: remove
+                Logger.LogWarning(ex, "Engine feedback possible reach to end");
+                break;
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "Unexpected engine feedback error");
+                throw;
+            }
         }
     }
 
@@ -243,8 +357,19 @@ public partial class UcciEngineV2 : ObservableObject, IUcciEngineV2
         this.SendCommand($"{Command.Position} fen {chessBoardContext.BuildForsythEdwardsNotation().GetFenString()}");
     }
 
-    private void PopulateIntoFeedback(InfoFeedback feedback, IChessBoardContext chessBoardContext)
+    private InfoFeedback ParseIntoFeedback(UcciFeedback ucciFeedback, IChessBoardContext chessBoardContext)
     {
+        if (ucciFeedback.Command != FeedbackCommand.Info)
+        {
+            throw new Exception("Not info feedback command");
+        }
+
+        var feedback = new InfoFeedback()
+        {
+            Pv = ucciFeedback.InfoPv,
+            Info = ucciFeedback.InfoDict,
+        };
+
         Logger.LogDebug("[PopulateIntoFeedback] {}", feedback);
 
         if (feedback.Info.ContainsKey("score") &&
@@ -268,13 +393,11 @@ public partial class UcciEngineV2 : ObservableObject, IUcciEngineV2
 
             for (int i = 0; i < feedback.Pv.Count; i++)
             {
-                if (!MovementExtension.ParseMovementFromUnifyString(feedback.Pv[i], out Movement movement))
+                if (!tmpChessModel.ParseUnifyStringMovement(feedback.Pv[i], out Movement movement))
                 {
                     Logger.LogError("Error parsing movement {}", feedback.Pv[i]);
                     break;
                 }
-
-                tmpChessModel.PopulateMovement(movement);
 
                 predict.Append(" ").Append(movement.ChineseViewableString);
                 tmpChessModel.ApplyMovement(movement);
@@ -284,7 +407,7 @@ public partial class UcciEngineV2 : ObservableObject, IUcciEngineV2
             feedback.ViewableMovementList = predict.ToString();
         }
 
-        Logger.LogInformation("Finished HandleInfoFeedback");
+        return feedback;
     }
 }
 
@@ -308,7 +431,17 @@ internal interface IUcciEngineV2
 
     public void BanMoves(IEnumerable<string> banMoves, CancellationToken cancellationToken);
 
-    public BestMove Eval(GoOption option, IChessBoard chessBoard, CancellationToken cancellationToken);
+    public void ExecuteForever(
+        GoOption option,
+        IChessBoardContext chessBoardContext,
+        Action<InfoFeedback> onInfoReceived,
+        Action<BestMove> onBestMovementReceived);
+
+    public void ExecuteOnce(
+        GoOption option,
+        IChessBoardContext chessBoardContext,
+        Action<InfoFeedback> onInfoReceived,
+        Action<BestMove> onBestMovementReceived);
 
     public void GoInfinite(GoOption option,
         IChessBoardContext chessBoardContext,

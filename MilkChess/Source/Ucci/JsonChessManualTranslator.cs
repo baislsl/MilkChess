@@ -17,12 +17,11 @@ public class JsonChessManualTranslator : IChessManualTranslator
 
         foreach (var record in chessHistory.records)
         {
-            if (!MovementExtension.ParseMovementFromUnifyString(record.Move, out Movement movement))
+            if (!chessModel.ParseUnifyStringMovement(record.Move, out Movement movement))
             {
                 throw new ArgumentException($"Invalid move {record.Move}");
             }
 
-            chessModel.PopulateMovement(movement);
             chessModel.ApplyMovement(movement);
 
             chessBoardContext.HistoryManager.InsertMovement(movement);
