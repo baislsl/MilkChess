@@ -104,6 +104,19 @@ public partial class UcciEngineV2 : ObservableObject, IUcciEngineV2
         Action<InfoFeedback> onInfoReceived,
         Action<BestMove> onBestMovementReceived)
     {
+        lock (this)
+        {
+            this.ThrowIfNotReady();
+            this.ExecuteForeverInternal(option, chessBoardContext, onInfoReceived, onBestMovementReceived);
+        }
+    }
+
+    private void ExecuteForeverInternal(
+        GoOption option,
+        IChessBoardContext chessBoardContext,
+        Action<InfoFeedback> onInfoReceived,
+        Action<BestMove> onBestMovementReceived)
+    {
         this.State = EngineState.Thinking;
         this.cancellationTokenSource = new CancellationTokenSource();
 
@@ -136,7 +149,11 @@ public partial class UcciEngineV2 : ObservableObject, IUcciEngineV2
         Action<InfoFeedback> onFeedbackReceived,
         Action<BestMove> onBestMovementReceived)
     {
-        this.GoInternal(option, chessBoardContext, onFeedbackReceived, onBestMovementReceived);
+        lock (this)
+        {
+            this.ThrowIfNotReady();
+            this.GoInternal(option, chessBoardContext, onFeedbackReceived, onBestMovementReceived);
+        }
     }
 
     // Go infinite for current chess board at a new thread.
@@ -144,7 +161,11 @@ public partial class UcciEngineV2 : ObservableObject, IUcciEngineV2
         IChessBoardContext chessBoardContext,
         Action<InfoFeedback> onFeedbackReceived)
     {
-        this.GoInternal(option, chessBoardContext, onFeedbackReceived, null);
+        lock (this)
+        {
+            this.ThrowIfNotReady();
+            this.GoInternal(option, chessBoardContext, onFeedbackReceived, null);
+        }
     }
 
     private void GoInternal(GoOption option,
@@ -233,8 +254,16 @@ public partial class UcciEngineV2 : ObservableObject, IUcciEngineV2
         return null;
     }
 
-    // Stop from thinking state.
     public void Stop()
+    {
+        lock (this)
+        {
+            this.StopInternal();
+        }
+    }
+
+    // Stop from thinking state.
+    private void StopInternal()
     {
         if (this.State != EngineState.Thinking)
         {
@@ -352,7 +381,7 @@ public partial class UcciEngineV2 : ObservableObject, IUcciEngineV2
         this.NativeUcciEngine.SendCommand(command);
     }
 
-    public void SetFenPosition(IChessBoardContext chessBoardContext)
+    private void SetFenPosition(IChessBoardContext chessBoardContext)
     {
         this.SendCommand($"{Command.Position} fen {chessBoardContext.BuildForsythEdwardsNotation().GetFenString()}");
     }
@@ -408,6 +437,14 @@ public partial class UcciEngineV2 : ObservableObject, IUcciEngineV2
         }
 
         return feedback;
+    }
+
+    private void ThrowIfNotReady()
+    {
+        if (this.State != EngineState.Ready)
+        {
+            throw new Exception("Engine is not ready");
+        }
     }
 }
 

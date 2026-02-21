@@ -104,11 +104,6 @@ public partial class ChessBoardViewModel
                 option.Depth = this.Config.Engine.GoDepth;
                 Engine.ExecuteOnce(option, this, this.onFeedbackReceived, this.onBestMovementReceived);
             }
-            else
-            {
-                option.Depth = -1;
-                Engine.GoInfinite(option, this, this.onFeedbackReceived);
-            }
         }
     }
 
