@@ -1,24 +1,19 @@
-using System.Text;
-using Microsoft.Extensions.Configuration;
+using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.Extensions.Logging;
 using MilkChess.Engine;
-using MilkChess.Helper;
-using MilkChess.Model;
 using MilkChess.Ucci;
 
 namespace MilkChess.UserInterface;
 
 public partial class ChessBoardViewModel
 {
-    private UcciEngineV2 Engine;
+    [ObservableProperty] private UcciEngineV2 engine;
 
     private CancellationTokenSource GoCancellationTokenSource;
 
     private uint LastEngineRequestId = 0;
 
     private Task EngineExecutionTask;
-
-    private EngineInteractiveMode InteractiveMode = EngineInteractiveMode.StopMode;
 
     private void HandleInfoFeedback(InfoFeedback feedback)
     {
@@ -56,10 +51,20 @@ public partial class ChessBoardViewModel
         Application.Current.MainPage.Dispatcher.Dispatch(action);
     }
 
+    public void ConnectOrDisconnectEngine()
+    {
+        if (this.Engine == null)
+        {
+            this.InitializeUcciEngine();
+        }
+        else
+        {
+            this.DisconnectEngine();
+        }
+    }
+
     public void InitializeUcciEngine()
     {
-        if (Engine != null) return;
-
         Logger.LogInformation("Initailzing engine...");
         Engine = ServiceProvider.GetService<UcciEngineV2>();
 
@@ -119,7 +124,12 @@ public partial class ChessBoardViewModel
         };
 
         Engine.Stop();
-        EngineSuggestedMovements.Clear();
+
+        // Don't clear EngineSuggestedMovements ff simply stopping the engine
+        if (InteractiveMode != EngineInteractiveMode.StopMode)
+        {
+            EngineSuggestedMovements.Clear();
+        }
 
         if (InteractiveMode == EngineInteractiveMode.AnalyzeMode)
         {
@@ -138,9 +148,12 @@ public partial class ChessBoardViewModel
         Engine.Quit();
 
         Engine = null;
+
+        MovementIndicator.Reset();
+        EngineSuggestedMovements.Clear();
     }
 
-    private enum EngineInteractiveMode
+    public enum EngineInteractiveMode
     {
         StopMode,
         AnalyzeMode,

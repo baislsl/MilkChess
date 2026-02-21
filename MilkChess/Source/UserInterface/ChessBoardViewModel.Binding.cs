@@ -1,10 +1,9 @@
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
-using CommunityToolkit.Mvvm;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.Extensions.Logging;
+using MilkChess.Engine;
 using MilkChess.Helper;
 using MilkChess.Model;
 using Color = Microsoft.Maui.Graphics.Color;
@@ -14,28 +13,14 @@ namespace MilkChess.UserInterface;
 
 public partial class ChessBoardViewModel
 {
-    #region binding component
-
-    public event PropertyChangedEventHandler PropertyChanged;
-
-    #endregion
-
-    #region view model definition
+    public string ConnectOrDisconnectEngineText =>
+        this.Engine == null ? UIConstants.ConnectEngineText : UIConstants.DisconnectEngineText;
 
     public Color ScoreColor => this.Score > 0 ? Colors.Red : Colors.Black;
 
-    private int _score;
+    [ObservableProperty] private int _score;
 
-    public int Score
-    {
-        get => _score;
-        set
-        {
-            this._score = value;
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Score)));
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ScoreColor)));
-        }
-    }
+    [ObservableProperty] private EngineInteractiveMode interactiveMode = EngineInteractiveMode.AnalyzeMode;
 
     private bool _IsEngineAutoMoving;
 
@@ -47,12 +32,12 @@ public partial class ChessBoardViewModel
             if (value != _IsEngineAutoMoving)
             {
                 _IsEngineAutoMoving = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ResetCommand)));
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(MoveBackwardCommand)));
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(MoveForwardCommand)));
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(MoveToStartCommand)));
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(MoveToEndCommand)));
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ResetCommand)));
+                // PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ResetCommand)));
+                // PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(MoveBackwardCommand)));
+                // PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(MoveForwardCommand)));
+                // PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(MoveToStartCommand)));
+                // PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(MoveToEndCommand)));
+                // PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ResetCommand)));
             }
         }
     }
@@ -65,15 +50,25 @@ public partial class ChessBoardViewModel
 
     public ObservableCollection<Movement> HistoryMovements => (ObservableCollection<Movement>)HistoryManager.Movements;
 
-    [ObservableProperty] private Color _switchToStopModeColor;
+    public Color SwitchToStopModeColor => (this.InteractiveMode == EngineInteractiveMode.StopMode)
+        ? ActiveInteractiveModeColor
+        : InactiveInteractiveModeColor;
 
-    [ObservableProperty] private Color _switchToAnalyzeModeColor;
+    public Color SwitchToAnalyzeModeColor => (this.InteractiveMode == EngineInteractiveMode.AnalyzeMode)
+        ? ActiveInteractiveModeColor
+        : InactiveInteractiveModeColor;
 
-    [ObservableProperty] private Color _switchToBlackAutoModeColor;
+    public Color SwitchToBlackAutoModeColor => (this.InteractiveMode == EngineInteractiveMode.BlackAutoMode)
+        ? ActiveInteractiveModeColor
+        : InactiveInteractiveModeColor;
 
-    [ObservableProperty] private Color _switchToRedAutoModeColor;
+    public Color SwitchToRedAutoModeColor => (this.InteractiveMode == EngineInteractiveMode.RedAutoMode)
+        ? ActiveInteractiveModeColor
+        : InactiveInteractiveModeColor;
 
-    [ObservableProperty] private Color _switchToAutoModeColor;
+    public Color SwitchToAutoModeColor => (this.InteractiveMode == EngineInteractiveMode.AutoMode)
+        ? ActiveInteractiveModeColor
+        : InactiveInteractiveModeColor;
 
     // Compiler will throw error result if I remove this unused fields.
     // This seems to be the compiler bug.
@@ -81,8 +76,6 @@ public partial class ChessBoardViewModel
     public string ActionCount => default;
     public string Movements => default;
     public string Depth => default;
-
-    #endregion
 
     #region command definition
 
@@ -120,28 +113,16 @@ public partial class ChessBoardViewModel
             this.RefreshEngineCommandMiddleware(),
             this.CommonCommandMiddleware());
 
-    public ICommand ConnectToRemoteEngineCommand =>
+    public ICommand ConnectOrDisconnectEngineCommand =>
         CommandMiddlewareHelper.BuildCommand(
-            this.InitializeUcciEngine,
+            this.ConnectOrDisconnectEngine,
             this.CommonCommandMiddleware());
 
-    public ICommand DisconnectEngineCommand =>
+    public ICommand StopEngineCommand =>
         CommandMiddlewareHelper.BuildCommand(
-            this.DisconnectEngine,
-            this.CommonCommandMiddleware());
-
-    public ICommand InvokeBestMovementCommand =>
-        CommandMiddlewareHelper.BuildCommand(
-            new Command(this.InvokeBestMovement, () => !IsEngineAutoMoving),
-            this.AutoSaveChessManualMiddleware(),
+            () => this.SwitchInteractMode(EngineInteractiveMode.StopMode),
             this.RefreshEngineCommandMiddleware(),
             this.CommonCommandMiddleware());
-
-    public ICommand ReverseBoardCommand =>
-        CommandMiddlewareHelper.BuildCommand(
-            this.ReverseBoard,
-            this.CommonCommandMiddleware());
-
 
     public ICommand SwitchToAnalyzeModeCommand =>
         CommandMiddlewareHelper.BuildCommand(
@@ -159,6 +140,18 @@ public partial class ChessBoardViewModel
         CommandMiddlewareHelper.BuildCommand(
             () => this.SwitchInteractMode(EngineInteractiveMode.RedAutoMode),
             this.RefreshEngineCommandMiddleware(),
+            this.CommonCommandMiddleware());
+
+    public ICommand InvokeBestMovementCommand =>
+        CommandMiddlewareHelper.BuildCommand(
+            new Command(this.InvokeBestMovement, () => !IsEngineAutoMoving),
+            this.AutoSaveChessManualMiddleware(),
+            this.RefreshEngineCommandMiddleware(),
+            this.CommonCommandMiddleware());
+
+    public ICommand ReverseBoardCommand =>
+        CommandMiddlewareHelper.BuildCommand(
+            this.ReverseBoard,
             this.CommonCommandMiddleware());
 
     public ICommand SwitchToAutoModeCommand =>
@@ -228,5 +221,25 @@ public partial class ChessBoardViewModel
                 Logger.LogInformation($"Finished command {commandName}");
             }, command.CanExecute);
         };
+    }
+
+    partial void OnEngineChanged(UcciEngineV2 oldValue, UcciEngineV2 newValue)
+    {
+        OnPropertyChanged(nameof(EngineState));
+        OnPropertyChanged(nameof(ConnectOrDisconnectEngineText));
+    }
+
+    partial void OnScoreChanged(int oldValue, int newValue)
+    {
+        OnPropertyChanged(nameof(ScoreColor));
+    }
+
+    partial void OnInteractiveModeChanged(EngineInteractiveMode oldValue, EngineInteractiveMode newValue)
+    {
+        OnPropertyChanged(nameof(SwitchToStopModeColor));
+        OnPropertyChanged(nameof(SwitchToAnalyzeModeColor));
+        OnPropertyChanged(nameof(SwitchToAutoModeColor));
+        OnPropertyChanged(nameof(SwitchToRedAutoModeColor));
+        OnPropertyChanged(nameof(SwitchToBlackAutoModeColor));
     }
 }

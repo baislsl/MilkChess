@@ -78,7 +78,6 @@ public partial class ChessBoardViewModel : ObservableObject, IChessBoardContext
         CursorSelector = new CursorSelector(this, null, UIConstants.CursorBackgroundResource);
         MovementIndicator = new MovementIndicator(this);
         EngineSuggestedMovements = new ObservableCollection<PredictMovementTrace>();
-        this.ResetEngineModeColor();
     }
 
     public void AddToAbsoluteLayout(AbsoluteLayout layout)
@@ -206,13 +205,6 @@ public partial class ChessBoardViewModel : ObservableObject, IChessBoardContext
         }
     }
 
-    private void ResetEngineModeColor()
-    {
-        SwitchToAnalyzeModeColor = SwitchToRedAutoModeColor =
-            SwitchToBlackAutoModeColor = SwitchToAutoModeColor = InactiveInteractiveModeColor;
-    }
-
-
     private void SwitchInteractMode(EngineInteractiveMode mode)
     {
         if (this.InteractiveMode != mode)
@@ -220,24 +212,6 @@ public partial class ChessBoardViewModel : ObservableObject, IChessBoardContext
             Logger.LogInformation("Switch interactive mode {} -> {}", this.InteractiveMode, mode);
 
             this.InteractiveMode = mode;
-            this.ResetEngineModeColor();
-            switch (this.InteractiveMode)
-            {
-                case EngineInteractiveMode.AnalyzeMode:
-                    SwitchToAnalyzeModeColor = ActiveInteractiveModeColor;
-                    break;
-                case EngineInteractiveMode.AutoMode:
-                    SwitchToAutoModeColor = ActiveInteractiveModeColor;
-                    break;
-                case EngineInteractiveMode.RedAutoMode:
-                    SwitchToRedAutoModeColor = ActiveInteractiveModeColor;
-                    break;
-                case EngineInteractiveMode.BlackAutoMode:
-                    SwitchToBlackAutoModeColor = ActiveInteractiveModeColor;
-                    break;
-                default:
-                    throw new ArgumentException($"Unknown interactive mode {this.InteractiveMode}");
-            }
         }
     }
 

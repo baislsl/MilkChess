@@ -1,4 +1,5 @@
 using System.Text;
+using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MilkChess.Helper;
@@ -8,16 +9,15 @@ using Command = MilkChess.Ucci.Command;
 
 namespace MilkChess.Engine;
 
-public class UcciEngineV2 : IUcciEngineV2
+public partial class UcciEngineV2 : ObservableObject, IUcciEngineV2
 {
-    public EngineState State { get; set; } = EngineState.Disconnected;
+    [ObservableProperty] private EngineState state = EngineState.Disconnected;
 
     private readonly INativeUcciEngine NativeUcciEngine;
     private readonly ILogger Logger;
 
     private CancellationTokenSource cancellationTokenSource;
     private Task thinkingTask;
-
 
     public UcciEngineV2(ILogger<UcciEngineV2> logger, LocalExecutableEngine localExecutableEngine)
     {

@@ -44,11 +44,13 @@
                 <Button Grid.Row="2" Grid.Column="0" Text="To Start" Command="{Binding MoveToStartCommand}" />
                 <Button Grid.Row="2" Grid.Column="1" Text="To End" Command="{Binding  MoveToEndCommand}" />
 
-                <Button Grid.Row="3" Grid.Column="0" Text="ConnectEngine"
-                        Command="{Binding ConnectToRemoteEngineCommand}" />
-                <Button Grid.Row="3" Grid.Column="1" Text="DisconnectEngine"
-                        Command="{Binding DisconnectEngineCommand }" />
+                <Button Grid.Row="3" Grid.Column="0" Text="{Binding ConnectOrDisconnectEngineText}"
+                        Command="{Binding ConnectOrDisconnectEngineCommand}" />
 
+                <Button Grid.Row="3" Grid.Column="1"
+                        BackgroundColor="{Binding SwitchToStopModeColor}"
+                        Text="Stop"
+                        Command="{Binding StopEngineCommand }" />
                 <Button Grid.Row="4" Grid.Column="0"
                         BackgroundColor="{Binding SwitchToAnalyzeModeColor}"
                         Text="AnalyzeMode"
@@ -57,12 +59,10 @@
                         BackgroundColor="{Binding SwitchToAutoModeColor}"
                         Text="AutoMode"
                         Command="{Binding SwitchToAutoModeCommand }" />
-
                 <Button Grid.Row="5" Grid.Column="0"
                         BackgroundColor="{Binding SwitchToRedAutoModeColor}"
                         Text="RedAutoMode"
                         Command="{Binding SwitchToRedAutoModeCommand}" />
-
                 <Button Grid.Row="5" Grid.Column="1"
                         BackgroundColor="{Binding SwitchToBlackAutoModeColor}"
                         Text="BlackAutoMode"
@@ -129,12 +129,17 @@
             </VerticalStackLayout>
         </HorizontalStackLayout>
         <Grid Grid.Row="1" RowDefinitions="Auto,*">
-            <Label Text="{Binding Path = Score,
-                            StringFormat='Score: {0}  '}"
-                   TextColor="{Binding ScoreColor}"
-                   FontSize="26"
+            <Label TextColor="{Binding ScoreColor}"
+                   FontSize="20"
                    Margin="2"
-                   FontAttributes="Bold" />
+                   FontAttributes="Bold">
+                <Label.Text>
+                    <MultiBinding StringFormat="Score: {0}  EngineState: {1}">
+                        <Binding Path="Score" />
+                        <Binding Path="Engine.State" />
+                    </MultiBinding>
+                </Label.Text>
+            </Label>
             <ListView
                 Grid.Row="1"
                 Margin="2"

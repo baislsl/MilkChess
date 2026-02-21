@@ -41,11 +41,11 @@ public class MovementIndicator
         }
         else
         {
-            this.ClearMovement();
+            this.Reset();
         }
     }
 
-    public void ClearMovement()
+    public void Reset()
     {
         From.Position = null;
         To.Position = null;
