@@ -176,6 +176,7 @@ public partial class ChessBoardViewModel
         CommandMiddlewareHelper.BuildCommand(
             new Command<object>(this.SwitchToSelectedMovement),
             this.AutoSaveChessManualMiddleware(),
+            this.RefreshEngineCommandMiddleware(),
             this.CommonCommandMiddleware());
 
     #endregion
@@ -199,7 +200,6 @@ public partial class ChessBoardViewModel
         {
             return new Command<object>(_ =>
             {
-                this.Engine.Stop();
                 command.Execute(_);
                 RefreshUcciEngine();
             });

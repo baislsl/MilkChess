@@ -33,7 +33,7 @@ public static class Command
 
     public const string IsReady = "isready";
 
-    public const string SetOption = "setOption";
+    public const string SetOption = "setoption";
 
     public const string Position = "position";
 

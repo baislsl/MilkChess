@@ -73,9 +73,20 @@ public class UcciEngineV2 : IUcciEngineV2
         throw new Exception("IsReady receive no feedback");
     }
 
-    public void SetOption(string option, string config, CancellationToken cancellationToken)
+    public void SetOption(string name, string value, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        var builder = new StringBuilder();
+
+        builder.Append(Command.SetOption)
+            .Append(" name ")
+            .Append(name);
+
+        if (!string.IsNullOrEmpty(value))
+        {
+            builder.Append(" value ").Append(value);
+        }
+
+        this.SendCommand(builder.ToString());
     }
 
     public void BanMoves(IEnumerable<string> banMoves, CancellationToken cancellationToken)

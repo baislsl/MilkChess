@@ -2,25 +2,29 @@ namespace MilkChess.Helper;
 
 public class MilkChessConfig
 {
-    public EngineConfig Engine { get; set; }
+    public Engine Engine { get; set; }
 
-    public PathDefinitionConfig PathDefinition { get; set; }
+    public Dictionary<string, string> EngineOption { get; set; } = new();
 
-    public class EngineConfig
-    {
-        public string Path { get; set; }
+    public PathDefinition PathDefinition { get; set; }
+}
 
-        public List<string> Arguments { get; set; }
+public class Engine
+{
+    public string Path { get; set; }
 
-        public int GoDepth { get; set; }
+    public List<string> Arguments { get; set; }
 
-        public string Log { get; set; }
-    }
+    public int GoDepth { get; set; }
 
-    public class PathDefinitionConfig
-    {
-        public string Root { get; set; }
+    public string Log { get; set; }
 
-        public string DataPath { get; set; }
-    }
+    public int ConnectionTimeoutSeconds { get; set; }
+}
+
+public class PathDefinition
+{
+    public string Root { get; set; }
+
+    public string DataPath { get; set; }
 }

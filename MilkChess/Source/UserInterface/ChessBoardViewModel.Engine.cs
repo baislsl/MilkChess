@@ -63,7 +63,8 @@ public partial class ChessBoardViewModel
         Logger.LogInformation("Initailzing engine...");
         Engine = ServiceProvider.GetService<UcciEngineV2>();
 
-        CancellationTokenSource cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+        CancellationTokenSource cancellationTokenSource =
+            new CancellationTokenSource(TimeSpan.FromSeconds(this.Config.Engine.ConnectionTimeoutSeconds));
 
         var startUciFeedback = Engine.StartUci(cancellationTokenSource.Token); // EngineState = Connected
 
@@ -74,6 +75,14 @@ public partial class ChessBoardViewModel
         else
         {
             Logger.LogInformation($"init engine success");
+        }
+
+        if (this.Config.EngineOption?.Count > 0)
+        {
+            foreach (var option in this.Config.EngineOption)
+            {
+                Engine.SetOption(option.Key, option.Value, cancellationTokenSource.Token);
+            }
         }
 
         Engine.WaitToReady(cancellationTokenSource.Token); // EngineState = Ready

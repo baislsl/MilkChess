@@ -56,7 +56,7 @@ public class LocalExecutableEngine : INativeUcciEngine
 
         if (!UcciFeedback.TryParse(feedback, out UcciFeedback ucciFeedback))
         {
-            Logger.LogError($"Can't parse feedback: {feedback}");
+            Logger.LogError("Can't parse feedback: {Feedback}", feedback);
             return null;
         }
         else
@@ -72,7 +72,7 @@ public class LocalExecutableEngine : INativeUcciEngine
 
         if (!UcciFeedback.TryParse(feedback, out UcciFeedback ucciFeedback))
         {
-            Logger.LogError($"Can't parse feedback: {feedback}");
+            Logger.LogError("Can't parse feedback: {Feedback}", feedback);
             return null;
         }
         else
