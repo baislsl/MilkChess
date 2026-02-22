@@ -18,8 +18,11 @@ public class UIConstants
     public const int VerticalOffset = 39;
     public const int ChessSize = 55;
 
-    public const string ConnectEngineText = "ConnectEngine";
-    public const string DisconnectEngineText = "DisconnectEngine";
+    public const string ConnectedEngineText = "ConnectEngine";
+    public const string DisconnectedEngineText = "DisconnectEngine";
+
+    public const string StopEngineText = "StopEngine";
+    public const string EngineIdleStateText = "Idle";
 }
 
 internal static class UserInterfaceHelper

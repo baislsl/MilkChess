@@ -36,21 +36,21 @@
                     <ColumnDefinition />
                 </Grid.ColumnDefinitions>
                 <Button Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Text="Reset"
-                        Command="{Binding ResetActionCommand}" />
+                        Command="{Binding ResetCommand}" />
 
-                <Button Grid.Row="1" Grid.Column="0" Text="Go back" Command="{Binding MoveBackwardActionCommand}" />
-                <Button Grid.Row="1" Grid.Column="1" Text="Move forward" Command="{Binding MoveForwardActionCommand}" />
+                <Button Grid.Row="1" Grid.Column="0" Text="Go back" Command="{Binding MoveBackwardCommand}" />
+                <Button Grid.Row="1" Grid.Column="1" Text="Move forward" Command="{Binding MoveForwardCommand}" />
 
-                <Button Grid.Row="2" Grid.Column="0" Text="To Start" Command="{Binding MoveToStartActionCommand}" />
-                <Button Grid.Row="2" Grid.Column="1" Text="To End" Command="{Binding  MoveToEndActionCommand}" />
+                <Button Grid.Row="2" Grid.Column="0" Text="To Start" Command="{Binding MoveToStartCommand}" />
+                <Button Grid.Row="2" Grid.Column="1" Text="To End" Command="{Binding  MoveToEndCommand}" />
 
                 <Button Grid.Row="3" Grid.Column="0" Text="{Binding ConnectOrDisconnectEngineText}"
-                        Command="{Binding ConnectOrDisconnectEngineActionCommand}" />
+                        Command="{Binding ConnectOrDisconnectEngineCommand}" />
 
                 <Button Grid.Row="3" Grid.Column="1"
-                        BackgroundColor="{Binding SwitchToStopModeColor}"
-                        Text="Stop"
-                        Command="{Binding SwtichToStopModeCommand }" />
+                        BackgroundColor="{Binding SwitchToIdleModeColor}"
+                        Text="{Binding SwitchToIdleModeText}"
+                        Command="{Binding StopEngineCommand }" />
                 <Button Grid.Row="4" Grid.Column="0"
                         BackgroundColor="{Binding SwitchToAnalyzeModeColor}"
                         Text="AnalyzeMode"
@@ -69,13 +69,13 @@
                         Command="{Binding SwitchToBlackAutoModeCommand}" />
 
                 <Button Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2" Text="UseBestMovement"
-                        Command="{Binding InvokeBestMovementActionCommand}" />
+                        Command="{Binding InvokeBestMovementCommand}" />
 
                 <Button Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="2" Text="RotateBoard"
-                        Command="{Binding ReverseBoardActionCommand}" />
+                        Command="{Binding ReverseBoardCommand}" />
 
                 <Button Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="2" Text="SaveLayout"
-                        Command="{Binding SaveChessManualActionCommand}" />
+                        Command="{Binding SaveChessManualCommand}" />
             </Grid>
             <VerticalStackLayout
                 WidthRequest="300">
@@ -97,7 +97,7 @@
                         <DataTemplate>
                             <ViewCell>
                                 <Button
-                                    Command="{Binding Source={x:Reference ChessBoardPage}, Path=ChessBoardViewModel.SwitchToSelectedMovementCommand}"
+                                    Command="{Binding Source={x:Reference ChessBoardPage}, Path=ChessBoardViewModel.SwitchToSelectedMovementActionCommand}"
                                     CommandParameter="{Binding}"
                                     VerticalOptions="Fill"
                                     HorizontalOptions="Start"

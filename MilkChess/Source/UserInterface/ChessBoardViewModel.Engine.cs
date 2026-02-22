@@ -8,12 +8,8 @@ namespace MilkChess.UserInterface;
 
 public partial class ChessBoardViewModel
 {
-    [ObservableProperty] [NotifyCanExecuteChangedFor(nameof(ResetActionCommand))]
-    private UcciEngine engine;
-
-    private CancellationTokenSource EngineCancellationTokenSource;
-
-    private Task EngineExecutionTask;
+    [ObservableProperty]
+    private UcciEngine _engine;
 
     private void DispatchAction(Action action)
     {
@@ -67,6 +63,8 @@ public partial class ChessBoardViewModel
 
         Engine.WaitToReady(cancellationTokenSource.Token); // EngineState = Ready
 
+        this.InteractiveMode = EngineInteractiveMode.IdleMode;
+
         RefreshUcciEngine();
     }
 
@@ -77,7 +75,7 @@ public partial class ChessBoardViewModel
         this.StopEngine();
 
         // Don't clear EngineSuggestedMovements ff simply stopping the engine
-        if (InteractiveMode != EngineInteractiveMode.StopMode)
+        if (InteractiveMode != EngineInteractiveMode.IdleMode)
         {
             EngineSuggestedMovements.Clear();
         }
@@ -177,6 +175,7 @@ public partial class ChessBoardViewModel
         Engine.Quit();
 
         Engine = null;
+        this.InteractiveMode = EngineInteractiveMode.None;
 
         MovementIndicator.Reset();
         EngineSuggestedMovements.Clear();
@@ -184,7 +183,8 @@ public partial class ChessBoardViewModel
 
     public enum EngineInteractiveMode
     {
-        StopMode,
+        None,
+        IdleMode,
         AnalyzeMode,
         AutoMode,
         RedAutoMode,

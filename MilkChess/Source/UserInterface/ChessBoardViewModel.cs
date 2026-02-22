@@ -133,6 +133,8 @@ public partial class ChessBoardViewModel : ObservableObject, IChessBoardContext
     {
         SetChessAtPosition(null, movement.From, out _);
         SetChessAtPosition(movement.MovedChess, movement.To, out _);
+
+        this.MovementIndicator.Reset();
     }
 
     public virtual Chess GetChessAtPosition(Position position)
@@ -150,18 +152,23 @@ public partial class ChessBoardViewModel : ObservableObject, IChessBoardContext
     {
         SetChessAtPosition(movement.MovedChess, movement.From, out _);
         SetChessAtPosition(movement.RemovedChess, movement.To, out _);
+
+        this.MovementIndicator.Reset();
     }
 
     public virtual void MoveChess(Position from, Position to, out Chess removedChess)
     {
         Chess chess = this.GetChessAtPosition(from);
         this.SetChessAtPosition(chess, to, out removedChess);
+
+        this.MovementIndicator.Reset();
     }
 
     public virtual void Reset()
     {
         ChessModel.Reset();
         HistoryManager.Reset();
+        MovementIndicator.Reset();
 
         Iterator.IterateOverChessBoard(position =>
         {
@@ -169,6 +176,7 @@ public partial class ChessBoardViewModel : ObservableObject, IChessBoardContext
         });
 
         this.CursorSelector.Position = null;
+        this.Score = 0;
     }
 
     private void MoveForward()
@@ -316,12 +324,11 @@ public partial class ChessBoardViewModel : ObservableObject, IChessBoardContext
 
     private bool IsEngineOperatingChessBoard()
     {
-        if (this.Engine == null) return false;
-
         switch (InteractiveMode)
         {
+            case EngineInteractiveMode.None:
             case EngineInteractiveMode.AnalyzeMode:
-            case EngineInteractiveMode.StopMode:
+            case EngineInteractiveMode.IdleMode:
                 return false;
             case EngineInteractiveMode.AutoMode:
             case EngineInteractiveMode.BlackAutoMode:
