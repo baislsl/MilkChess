@@ -77,7 +77,10 @@ public partial class ChessBoardViewModel : ObservableObject, IChessBoardContext
 
         CursorSelector = new CursorSelector(this, null, UIConstants.CursorBackgroundResource);
         MovementIndicator = new MovementIndicator(this);
+
         EngineSuggestedMovements = new ObservableCollection<PredictMovementTrace>();
+        EngineSuggestedMovements.CollectionChanged += (_, __) => OnPropertyChanged(nameof(ScoreText));
+        EngineSuggestedMovements.CollectionChanged += (_, __) => OnPropertyChanged(nameof(ScoreColor));
     }
 
     public void AddToAbsoluteLayout(AbsoluteLayout layout)
@@ -169,6 +172,7 @@ public partial class ChessBoardViewModel : ObservableObject, IChessBoardContext
         ChessModel.Reset();
         HistoryManager.Reset();
         MovementIndicator.Reset();
+        EngineSuggestedMovements.Clear();
 
         Iterator.IterateOverChessBoard(position =>
         {
@@ -176,7 +180,6 @@ public partial class ChessBoardViewModel : ObservableObject, IChessBoardContext
         });
 
         this.CursorSelector.Position = null;
-        this.Score = 0;
     }
 
     private void MoveForward()

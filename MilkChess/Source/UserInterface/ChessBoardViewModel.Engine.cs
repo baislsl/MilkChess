@@ -113,8 +113,6 @@ public partial class ChessBoardViewModel
         {
             if (feedback.Movements?.Count > 0)
             {
-                this.Score = feedback.Score;
-
                 if (MovementIndicator.Movement?.ToUnifyString() != feedback.Movements[0].ToUnifyString())
                 {
                     // Set best movement

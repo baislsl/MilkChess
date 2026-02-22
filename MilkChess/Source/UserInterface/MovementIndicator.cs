@@ -10,7 +10,7 @@ public class MovementIndicator
     private readonly CursorSelector From;
     private readonly CursorSelector To;
 
-    public Movement Movement { get; set; }
+    public Movement Movement { get; private set; }
 
     public MovementIndicator(IChessBoard chessBoard)
     {

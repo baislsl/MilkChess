@@ -28,10 +28,11 @@ public partial class ChessBoardViewModel
 
     public bool CanInvokeBestMovement => this.InteractiveMode == EngineInteractiveMode.AnalyzeMode;
 
-    [ObservableProperty] [NotifyPropertyChangedFor(nameof(ScoreColor))]
-    private int _score;
+    private int? EvalScore => this.EngineSuggestedMovements?.FirstOrDefault()?.Score;
 
-    public Color ScoreColor => this.Score > 0 ? Colors.Red : Colors.Black;
+    public string ScoreText => EvalScore?.ToString() ?? string.Empty;
+
+    public Color ScoreColor => (EvalScore.HasValue && this.EvalScore.Value > 0) ? Colors.Red : Colors.Black;
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(ResetCommand))]
@@ -49,7 +50,10 @@ public partial class ChessBoardViewModel
     [NotifyPropertyChangedFor(nameof(SwitchToIdleModeText))]
     private EngineInteractiveMode _interactiveMode = EngineInteractiveMode.None;
 
-    public ObservableCollection<PredictMovementTrace> EngineSuggestedMovements { get; set; }
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ScoreText))]
+    [NotifyPropertyChangedFor(nameof(ScoreColor))]
+    private ObservableCollection<PredictMovementTrace> _engineSuggestedMovements;
 
     public int ChessBoardHeight => UIConstants.ChessBoardHeight;
 
@@ -84,6 +88,8 @@ public partial class ChessBoardViewModel
     public string Movements => default;
 
     public string Depth => default;
+
+    public string Score => default;
 
     #region command definition
 
