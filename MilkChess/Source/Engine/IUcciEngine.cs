@@ -15,19 +15,44 @@ internal interface INativeUcciEngine : IDisposable
     public Task<UcciFeedback> GetFeedbackAsync(CancellationToken cancellationToken);
 }
 
+public enum EngineState
+{
+    Disconnected,
+    Connected,
+    Ready,
+    Thinking,
+}
+
 internal interface IUcciEngine
 {
-    public UciFeedback StartUci(CancellationToken cancellationToken);
+    public EngineState State { get; }
+
+    public StartUciFeedback StartUci(CancellationToken cancellationToken);
 
     public void WaitToReady(CancellationToken cancellationToken);
 
     public void SetOption(string option, string config, CancellationToken cancellationToken);
 
-    public void Position(IChessBoardContext chessBoardContext, CancellationToken cancellationToken);
-
     public void BanMoves(IEnumerable<string> banMoves, CancellationToken cancellationToken);
 
-    public BestMove Go(GoOption option, CancellationToken cancellationToken, EventHandler<InfoFeedback> onInfoReceived);
+    public void ExecuteForever(
+        GoOption option,
+        IChessBoardContext chessBoardContext,
+        Action<InfoFeedback> onInfoReceived,
+        Action<BestMove> onBestMovementReceived);
+
+    public void ExecuteOnce(
+        GoOption option,
+        IChessBoardContext chessBoardContext,
+        Action<InfoFeedback> onInfoReceived,
+        Action<BestMove> onBestMovementReceived);
+
+    public void GoInfinite(GoOption option,
+        IChessBoardContext chessBoardContext,
+        Action<InfoFeedback> onInfoReceived);
+
+    // Stop from thinking state.
+    public void Stop();
 
     public void Quit();
 }
@@ -91,14 +116,14 @@ public class InfoFeedback
     }
 }
 
-public class UciFeedback
+public class StartUciFeedback
 {
     public Dictionary<string, string> ID { get; set; }
     public List<string> Options { get; set; }
 
     public bool ReceivedUcciOk { get; set; }
 
-    public UciFeedback()
+    public StartUciFeedback()
     {
         this.ID = new Dictionary<string, string>();
         this.Options = new List<string>();

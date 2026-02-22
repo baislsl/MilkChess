@@ -230,7 +230,7 @@ public partial class ChessBoardViewModel
         };
     }
 
-    partial void OnEngineChanged(UcciEngineV2 oldValue, UcciEngineV2 newValue)
+    partial void OnEngineChanged(UcciEngine oldValue, UcciEngine newValue)
     {
         OnPropertyChanged(nameof(ConnectOrDisconnectEngineText));
     }
