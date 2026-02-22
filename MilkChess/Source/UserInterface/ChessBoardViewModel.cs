@@ -314,6 +314,25 @@ public partial class ChessBoardViewModel : ObservableObject, IChessBoardContext
         }
     }
 
+    private bool IsEngineOperatingChessBoard()
+    {
+        if (this.Engine == null) return false;
+
+        switch (InteractiveMode)
+        {
+            case EngineInteractiveMode.AnalyzeMode:
+            case EngineInteractiveMode.StopMode:
+                return false;
+            case EngineInteractiveMode.AutoMode:
+            case EngineInteractiveMode.BlackAutoMode:
+            case EngineInteractiveMode.RedAutoMode:
+                // TODO: If black/red auto, it doesn't operating when turn is red/black
+                return true;
+        }
+
+        return false;
+    }
+
     private ICommand WrapClickCommand(Action action, Func<object, bool> canExecute = null,
         [CallerMemberName] string commandName = "")
     {

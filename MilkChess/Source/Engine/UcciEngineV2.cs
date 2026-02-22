@@ -11,7 +11,8 @@ namespace MilkChess.Engine;
 
 public partial class UcciEngineV2 : ObservableObject, IUcciEngineV2
 {
-    [ObservableProperty] private EngineState state = EngineState.Disconnected;
+    [ObservableProperty]
+    private EngineState state = EngineState.Disconnected;
 
     private readonly INativeUcciEngine NativeUcciEngine;
     private readonly MilkChessConfig Config;
@@ -171,16 +172,18 @@ public partial class UcciEngineV2 : ObservableObject, IUcciEngineV2
         Action<InfoFeedback> onInfoReceived,
         Action<BestMove> onBestMovementReceived)
     {
+        this.State = EngineState.Thinking;
+
         this.SetFenPosition(chessBoardContext);
         this.SendCommand(this.BuildGoCommand(option));
 
-        this.State = EngineState.Thinking;
         this.cancellationTokenSource = new CancellationTokenSource();
 
         var cancellationToken = this.cancellationTokenSource.Token;
         this.thinkingTask = Task.Run(async () =>
         {
-            var bestmove = await this.ListenEngineFeedbackAsync(CancellationToken.None, chessBoardContext, onInfoReceived)
+            var bestmove = await this
+                .ListenEngineFeedbackAsync(CancellationToken.None, chessBoardContext, onInfoReceived)
                 .ConfigureAwait(false);
 
             cancellationToken.ThrowIfCancellationRequested();
@@ -205,8 +208,7 @@ public partial class UcciEngineV2 : ObservableObject, IUcciEngineV2
             UcciFeedback feedback;
             try
             {
-                feedback = await this.NativeUcciEngine.GetFeedbackAsync(cancellationToken)
-                    .ConfigureAwait(false);
+                feedback = await this.NativeUcciEngine.GetFeedbackAsync(cancellationToken).ConfigureAwait(false);
             }
             catch (Exception ex) when (ExceptionUtil.GetInnerMostException(ex) is TaskCanceledException)
             {
@@ -267,7 +269,7 @@ public partial class UcciEngineV2 : ObservableObject, IUcciEngineV2
         this.cancellationTokenSource.Cancel();
         try
         {
-            this.thinkingTask.Wait(TimeSpan.FromSeconds(10));
+            this.thinkingTask.Wait();
         }
         catch (Exception ex) when (ExceptionUtil.GetInnerMostException(ex) is TaskCanceledException)
         {

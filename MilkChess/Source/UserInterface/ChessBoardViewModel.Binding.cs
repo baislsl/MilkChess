@@ -1,7 +1,9 @@
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
 using MilkChess.Engine;
 using MilkChess.Helper;
@@ -16,31 +18,19 @@ public partial class ChessBoardViewModel
     public string ConnectOrDisconnectEngineText =>
         this.Engine == null ? UIConstants.ConnectEngineText : UIConstants.DisconnectEngineText;
 
+    public bool IsChessboardFreeFromAutoMoving => !IsEngineOperatingChessBoard();
+
     public Color ScoreColor => this.Score > 0 ? Colors.Red : Colors.Black;
 
     [ObservableProperty] private int _score;
 
-    [ObservableProperty] private EngineInteractiveMode interactiveMode = EngineInteractiveMode.AnalyzeMode;
-
-    private bool _IsEngineAutoMoving;
-
-    private bool IsEngineAutoMoving
-    {
-        get => _IsEngineAutoMoving;
-        set
-        {
-            if (value != _IsEngineAutoMoving)
-            {
-                _IsEngineAutoMoving = value;
-                // PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ResetCommand)));
-                // PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(MoveBackwardCommand)));
-                // PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(MoveForwardCommand)));
-                // PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(MoveToStartCommand)));
-                // PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(MoveToEndCommand)));
-                // PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ResetCommand)));
-            }
-        }
-    }
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(ResetActionCommand))]
+    [NotifyCanExecuteChangedFor(nameof(MoveBackwardActionCommand))]
+    [NotifyCanExecuteChangedFor(nameof(MoveForwardActionCommand))]
+    [NotifyCanExecuteChangedFor(nameof(MoveToStartActionCommand))]
+    [NotifyCanExecuteChangedFor(nameof(MoveToEndActionCommand))]
+    private EngineInteractiveMode _interactiveMode = EngineInteractiveMode.AnalyzeMode;
 
     public ObservableCollection<PredictMovementTrace> EngineSuggestedMovements { get; set; }
 
@@ -75,97 +65,113 @@ public partial class ChessBoardViewModel
     public string ChineseViewableString => default;
     public string ActionCount => default;
     public string Movements => default;
+
     public string Depth => default;
 
     #region command definition
 
-    public ICommand ResetCommand =>
-        CommandMiddlewareHelper.BuildCommand(
-            new Command(this.Reset, () => !IsEngineAutoMoving),
+    [RelayCommand(CanExecute = nameof(IsChessboardFreeFromAutoMoving))]
+    private void ResetAction() =>
+        CommandMiddlewareHelper.Execute(
+            this.Reset,
             this.RefreshEngineCommandMiddleware(),
             this.CommonCommandMiddleware());
 
-    public ICommand MoveBackwardCommand =>
-        CommandMiddlewareHelper.BuildCommand(
-            new Command(this.MoveBackward, () => !IsEngineAutoMoving),
+    [RelayCommand(CanExecute = nameof(IsChessboardFreeFromAutoMoving))]
+    private void MoveBackwardAction() =>
+        CommandMiddlewareHelper.Execute(
+            this.MoveBackward,
             this.AutoSaveChessManualMiddleware(),
             this.RefreshEngineCommandMiddleware(),
             this.CommonCommandMiddleware());
 
-    public ICommand MoveForwardCommand =>
-        CommandMiddlewareHelper.BuildCommand(
-            new Command(this.MoveForward, () => !IsEngineAutoMoving),
+    [RelayCommand(CanExecute = nameof(IsChessboardFreeFromAutoMoving))]
+    private void MoveForwardAction() =>
+        CommandMiddlewareHelper.Execute(
+            this.MoveForward,
             this.AutoSaveChessManualMiddleware(),
             this.RefreshEngineCommandMiddleware(),
             this.CommonCommandMiddleware());
 
-    public ICommand MoveToStartCommand =>
-        CommandMiddlewareHelper.BuildCommand(
-            new Command(this.MoveToStart, () => !IsEngineAutoMoving),
+    [RelayCommand(CanExecute = nameof(IsChessboardFreeFromAutoMoving))]
+    private void MoveToStartAction() =>
+        CommandMiddlewareHelper.Execute(
+            this.MoveToStart,
             this.AutoSaveChessManualMiddleware(),
             this.RefreshEngineCommandMiddleware(),
             this.CommonCommandMiddleware());
 
-    public ICommand MoveToEndCommand =>
-        CommandMiddlewareHelper.BuildCommand(
-            new Command(this.MoveToEnd, () => !IsEngineAutoMoving),
+    [RelayCommand(CanExecute = nameof(IsChessboardFreeFromAutoMoving))]
+    private void MoveToEndAction() =>
+        CommandMiddlewareHelper.Execute(
+            this.MoveToEnd,
             this.AutoSaveChessManualMiddleware(),
             this.RefreshEngineCommandMiddleware(),
             this.CommonCommandMiddleware());
 
-    public ICommand ConnectOrDisconnectEngineCommand =>
-        CommandMiddlewareHelper.BuildCommand(
+    [RelayCommand]
+    private void ConnectOrDisconnectEngineAction() =>
+        CommandMiddlewareHelper.Execute(
             this.ConnectOrDisconnectEngine,
             this.CommonCommandMiddleware());
 
-    public ICommand StopEngineCommand =>
-        CommandMiddlewareHelper.BuildCommand(
+    [RelayCommand]
+    private void SwtichToStopMode() =>
+        CommandMiddlewareHelper.Execute(
             () => this.SwitchInteractMode(EngineInteractiveMode.StopMode),
             this.RefreshEngineCommandMiddleware(),
             this.CommonCommandMiddleware());
 
-    public ICommand SwitchToAnalyzeModeCommand =>
-        CommandMiddlewareHelper.BuildCommand(
+    [RelayCommand]
+    private void SwitchToAnalyzeMode() =>
+        CommandMiddlewareHelper.Execute(
             () => this.SwitchInteractMode(EngineInteractiveMode.AnalyzeMode),
             this.RefreshEngineCommandMiddleware(),
             this.CommonCommandMiddleware());
 
-    public ICommand SwitchToBlackAutoModeCommand =>
-        CommandMiddlewareHelper.BuildCommand(
+    [RelayCommand]
+    private void SwitchToBlackAutoMode() =>
+        CommandMiddlewareHelper.Execute(
             () => this.SwitchInteractMode(EngineInteractiveMode.BlackAutoMode),
             this.RefreshEngineCommandMiddleware(),
             this.CommonCommandMiddleware());
 
-    public ICommand SwitchToRedAutoModeCommand =>
-        CommandMiddlewareHelper.BuildCommand(
+    [RelayCommand]
+    private void SwitchToRedAutoMode() =>
+        CommandMiddlewareHelper.Execute(
             () => this.SwitchInteractMode(EngineInteractiveMode.RedAutoMode),
             this.RefreshEngineCommandMiddleware(),
             this.CommonCommandMiddleware());
 
-    public ICommand InvokeBestMovementCommand =>
-        CommandMiddlewareHelper.BuildCommand(
-            new Command(this.InvokeBestMovement, () => !IsEngineAutoMoving),
-            this.AutoSaveChessManualMiddleware(),
-            this.RefreshEngineCommandMiddleware(),
-            this.CommonCommandMiddleware());
-
-    public ICommand ReverseBoardCommand =>
-        CommandMiddlewareHelper.BuildCommand(
-            this.ReverseBoard,
-            this.CommonCommandMiddleware());
-
-    public ICommand SwitchToAutoModeCommand =>
-        CommandMiddlewareHelper.BuildCommand(
+    [RelayCommand]
+    private void SwitchToAutoMode() =>
+        CommandMiddlewareHelper.Execute(
             () => this.SwitchInteractMode(EngineInteractiveMode.AutoMode),
             this.RefreshEngineCommandMiddleware(),
             this.CommonCommandMiddleware());
 
-    public ICommand SaveChessManualCommand =>
-        CommandMiddlewareHelper.BuildCommand(
+    [RelayCommand]
+    private void InvokeBestMovementAction() =>
+        CommandMiddlewareHelper.Execute(
+            this.InvokeBestMovement,
+            this.AutoSaveChessManualMiddleware(),
+            this.RefreshEngineCommandMiddleware(),
+            this.CommonCommandMiddleware());
+
+    [RelayCommand]
+    private void ReverseBoardAction() =>
+        CommandMiddlewareHelper.Execute(
+            this.ReverseBoard,
+            this.CommonCommandMiddleware());
+
+    [RelayCommand]
+    private void SaveChessManualAction() =>
+        CommandMiddlewareHelper.Execute(
             this.SaveChessManual,
             this.CommonCommandMiddleware());
 
-    public ICommand SwitchToSelectedMovementCommand =>
+    [RelayCommand]
+    private void SwitchToSelectedMovement() =>
         CommandMiddlewareHelper.BuildCommand(
             new Command<object>(this.SwitchToSelectedMovement),
             this.AutoSaveChessManualMiddleware(),
@@ -193,7 +199,7 @@ public partial class ChessBoardViewModel
         {
             return new Command<object>(_ =>
             {
-                Engine?.Stop();
+                this.StopEngine();
                 command.Execute(_);
                 RefreshUcciEngine();
             });
@@ -205,14 +211,14 @@ public partial class ChessBoardViewModel
     {
         return delegate(ICommand command)
         {
-            return new Command<object>(_ =>
+            return new Command<object>(sender =>
             {
                 this.CursorSelector.Position = null;
 
                 try
                 {
                     Logger.LogInformation($"Received command {commandName}");
-                    command.Execute(_);
+                    command.Execute(sender);
                 }
                 catch (Exception e)
                 {
@@ -226,7 +232,6 @@ public partial class ChessBoardViewModel
 
     partial void OnEngineChanged(UcciEngineV2 oldValue, UcciEngineV2 newValue)
     {
-        OnPropertyChanged(nameof(EngineState));
         OnPropertyChanged(nameof(ConnectOrDisconnectEngineText));
     }
 

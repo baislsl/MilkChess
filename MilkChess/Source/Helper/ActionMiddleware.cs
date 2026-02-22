@@ -37,4 +37,9 @@ public static class CommandMiddlewareHelper
         ICommand cmd = new Command<object>(_ => action());
         return BuildCommand(cmd, middleware);
     }
+
+    public static void Execute(Action action, params CommandMiddleware[] middleware)
+    {
+        BuildCommand(action, middleware).Execute(null);
+    }
 }
