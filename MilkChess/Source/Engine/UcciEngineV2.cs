@@ -122,7 +122,7 @@ public partial class UcciEngineV2 : ObservableObject, IUcciEngineV2
 
         var cancellationToken = this.cancellationTokenSource.Token;
 
-        this.thinkingTask = Task.Factory.StartNew(async () =>
+        this.thinkingTask = Task.Run(async () =>
         {
             while (!cancellationToken.IsCancellationRequested)
             {
@@ -130,7 +130,7 @@ public partial class UcciEngineV2 : ObservableObject, IUcciEngineV2
                 this.SendCommand(this.BuildGoCommand(option));
 
                 var bestmove = await this
-                    .ListenEngineFeedbackAsync(cancellationToken, chessBoardContext, onInfoReceived)
+                    .ListenEngineFeedbackAsync(CancellationToken.None, chessBoardContext, onInfoReceived)
                     .ConfigureAwait(false);
 
                 cancellationToken.ThrowIfCancellationRequested();
@@ -178,9 +178,9 @@ public partial class UcciEngineV2 : ObservableObject, IUcciEngineV2
         this.cancellationTokenSource = new CancellationTokenSource();
 
         var cancellationToken = this.cancellationTokenSource.Token;
-        this.thinkingTask = Task.Factory.StartNew(async () =>
+        this.thinkingTask = Task.Run(async () =>
         {
-            var bestmove = await this.ListenEngineFeedbackAsync(cancellationToken, chessBoardContext, onInfoReceived)
+            var bestmove = await this.ListenEngineFeedbackAsync(CancellationToken.None, chessBoardContext, onInfoReceived)
                 .ConfigureAwait(false);
 
             cancellationToken.ThrowIfCancellationRequested();
@@ -191,7 +191,6 @@ public partial class UcciEngineV2 : ObservableObject, IUcciEngineV2
             this.State = EngineState.Ready;
             this.cancellationTokenSource = null;
             this.thinkingTask = null;
-
         }, cancellationToken);
     }
 
@@ -265,14 +264,10 @@ public partial class UcciEngineV2 : ObservableObject, IUcciEngineV2
 
         this.SendCommand(Command.Stop);
 
-        // Even if engine stop immediately after receiveing stop command, there may be remaing feedback in i/o.
-        // Wait for some time to ensure the remain output is flushed.
-        Thread.Sleep(this.Config.Engine.StopWaitingMilliseconds);
-
-        this.cancellationTokenSource?.Cancel();
+        this.cancellationTokenSource.Cancel();
         try
         {
-            this.thinkingTask?.Wait();
+            this.thinkingTask.Wait(TimeSpan.FromSeconds(10));
         }
         catch (Exception ex) when (ExceptionUtil.GetInnerMostException(ex) is TaskCanceledException)
         {
@@ -382,8 +377,8 @@ public partial class UcciEngineV2 : ObservableObject, IUcciEngineV2
 
         if (feedback.Pv?.Count > 0)
         {
-            StringBuilder predict = new StringBuilder();
-            ChessModel tmpChessModel = new ChessModel(chessBoardContext);
+            var predict = new StringBuilder();
+            var tmpChessModel = new ChessModel(chessBoardContext);
 
             for (int i = 0; i < feedback.Pv.Count; i++)
             {

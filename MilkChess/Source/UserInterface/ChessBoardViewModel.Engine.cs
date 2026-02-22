@@ -138,7 +138,7 @@ public partial class ChessBoardViewModel
         {
             Logger.LogInformation("Getting Best move {}", bestMove.BestMovement);
 
-            CountdownEvent dispatchCountDownEvent = new CountdownEvent(1);
+            var dispatchCountDownEvent = new CountdownEvent(1);
 
             this.DispatchAction(() =>
             {

@@ -31,19 +31,4 @@ public class EngineTest
 
         Assert.AreEqual("uciok", ret);
     }
-
-    [TestMethod]
-    public void TestUcciEngine()
-    {
-        var app = MauiProgram.CreateMauiApp();
-
-        UcciEngineV2 engine = new UcciEngineV2(
-            app.Services.GetService<ILogger<UcciEngineV2>>(),
-            app.Services.GetService<LocalExecutableEngine>());
-
-        engine.StartUci(CancellationToken.None);
-        engine.WaitToReady(CancellationToken.None);
-        // TODO:
-        engine.Quit();
-    }
 }

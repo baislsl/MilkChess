@@ -193,6 +193,7 @@ public partial class ChessBoardViewModel
         {
             return new Command<object>(_ =>
             {
+                Engine?.Stop();
                 command.Execute(_);
                 RefreshUcciEngine();
             });
