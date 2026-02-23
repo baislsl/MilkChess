@@ -2,8 +2,9 @@
 
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:userInterface="clr-namespace:MilkChess.UserInterface"
-             x:DataType="userInterface:ChessBoardViewModel"
+             xmlns:UserInterface="clr-namespace:MilkChess.UserInterface"
+             xmlns:Model="clr-namespace:MilkChess.Model"
+             x:DataType="UserInterface:ChessBoardViewModel"
              x:Name="ChessBoardPage"
              x:Class="MilkChess.MainPage">
     <Grid>
@@ -16,6 +17,37 @@
                 WidthRequest="{Binding ChessBoardWidth}"
                 HeightRequest="{Binding ChessBoardHeight}"
                 x:Name="ChessBoardLayout">
+                <Image
+                    ZIndex="{x:Static UserInterface:UIConstants.BackgroundZIndex}"
+                    Source="{Binding Source={x:Static UserInterface:UIConstants.ChessBoardBackgroundResource}}"
+                    AbsoluteLayout.LayoutFlags="PositionProportional"
+                    AbsoluteLayout.LayoutBounds="0,0,AutoSize,AutoSize" />
+                <BoxView
+                    ZIndex="{x:Static UserInterface:UIConstants.ExecutionTurnZIndex}"
+                    WidthRequest="20"
+                    HeightRequest="20"
+                    CornerRadius="10"
+                    Color="{Binding HistoryManager.ExecutionTurnColor}"
+                    AbsoluteLayout.LayoutFlags="None"
+                    AbsoluteLayout.LayoutBounds="{Binding ExecutionTurnLayoutBound}" />
+                <Image
+                    ZIndex="{x:Static UserInterface:UIConstants.CursorSelectorZIndex}"
+                    Source="{x:Static UserInterface:UIConstants.CursorBackgroundResource}"
+                    IsVisible="{Binding CursorSelector.IsVisible}"
+                    AbsoluteLayout.LayoutFlags="None"
+                    AbsoluteLayout.LayoutBounds="{Binding CursorSelector.LayoutBound}" />
+                <Image
+                    ZIndex="{x:Static UserInterface:UIConstants.MovementIndicatorZIndex}"
+                    Source="{Binding MovementIndicator.UISource}"
+                    IsVisible="{Binding MovementIndicator.From.IsVisible}"
+                    AbsoluteLayout.LayoutFlags="None"
+                    AbsoluteLayout.LayoutBounds="{Binding MovementIndicator.From.LayoutBound}" />
+                <Image
+                    ZIndex="{x:Static UserInterface:UIConstants.MovementIndicatorZIndex}"
+                    Source="{Binding MovementIndicator.UISource}"
+                    IsVisible="{Binding MovementIndicator.To.IsVisible}"
+                    AbsoluteLayout.LayoutFlags="None"
+                    AbsoluteLayout.LayoutBounds="{Binding MovementIndicator.To.LayoutBound}" />
             </AbsoluteLayout>
             <Grid
                 Margin="5"
@@ -78,100 +110,95 @@
                         Command="{Binding SaveChessManualCommand}" />
             </Grid>
             <VerticalStackLayout
-                WidthRequest="300">
+                WidthRequest="200">
                 <Label Text="History Movements:"
                        FontAttributes="Bold"
                        Margin="2"
                        FontSize="18" />
-                <ListView
-                    x:Name="MovementView"
-                    RowHeight="20"
+                <CollectionView
                     MinimumHeightRequest="{Binding ChessBoardHeight}"
                     BackgroundColor="LightBlue"
-                    xmlns:local="clr-namespace:MilkChess.Model"
-                    ItemsSource="{Binding HistoryMovements}">
-                    <ListView.Resources>
-                        <local:MovementColorConvertor x:Key="MovementColorConvertor" />
-                    </ListView.Resources>
-                    <ListView.ItemTemplate>
+                    ItemsUpdatingScrollMode="KeepLastItemInView"
+                    ItemsSource="{Binding HistoryManager.Movements}">
+                    <!-- <ListView.Resources> -->
+                    <!--     <Model:MovementColorConvertor x:Key="MovementColorConvertor" /> -->
+                    <!-- </ListView.Resources> -->
+                    <CollectionView.ItemTemplate>
                         <DataTemplate>
-                            <ViewCell>
-                                <Button
-                                    Command="{Binding Source={x:Reference ChessBoardPage}, Path=ChessBoardViewModel.SwitchToSelectedMovementActionCommand}"
-                                    CommandParameter="{Binding}"
-                                    VerticalOptions="Fill"
-                                    HorizontalOptions="Start"
-                                    BorderWidth="0"
-                                    CornerRadius="1"
-                                    Margin="1"
-                                    BackgroundColor="LightGray"
+                            <Border
+                                WidthRequest="190"
+                                HeightRequest="20"
+                                BackgroundColor="LightGray"
+                                Padding="6,0"
+                                Margin="1">
+
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer
+                                        Command="{Binding Source={x:Reference ChessBoardPage}, Path=ChessBoardViewModel.SwitchToSelectedMovementCommand}"
+                                        CommandParameter="{Binding}" />
+                                </Border.GestureRecognizers>
+                                <Label
+                                    VerticalTextAlignment="Center"
+                                    HorizontalTextAlignment="Start"
                                     FontSize="18"
-                                    FontAttributes="Bold">
-                                    <Button.TextColor>
-                                        <Color>Black</Color>
-                                        <!-- <MultiBinding Converter="{StaticResource MovementColorConvertor}"> -->
-                                        <!--     <Binding  /> -->
-                                        <!--     <Binding Source="{x:Reference ChessBoardPage}" -->
-                                        <!--              Path="CurrentHistoryManagerCursor" /> -->
-                                        <!-- </MultiBinding> -->
-                                    </Button.TextColor>
-                                    <Button.Text>
+                                    FontAttributes="Bold"
+                                    TextColor="Black">
+                                    <Label.Text>
                                         <MultiBinding StringFormat="{}{0}. {1}">
                                             <Binding Path="ActionCount" />
                                             <Binding Path="ChineseViewableString" />
                                         </MultiBinding>
-                                    </Button.Text>
-                                </Button>
-                            </ViewCell>
+                                    </Label.Text>
+                                </Label>
+                            </Border>
                         </DataTemplate>
-                    </ListView.ItemTemplate>
-                </ListView>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
             </VerticalStackLayout>
         </HorizontalStackLayout>
         <Grid Grid.Row="1" RowDefinitions="Auto,*">
-            <Label TextColor="{Binding ScoreColor}"
-                   FontSize="20"
-                   Margin="2"
-                   FontAttributes="Bold">
+            <Label
+                TextColor="{Binding EngineFeedback.ScoreColor}"
+                FontSize="20"
+                Margin="2"
+                FontAttributes="Bold">
                 <Label.Text>
                     <MultiBinding StringFormat="Score: {0}  Engine: {1}">
-                        <Binding Path="ScoreText" />
+                        <Binding Path="EngineFeedback.ScoreText" />
                         <Binding Path="Engine.State" />
                     </MultiBinding>
                 </Label.Text>
             </Label>
-            <ListView
+            <CollectionView
                 Grid.Row="1"
-                Margin="2"
                 MinimumHeightRequest="100"
                 BackgroundColor="LightBlue"
                 HorizontalScrollBarVisibility="Default"
-                ItemsSource="{Binding  EngineSuggestedMovements}">
-                <ListView.ItemTemplate>
+                ItemsUpdatingScrollMode="KeepScrollOffset"
+                ItemsSource="{Binding  EngineFeedback.PredictMovementTraces}">
+                <CollectionView.ItemTemplate>
                     <DataTemplate>
-                        <ViewCell>
-                            <Label Margin="1"
-                                   LineBreakMode="WordWrap"
-                                   MaxLines="5"
-                                   TextColor="Black"
-                                   FontSize="18">
-                                <Label.FormattedText>
-                                    <FormattedString>
-                                        <Span Text="Score: " TextColor="Black" />
-                                        <Span Text="{Binding Score}" TextColor="Black" FontAttributes="Bold" />
-                                        <Span Text=" Depth: " TextColor="Black" />
-                                        <Span Text="{Binding Depth}" TextColor="Black" FontAttributes="Bold" />
-                                        <Span Text="{Binding Path=Movements, StringFormat='  {0}' }"
-                                              FontAttributes="Italic" />
-                                    </FormattedString>
-                                </Label.FormattedText>
-                            </Label>
-                        </ViewCell>
+                        <Label
+                            x:DataType="Model:PredictMovementTrace"
+                            Margin="2"
+                            LineBreakMode="WordWrap"
+                            MaxLines="5"
+                            TextColor="Black"
+                            FontSize="18">
+                            <Label.FormattedText>
+                                <FormattedString>
+                                    <Span Text="Score: " TextColor="Black" />
+                                    <Span Text="{Binding Score}" TextColor="Black" FontAttributes="Bold" />
+                                    <Span Text=" Depth: " TextColor="Black" />
+                                    <Span Text="{Binding Depth}" TextColor="Black" FontAttributes="Bold" />
+                                    <Span Text="{Binding Path=Movements, StringFormat='  {0}' }"
+                                          FontAttributes="Italic" />
+                                </FormattedString>
+                            </Label.FormattedText>
+                        </Label>
                     </DataTemplate>
-                </ListView.ItemTemplate>
-            </ListView>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
         </Grid>
     </Grid>
-
-
 </ContentPage>

@@ -17,10 +17,6 @@ public partial class ChessBoardViewModel : ObservableObject, IChessBoardContext
 
     public readonly List<List<ChessButton>> Matrix;
 
-    public readonly CursorSelector CursorSelector;
-
-    public readonly MovementIndicator MovementIndicator;
-
     public readonly ILogger Logger;
 
     private readonly IServiceProvider ServiceProvider;
@@ -46,10 +42,10 @@ public partial class ChessBoardViewModel : ObservableObject, IChessBoardContext
         ServiceProvider = serviceProvider;
         Config = milkChessConfig.Value;
 
-        Matrix = new List<List<ChessButton>>(ChessBoardHeight);
-        for (int i = 0; i < ChessBoardHeight; i++)
+        Matrix = new List<List<ChessButton>>(Constants.ChessBoardWidth);
+        for (int i = 0; i < Constants.ChessBoardHeight; i++)
         {
-            Matrix.Add(new List<ChessButton>(new ChessButton[ChessBoardWidth]));
+            Matrix.Add(new List<ChessButton>(new ChessButton[Constants.ChessBoardWidth]));
         }
 
         Iterator.IterateOverChessBoard(position =>
@@ -75,21 +71,15 @@ public partial class ChessBoardViewModel : ObservableObject, IChessBoardContext
             Logger.LogInformation("Use chess position from previous execution");
         }
 
-        CursorSelector = new CursorSelector(this, null, UIConstants.CursorBackgroundResource);
+        CursorSelector = new CursorSelector(this, null);
         MovementIndicator = new MovementIndicator(this);
 
-        EngineSuggestedMovements = new ObservableCollection<PredictMovementTrace>();
-        EngineSuggestedMovements.CollectionChanged += (_, __) => OnPropertyChanged(nameof(ScoreText));
-        EngineSuggestedMovements.CollectionChanged += (_, __) => OnPropertyChanged(nameof(ScoreColor));
+        EngineFeedback = new EngineFeedback();
     }
 
     public void AddToAbsoluteLayout(AbsoluteLayout layout)
     {
-        MovementIndicator.AddToAbsoluteLayout(layout);
-
         Iterator.IterateOverChessBoard(position => { layout.Add(Matrix[position.Y][position.X]); });
-
-        layout.Add(CursorSelector);
     }
 
     public void OnChessSelected(object sender, EventArgs args)
@@ -172,7 +162,7 @@ public partial class ChessBoardViewModel : ObservableObject, IChessBoardContext
         ChessModel.Reset();
         HistoryManager.Reset();
         MovementIndicator.Reset();
-        EngineSuggestedMovements.Clear();
+        EngineFeedback.Clear();
 
         Iterator.IterateOverChessBoard(position =>
         {
@@ -286,8 +276,9 @@ public partial class ChessBoardViewModel : ObservableObject, IChessBoardContext
         GlobalConfig.IsRotated = !GlobalConfig.IsRotated;
 
         Iterator.IterateOverChessBoard(position => { Matrix[position.Y][position.X].Refresh(); });
-        CursorSelector.Refresh();
-        MovementIndicator?.Refresh();
+
+        this.CursorSelector.Refresh();
+        this.MovementIndicator.Refresh();
     }
 
     private void InvokeBestMovement()
@@ -358,14 +349,5 @@ public partial class ChessBoardViewModel : ObservableObject, IChessBoardContext
                 Logger.LogError(e, "MilkChess click Event error");
             }
         }, canExecute ?? (o => true));
-    }
-
-    public class PredictMovementTrace
-    {
-        public int Score { get; set; }
-
-        public int Depth { get; set; }
-
-        public string Movements { get; set; }
     }
 }

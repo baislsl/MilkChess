@@ -1,46 +1,36 @@
+using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.Maui.Layouts;
 using MilkChess.Model;
 
 namespace MilkChess.UserInterface;
 
-public class CursorSelector : Image
+public partial class CursorSelector : ObservableObject
 {
     private IChessBoard ChessBoard { get; set; }
 
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(LayoutBound))]
+    [NotifyPropertyChangedFor(nameof(IsVisible))]
     private Position _position;
 
-    public Position Position
-    {
-        get => _position;
+    public Rect LayoutBound => new Rect(
+        Position?.GetAbsoluteCoordinateX() ?? default,
+        Position?.GetAbsoluteCoordinateY() ?? default,
+        AbsoluteLayout.AutoSize,
+        AbsoluteLayout.AutoSize);
 
-        set
-        {
-            this._position = value;
-            Refresh();
-        }
-    }
+    public bool IsVisible => this.Position != null;
 
     public Chess Chess => this.ChessBoard.GetChessAtPosition(this.Position);
 
-    public CursorSelector(IChessBoard chessBoard, Position position, string source)
+    public CursorSelector(IChessBoard chessBoard, Position position)
     {
         this.ChessBoard = chessBoard;
-        this.Source = source;
         this.Position = position;
     }
 
     public void Refresh()
     {
-        this.IsVisible = (this.Position != null);
-
-        if (this.Position != null)
-        {
-            AbsoluteLayout.SetLayoutBounds(this, new Rect(
-                _position.GetAbsoluteCoordinateX(),
-                _position.GetAbsoluteCoordinateY(),
-                AbsoluteLayout.AutoSize,
-                AbsoluteLayout.AutoSize));
-            AbsoluteLayout.SetLayoutFlags(this, AbsoluteLayoutFlags.None);
-        }
+        OnPropertyChanged(nameof(LayoutBound));
     }
 }

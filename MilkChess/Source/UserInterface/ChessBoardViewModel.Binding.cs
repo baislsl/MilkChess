@@ -15,6 +15,10 @@ namespace MilkChess.UserInterface;
 
 public partial class ChessBoardViewModel
 {
+    [ObservableProperty] private CursorSelector _cursorSelector;
+
+    [ObservableProperty] private MovementIndicator _movementIndicator;
+
     public string ConnectOrDisconnectEngineText => this.InteractiveMode == EngineInteractiveMode.None
         ? UIConstants.ConnectedEngineText
         : UIConstants.DisconnectedEngineText;
@@ -27,12 +31,6 @@ public partial class ChessBoardViewModel
     public bool IsChessboardFreeFromAutoMoving => !IsEngineOperatingChessBoard();
 
     public bool CanInvokeBestMovement => this.InteractiveMode == EngineInteractiveMode.AnalyzeMode;
-
-    private int? EvalScore => this.EngineSuggestedMovements?.FirstOrDefault()?.Score;
-
-    public string ScoreText => EvalScore?.ToString() ?? string.Empty;
-
-    public Color ScoreColor => (EvalScore.HasValue && this.EvalScore.Value > 0) ? Colors.Red : Colors.Black;
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(ResetCommand))]
@@ -51,15 +49,9 @@ public partial class ChessBoardViewModel
     private EngineInteractiveMode _interactiveMode = EngineInteractiveMode.None;
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(ScoreText))]
-    [NotifyPropertyChangedFor(nameof(ScoreColor))]
-    private ObservableCollection<PredictMovementTrace> _engineSuggestedMovements;
+    private EngineFeedback _engineFeedback;
 
-    public int ChessBoardHeight => UIConstants.ChessBoardHeight;
-
-    public int ChessBoardWidth => UIConstants.ChessBoardWidth;
-
-    public ObservableCollection<Movement> HistoryMovements => (ObservableCollection<Movement>)HistoryManager.Movements;
+    //public ObservableCollection<Movement> HistoryMovements => (ObservableCollection<Movement>)HistoryManager.Movements;
 
     public Color SwitchToIdleModeColor => (this.InteractiveMode == EngineInteractiveMode.IdleMode)
         ? ActiveInteractiveModeColor
@@ -81,15 +73,14 @@ public partial class ChessBoardViewModel
         ? ActiveInteractiveModeColor
         : InactiveInteractiveModeColor;
 
-    // Compiler will throw error result if I remove this unused fields.
-    // This seems to be the compiler bug.
-    public string ChineseViewableString => default;
-    public string ActionCount => default;
-    public string Movements => default;
+    public Rect ExecutionTurnLayoutBound => new Rect(UIConstants.HorizontalOffset / 2.0,
+        UIConstants.ChessBoardHeight / 2.0,
+        AbsoluteLayout.AutoSize,
+        AbsoluteLayout.AutoSize);
 
-    public string Depth => default;
+    public int ChessBoardHeight => UIConstants.ChessBoardHeight;
 
-    public string Score => default;
+    public int ChessBoardWidth => UIConstants.ChessBoardWidth;
 
     #region command definition
 

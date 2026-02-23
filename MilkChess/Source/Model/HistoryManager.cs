@@ -1,26 +1,20 @@
 using System.Collections;
 using System.Collections.ObjectModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.Extensions.Logging;
 
 namespace MilkChess.Model;
 
-public class HistoryManager
+public partial class HistoryManager : ObservableObject
 {
-    private EventHandler ExecutionTurnEventHandler;
-
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ExecutionTurnColor))]
     private Color _executionTurn;
 
-    public Color ExecutionTurn
-    {
-        get => _executionTurn;
-        set
-        {
-            this._executionTurn = value;
-            ExecutionTurnEventHandler?.Invoke(this, EventArgs.Empty);
-        }
-    }
+    public Microsoft.Maui.Graphics.Color ExecutionTurnColor =>
+        this.ExecutionTurn == Model.Color.RED ? Colors.Red : Colors.Black;
 
-    public IList<Movement> Movements { get; private set; }
+    public ObservableCollection<Movement> Movements { get; private set; }
 
     private int Cursor;
 
@@ -35,10 +29,10 @@ public class HistoryManager
         }
     }
 
-    public HistoryManager(ILogger<HistoryManager> logger, IList<Movement> movementContainer = null)
+    public HistoryManager(ILogger<HistoryManager> logger)
     {
         this.Logger = logger;
-        this.Movements = movementContainer ?? new List<Movement>();
+        this.Movements = new ObservableCollection<Movement>();
         this.Reset();
     }
 
@@ -102,10 +96,5 @@ public class HistoryManager
         this.Movements.Clear();
         this.Cursor = 0;
         this.ExecutionTurn = Color.RED;
-    }
-
-    public void AddActiveColorListener(EventHandler eventHandler)
-    {
-        this.ExecutionTurnEventHandler += eventHandler;
     }
 }

@@ -8,10 +8,9 @@ namespace MilkChess.UserInterface;
 
 public partial class ChessBoardViewModel
 {
-    [ObservableProperty]
-    private UcciEngine _engine;
+    [ObservableProperty] private UcciEngine _engine;
 
-    private void DispatchAction(Action action)
+    private void DispatchAction(Action action, bool wait = false)
     {
         if (Application.Current == null || Application.Current.MainPage == null)
         {
@@ -19,7 +18,29 @@ public partial class ChessBoardViewModel
             return;
         }
 
-        Application.Current.MainPage.Dispatcher.Dispatch(action);
+        CountdownEvent dispatchCountDownEvent = null;
+        var dispatchAction = action;
+
+        if (wait)
+        {
+            dispatchCountDownEvent = new CountdownEvent(1);
+            dispatchAction = () =>
+            {
+                action();
+                dispatchCountDownEvent.Signal();
+            };
+        }
+
+        bool result = Application.Current.MainPage.Dispatcher.Dispatch(dispatchAction);
+
+        if (!result)
+        {
+            Logger.LogError("Failed to dispatch action");
+        }
+        else
+        {
+            dispatchCountDownEvent?.Wait();
+        }
     }
 
     public void ConnectOrDisconnectEngine()
@@ -74,10 +95,10 @@ public partial class ChessBoardViewModel
 
         this.StopEngine();
 
-        // Don't clear EngineSuggestedMovements ff simply stopping the engine
+        // Don't clear EngineFeedback ff simply stopping the engine
         if (InteractiveMode != EngineInteractiveMode.IdleMode)
         {
-            EngineSuggestedMovements.Clear();
+            EngineFeedback.Clear();
         }
 
         var option = new GoOption();
@@ -119,14 +140,14 @@ public partial class ChessBoardViewModel
                     MovementIndicator.SetMovement(feedback.Movements[0]);
                 }
 
-                EngineSuggestedMovements.Insert(0, new PredictMovementTrace()
+                EngineFeedback.Insert(new PredictMovementTrace()
                 {
                     Score = feedback.Score,
                     Depth = feedback.Depth,
                     Movements = feedback.ViewableMovementList,
                 });
             }
-        });
+        }, false);
     }
 
     private void onBestMovementReceived(BestMove bestMove)
@@ -135,7 +156,6 @@ public partial class ChessBoardViewModel
         {
             Logger.LogInformation("Getting Best move {}", bestMove.BestMovement);
 
-            var dispatchCountDownEvent = new CountdownEvent(1);
 
             this.DispatchAction(() =>
             {
@@ -145,12 +165,9 @@ public partial class ChessBoardViewModel
                 HistoryManager.InsertMovement(bestMovement);
                 this.CursorSelector.Position = null;
 
-                EngineSuggestedMovements.Clear();
+                EngineFeedback.Clear();
+            }, true);
 
-                dispatchCountDownEvent.Signal();
-            });
-
-            dispatchCountDownEvent.Wait();
             this.SaveChessManual();
         }
         else
@@ -176,7 +193,7 @@ public partial class ChessBoardViewModel
         this.InteractiveMode = EngineInteractiveMode.None;
 
         MovementIndicator.Reset();
-        EngineSuggestedMovements.Clear();
+        EngineFeedback.Clear();
     }
 
     public enum EngineInteractiveMode

@@ -11,8 +11,7 @@ namespace MilkChess.Engine;
 
 public partial class UcciEngine : ObservableObject, IUcciEngine
 {
-    [ObservableProperty]
-    private EngineState state = EngineState.Disconnected;
+    [ObservableProperty] private EngineState state = EngineState.Disconnected;
 
     private readonly INativeUcciEngine NativeUcciEngine;
     private readonly MilkChessConfig Config;
@@ -186,6 +185,7 @@ public partial class UcciEngine : ObservableObject, IUcciEngine
                 .ListenEngineFeedbackAsync(CancellationToken.None, chessBoardContext, onInfoReceived)
                 .ConfigureAwait(false);
 
+            // If user stop the engine manually, throw and no need to execute onBestMovementReceived.
             cancellationToken.ThrowIfCancellationRequested();
 
             // !IsCancellationRequested means engine return best move and stop by itself
@@ -198,7 +198,7 @@ public partial class UcciEngine : ObservableObject, IUcciEngine
     }
 
     // return null if canceled
-    public async Task<BestMove> ListenEngineFeedbackAsync(
+    private async Task<BestMove> ListenEngineFeedbackAsync(
         CancellationToken cancellationToken,
         IChessBoardContext chessBoardContext,
         Action<InfoFeedback> onInfoReceived)
@@ -266,7 +266,9 @@ public partial class UcciEngine : ObservableObject, IUcciEngine
 
         this.SendCommand(Command.Stop);
 
+        // TODO: firstly stop or cancel?
         this.cancellationTokenSource.Cancel();
+
         try
         {
             this.thinkingTask.Wait();

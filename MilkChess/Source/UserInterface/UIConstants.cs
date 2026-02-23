@@ -23,6 +23,21 @@ public class UIConstants
 
     public const string StopEngineText = "StopEngine";
     public const string EngineIdleStateText = "Idle";
+
+    public const int BackgroundZIndex = (int)ChessBoardZIndex.Background;
+    public const int ExecutionTurnZIndex = (int)ChessBoardZIndex.ExecutionTurn;
+    public const int MovementIndicatorZIndex = (int)ChessBoardZIndex.MovementIndicator;
+    public const int CursorSelectorZIndex = (int)ChessBoardZIndex.CursorSelector;
+    public const int ChessZIndex = (int)ChessBoardZIndex.Chess;
+
+    private enum ChessBoardZIndex
+    {
+        Background = 0,
+        ExecutionTurn,
+        MovementIndicator,
+        CursorSelector,
+        Chess,
+    }
 }
 
 internal static class UserInterfaceHelper

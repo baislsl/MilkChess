@@ -25,7 +25,8 @@ public class ChessButton : ImageButton
     {
         this.BackgroundColor = Color.FromRgba(0, 0, 0, 0);
         this.Position = position;
-        this._chess = chess;
+        this.Chess = chess;
+        this.ZIndex = UIConstants.ChessZIndex;
 
         Refresh();
     }

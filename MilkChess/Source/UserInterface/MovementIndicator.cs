@@ -1,28 +1,29 @@
+using CommunityToolkit.Mvvm.ComponentModel;
 using MilkChess.Model;
 using Color = MilkChess.Model.Color;
 
 namespace MilkChess.UserInterface;
 
-public class MovementIndicator
+public partial class MovementIndicator : ObservableObject
 {
     private IChessBoard ChessBoard { get; set; }
 
-    private readonly CursorSelector From;
-    private readonly CursorSelector To;
+    [ObservableProperty] private CursorSelector _from;
 
-    public Movement Movement { get; private set; }
+    [ObservableProperty] private CursorSelector _to;
+
+    [ObservableProperty] [NotifyPropertyChangedFor(nameof(UISource))]
+    private Movement _movement;
+
+    public string UISource => this.Movement?.ExecutedColor == Color.BLACK
+        ? UIConstants.BlackMovementCursorResource
+        : UIConstants.RedMovementCursorResource;
 
     public MovementIndicator(IChessBoard chessBoard)
     {
         this.ChessBoard = chessBoard;
-        this.From = new CursorSelector(chessBoard, null, UIConstants.BlackMovementCursorResource);
-        this.To = new CursorSelector(chessBoard, null, UIConstants.BlackMovementCursorResource);
-    }
-
-    public void AddToAbsoluteLayout(AbsoluteLayout layout)
-    {
-        layout.Add(From);
-        layout.Add(To);
+        this.From = new CursorSelector(chessBoard, null);
+        this.To = new CursorSelector(chessBoard, null);
     }
 
     public void SetMovement(Movement movement)
@@ -31,13 +32,8 @@ public class MovementIndicator
 
         if (movement != null)
         {
-            var uiSource = movement.ExecutedColor == Color.BLACK
-                ? UIConstants.BlackMovementCursorResource
-                : UIConstants.RedMovementCursorResource;
-
             From.Position = movement.From;
             To.Position = movement.To;
-            From.Source = To.Source = uiSource;
         }
         else
         {
@@ -54,7 +50,7 @@ public class MovementIndicator
 
     public void Refresh()
     {
-        From.Refresh();
-        To.Refresh();
+        this.From.Refresh();
+        this.To.Refresh();
     }
 }
