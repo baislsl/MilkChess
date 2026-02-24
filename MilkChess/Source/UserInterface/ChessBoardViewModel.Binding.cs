@@ -77,9 +77,11 @@ public partial class ChessBoardViewModel
         AbsoluteLayout.AutoSize,
         AbsoluteLayout.AutoSize);
 
-    public int ChessBoardHeight => UIConstants.ChessBoardHeight;
+    public int ChessBoardVisualHeight => (int)(UIConstants.ChessBoardHeight * ChessBoardScale);
 
-    public int ChessBoardWidth => UIConstants.ChessBoardWidth;
+    public int ChessBoardVisualWidth => (int)(UIConstants.ChessBoardWidth * ChessBoardScale);
+
+    [ObservableProperty] private double chessBoardScale = 1.0;
 
     #region command definition
 
@@ -276,7 +278,7 @@ public partial class ChessBoardViewModel
                 try
                 {
                     Logger.LogInformation($"Received command {commandName}");
-                    await next().ConfigureAwait(false);
+                    await next();
                 }
                 catch (Exception e)
                 {
@@ -286,5 +288,23 @@ public partial class ChessBoardViewModel
                 Logger.LogInformation($"Finished command {commandName}");
             };
         };
+    }
+
+    partial void OnChessBoardScaleChanged(double value)
+    {
+        Logger.LogInformation("Chess board scale changed {}", value);
+
+        if (value < 0.65)
+        {
+            ChessBoardScale = 0.65;
+        }
+
+        if (value > 2.0)
+        {
+            ChessBoardScale = 2.0;
+        }
+
+        OnPropertyChanged(nameof(ChessBoardVisualWidth));
+        OnPropertyChanged(nameof(ChessBoardVisualHeight));
     }
 }
