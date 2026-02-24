@@ -1,7 +1,5 @@
-using System.Collections.ObjectModel;
-using System.Runtime.CompilerServices;
-using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MilkChess.Helper;
@@ -34,13 +32,15 @@ public partial class ChessBoardViewModel : ObservableObject, IChessBoardContext
         ILogger<ChessBoardViewModel> logger,
         HistoryManager historyManager,
         ChessModel chessModel,
-        IOptions<MilkChessConfig> milkChessConfig)
+        IOptions<MilkChessConfig> milkChessConfig,
+        EngineFeedback engineFeedback)
     {
         ChessModel = chessModel;
         Logger = logger;
         HistoryManager = historyManager;
         ServiceProvider = serviceProvider;
         Config = milkChessConfig.Value;
+        EngineFeedback = engineFeedback;
 
         Matrix = new List<List<ChessButton>>(Constants.ChessBoardWidth);
         for (int i = 0; i < Constants.ChessBoardHeight; i++)
@@ -52,8 +52,9 @@ public partial class ChessBoardViewModel : ObservableObject, IChessBoardContext
         {
             ChessButton chessButton = new ChessButton(null, position);
 
-            // chessButton.Released += this.WrapEventHandler(this.OnChessSelected);
-            chessButton.Command = this.WrapClickCommand(() => { this.OnChessSelected(chessButton, null); });
+            chessButton.Command = this.ChessSelectedCommand;
+            chessButton.CommandParameter = chessButton;
+
             Matrix[position.Y][position.X] = chessButton;
         });
 
@@ -63,7 +64,7 @@ public partial class ChessBoardViewModel : ObservableObject, IChessBoardContext
             // If init manual not loaded successfully, refresh with the default chess position
             Iterator.IterateOverChessBoard(position =>
             {
-                this.SetChessAtPosition(this.GetChessAtPosition(position), position, out _);
+                this.SetChessAtPosition(ChessModel.GetChessAtPosition(position), position, out _);
             });
         }
         else
@@ -73,8 +74,6 @@ public partial class ChessBoardViewModel : ObservableObject, IChessBoardContext
 
         CursorSelector = new CursorSelector(this, null);
         MovementIndicator = new MovementIndicator(this);
-
-        EngineFeedback = new EngineFeedback();
     }
 
     public void AddToAbsoluteLayout(AbsoluteLayout layout)
@@ -82,9 +81,9 @@ public partial class ChessBoardViewModel : ObservableObject, IChessBoardContext
         Iterator.IterateOverChessBoard(position => { layout.Add(Matrix[position.Y][position.X]); });
     }
 
-    public void OnChessSelected(object sender, EventArgs args)
+    [RelayCommand]
+    private void OnChessSelected(ChessButton clickedButton)
     {
-        ChessButton clickedButton = (ChessButton)sender;
         Logger.LogInformation(
             $"Clicked {clickedButton.Position} {clickedButton.Chess}; Selected {CursorSelector.Position}, {CursorSelector.Chess}");
 
@@ -170,6 +169,39 @@ public partial class ChessBoardViewModel : ObservableObject, IChessBoardContext
         });
 
         this.CursorSelector.Position = null;
+    }
+
+    private async Task EditAsync()
+    {
+        var editChessBoardPage = ServiceProvider.GetRequiredService<EditChessBoardPage>();
+        editChessBoardPage.EditChessBoardViewModel.LoadChessBoardLayout(this);
+
+        if (Application.Current == null || Application.Current.MainPage == null)
+        {
+            Logger.LogError("Null application context");
+            return;
+        }
+
+        await Application.Current.MainPage.Navigation.PushModalAsync(editChessBoardPage);
+
+        var result = await editChessBoardPage.EditChessBoardResult.Task;
+
+        if (result.IsConfirmed)
+        {
+            Logger.LogInformation("Loading editor chess board ");
+
+            this.Reset();
+
+            Iterator.IterateOverChessBoard(position => this.SetChessAtPosition(
+                result.ChessBoard.GetChessAtPosition(position),
+                position,
+                out _
+            ));
+        }
+        else
+        {
+            Logger.LogInformation("User cancelled editing chess board");
+        }
     }
 
     private void MoveForward()
@@ -332,22 +364,5 @@ public partial class ChessBoardViewModel : ObservableObject, IChessBoardContext
         }
 
         return false;
-    }
-
-    private ICommand WrapClickCommand(Action action, Func<object, bool> canExecute = null,
-        [CallerMemberName] string commandName = "")
-    {
-        return new Command<object>(_ =>
-        {
-            try
-            {
-                Logger.LogInformation($"Received command {commandName}");
-                action();
-            }
-            catch (Exception e)
-            {
-                Logger.LogError(e, "MilkChess click Event error");
-            }
-        }, canExecute ?? (o => true));
     }
 }

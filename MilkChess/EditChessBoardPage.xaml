@@ -1,0 +1,114 @@
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:milkChess="clr-namespace:MilkChess"
+    xmlns:userInterface="clr-namespace:MilkChess.UserInterface"
+    xmlns:model="clr-namespace:MilkChess.Model"
+    x:DataType="userInterface:EditChessBoardViewModel"
+    x:Name="EditChessBoard"
+    x:Class="MilkChess.EditChessBoardPage">
+
+    <Grid HeightRequest="{Binding ChessBoardHeight}"
+          Padding="10"
+          ColumnSpacing="10">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="{Binding ChessBoardWidth}" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <AbsoluteLayout
+            Grid.Column="0"
+            Grid.RowSpan="2"
+            WidthRequest="{Binding ChessBoardWidth}"
+            HeightRequest="{Binding ChessBoardHeight}"
+            x:Name="ChessBoardAbsoluteLayout">
+            <Image
+                ZIndex="{x:Static userInterface:UIConstants.BackgroundZIndex}"
+                Source="{Binding Source={x:Static userInterface:UIConstants.ChessBoardBackgroundResource}}"
+                AbsoluteLayout.LayoutFlags="PositionProportional"
+                AbsoluteLayout.LayoutBounds="0,0,AutoSize,AutoSize" />
+            <Image
+                ZIndex="{x:Static userInterface:UIConstants.CursorSelectorZIndex}"
+                Source="{x:Static userInterface:UIConstants.CursorBackgroundResource}"
+                IsVisible="{Binding ChessBoardCursor.IsVisible}"
+                AbsoluteLayout.LayoutFlags="None"
+                AbsoluteLayout.LayoutBounds="{Binding ChessBoardCursor.LayoutBound}" />
+        </AbsoluteLayout>
+
+        <CollectionView
+            Grid.Column="1"
+            Grid.Row="0"
+            WidthRequest="{Binding Source={x:Static userInterface:UIConstants.IdleChessPanelWidth}}"
+            MaximumWidthRequest="{Binding Source={x:Static userInterface:UIConstants.IdleChessPanelWidth}}"
+            HeightRequest="{Binding Source={x:Static userInterface:UIConstants.IdleChessPanelHeight}}"
+            MaximumHeightRequest="{Binding Source={x:Static userInterface:UIConstants.IdleChessPanelHeight}}"
+            HorizontalOptions="Start"
+            VerticalScrollBarVisibility="Never"
+            ItemsSource="{Binding  IdleChessPanel.IdleChessList}">
+            <CollectionView.ItemsLayout>
+                <GridItemsLayout Orientation="Vertical"
+                                 Span="4" />
+            </CollectionView.ItemsLayout>
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="model:IdleChess">
+                    <Grid
+                        WidthRequest="{Binding Source={x:Static userInterface:UIConstants.ChessSize}}"
+                        HeightRequest="{Binding Source={x:Static userInterface:UIConstants.ChessSize}}">
+                        <Button
+                            Padding="0"
+                            HorizontalOptions="Fill"
+                            VerticalOptions="Fill"
+                            ImageSource="{Binding ImageSource}"
+                            BackgroundColor="{Binding BackgroundColor}"
+                            Command="{Binding
+                                Source={RelativeSource AncestorType={x:Type userInterface:EditChessBoardViewModel}},
+                                Path=IdleChessClickedCommand}"
+                            CommandParameter="{Binding .}" />
+                    </Grid>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <Grid
+            Grid.Column="1"
+            Grid.Row="1"
+            WidthRequest="{Binding Source={x:Static userInterface:UIConstants.IdleChessPanelWidth}}"
+            MaximumWidthRequest="{Binding Source={x:Static userInterface:UIConstants.IdleChessPanelWidth}}"
+            HorizontalOptions="Start"
+            RowSpacing="2"
+            ColumnSpacing="2">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <Button Grid.Row="0" Grid.Column="0"
+                    Text="Reset"
+                    Command="{Binding ResetChessBoardCommand}" />
+
+            <Button Grid.Row="0" Grid.Column="1"
+                    Text="Clear"
+                    Command="{Binding ClearChessBoardCommand}" />
+            <Button Grid.Row="1" Grid.Column="0"
+                    Text="Save"
+                    Command="{Binding
+                        Source={RelativeSource AncestorType={x:Type milkChess:EditChessBoardPage}},
+                        Path=ConfirmCommand}" />
+            <Button Grid.Row="1" Grid.Column="1"
+                    Text="Cancel"
+                    Command="{Binding
+                        Source={RelativeSource AncestorType={x:Type milkChess:EditChessBoardPage}},
+                        Path=CancelCommand}" />
+
+        </Grid>
+    </Grid>
+
+</ContentPage>

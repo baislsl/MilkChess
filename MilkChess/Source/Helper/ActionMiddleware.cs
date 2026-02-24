@@ -1,4 +1,5 @@
 using System.Windows.Input;
+using CommunityToolkit.Mvvm.Input;
 
 namespace MilkChess.Helper;
 
@@ -22,6 +23,8 @@ public static class CommandMiddlewareHelper
 {
     public delegate ICommand CommandMiddleware(ICommand command);
 
+    public delegate Func<Task> AsyncCommandMiddleware(Func<Task> next);
+
     public static ICommand BuildCommand(ICommand cmd, params CommandMiddleware[] middleware)
     {
         for (int i = middleware.Length - 1; i >= 0; i--)
@@ -34,8 +37,32 @@ public static class CommandMiddlewareHelper
 
     public static ICommand BuildCommand(Action action, params CommandMiddleware[] middleware)
     {
-        ICommand cmd = new Command<object>(_ => action());
+        ICommand cmd = new RelayCommand(action);
         return BuildCommand(cmd, middleware);
+    }
+
+    public static ICommand BuildCommand(Func<Task> action, params CommandMiddleware[] middleware)
+    {
+        ICommand cmd = new AsyncRelayCommand(action);
+        return BuildCommand(cmd, middleware);
+    }
+
+    public static Func<Task> BuildAsyncCommand(
+        Func<Task> action,
+        params AsyncCommandMiddleware[] middleware)
+    {
+        for (int i = middleware.Length - 1; i >= 0; i--)
+        {
+            action = middleware[i](action);
+        }
+
+        return action;
+    }
+
+
+    public static async Task ExecuteAsync(Func<Task> action, params AsyncCommandMiddleware[] middleware)
+    {
+        await BuildAsyncCommand(action, middleware)();
     }
 
     public static void Execute(Action action, params CommandMiddleware[] middleware)

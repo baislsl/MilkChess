@@ -105,6 +105,19 @@ public sealed class Position
         }
     }
 
+    public bool IsLegalPawnPosition(Color color)
+    {
+        if (!this.IsLegal()) return false;
+
+        if ((color == Color.BLACK && this.Y >= 5)
+            || (color == Color.RED && this.Y <= 4))
+        {
+            return this.X is 0 or 2 or 4 or 6 or 8;
+        }
+
+        return true;
+    }
+
     public bool InColorArea(Color color)
     {
         if (color == Color.RED)
@@ -130,6 +143,11 @@ public sealed class Position
     public static bool IsLegalBiShopPositionXY(Color color, int X, int Y)
     {
         return new Position(X, Y, true).IsLegalBiShopPosition(color);
+    }
+
+    public static bool IsLegalPawnPositionXY(Color color, int X, int Y)
+    {
+        return new Position(X, Y, true).IsLegalPawnPosition(color);
     }
 
     public static bool InColorAreaXY(Color color, int X, int Y)

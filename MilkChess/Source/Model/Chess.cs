@@ -79,6 +79,18 @@ public abstract class Chess : ICloneable
         return this.MemberwiseClone();
     }
 
+    public override bool Equals(object obj)
+    {
+        if (obj is not Chess otherPerson)
+        {
+            return false;
+        }
+        else
+        {
+            return this.ChessDefinition.Equals(otherPerson.ChessDefinition) && this.Color.Equals(otherPerson.Color);
+        }
+    }
+
     public virtual bool IsValidPosition(Position position)
     {
         return true;
@@ -162,6 +174,11 @@ public class Pawn : Chess
 
     public Pawn(Color color) : base(color)
     {
+    }
+
+    public override bool IsValidPosition(Position position)
+    {
+        return position.IsLegalPawnPosition(this.Color);
     }
 }
 

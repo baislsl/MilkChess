@@ -30,6 +30,9 @@ public class UIConstants
     public const int CursorSelectorZIndex = (int)ChessBoardZIndex.CursorSelector;
     public const int ChessZIndex = (int)ChessBoardZIndex.Chess;
 
+    public const int IdleChessPanelWidth = 4*ChessSize;
+    public const int IdleChessPanelHeight = 8*ChessSize;
+
     private enum ChessBoardZIndex
     {
         Background = 0,

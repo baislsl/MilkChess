@@ -48,8 +48,7 @@ public partial class ChessBoardViewModel
     [NotifyPropertyChangedFor(nameof(SwitchToIdleModeText))]
     private EngineInteractiveMode _interactiveMode = EngineInteractiveMode.None;
 
-    [ObservableProperty]
-    private EngineFeedback _engineFeedback;
+    [ObservableProperty] private EngineFeedback _engineFeedback;
 
     //public ObservableCollection<Movement> HistoryMovements => (ObservableCollection<Movement>)HistoryManager.Movements;
 
@@ -83,6 +82,13 @@ public partial class ChessBoardViewModel
     public int ChessBoardWidth => UIConstants.ChessBoardWidth;
 
     #region command definition
+
+    [RelayCommand(CanExecute = nameof(IsChessboardFreeFromAutoMoving))]
+    private async Task OnEditAsync() =>
+        await CommandMiddlewareHelper.ExecuteAsync(
+            this.EditAsync,
+            this.RefreshEngineCommandMiddlewareAsync(),
+            this.CommonCommandMiddlewareAsync());
 
     [RelayCommand(CanExecute = nameof(IsChessboardFreeFromAutoMoving))]
     private void OnReset() =>
@@ -220,6 +226,20 @@ public partial class ChessBoardViewModel
         };
     }
 
+    private CommandMiddlewareHelper.AsyncCommandMiddleware RefreshEngineCommandMiddlewareAsync()
+    {
+        return next =>
+        {
+            return async () =>
+            {
+                this.StopEngine();
+
+                await next();
+                RefreshUcciEngine();
+            };
+        };
+    }
+
     private CommandMiddlewareHelper.CommandMiddleware CommonCommandMiddleware(
         [CallerMemberName] string commandName = "")
     {
@@ -241,6 +261,30 @@ public partial class ChessBoardViewModel
 
                 Logger.LogInformation($"Finished command {commandName}");
             }, command.CanExecute);
+        };
+    }
+
+    private CommandMiddlewareHelper.AsyncCommandMiddleware CommonCommandMiddlewareAsync(
+        [CallerMemberName] string commandName = "")
+    {
+        return next =>
+        {
+            return async () =>
+            {
+                this.CursorSelector.Position = null;
+
+                try
+                {
+                    Logger.LogInformation($"Received command {commandName}");
+                    await next().ConfigureAwait(false);
+                }
+                catch (Exception e)
+                {
+                    Logger.LogError(e, "MilkChess click Event error");
+                }
+
+                Logger.LogInformation($"Finished command {commandName}");
+            };
         };
     }
 }

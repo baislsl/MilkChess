@@ -1,5 +1,4 @@
-﻿using System.Collections.ObjectModel;
-using System.Reflection;
+﻿using System.Reflection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using MilkChess.Engine;
@@ -40,7 +39,11 @@ namespace MilkChess
             builder.Services.AddSingleton<HistoryManager>();
             builder.Services.AddTransient<UcciLogger>();
             builder.Services.AddTransient<UcciEngine>();
+            builder.Services.AddTransient<EngineFeedback>();
             builder.Services.AddTransient<LocalExecutableEngine>();
+            builder.Services.AddTransient<IdleChessPanel>();
+            builder.Services.AddTransient<EditChessBoardPage>();
+            builder.Services.AddTransient<EditChessBoardViewModel>();
 
             using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(ConfigResourcePath);
             var config = new ConfigurationBuilder().AddIniStream(stream).Build();

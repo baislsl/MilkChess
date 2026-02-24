@@ -2,9 +2,9 @@
 
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:UserInterface="clr-namespace:MilkChess.UserInterface"
-             xmlns:Model="clr-namespace:MilkChess.Model"
-             x:DataType="UserInterface:ChessBoardViewModel"
+             xmlns:userInterface="clr-namespace:MilkChess.UserInterface"
+             xmlns:model="clr-namespace:MilkChess.Model"
+             x:DataType="userInterface:ChessBoardViewModel"
              x:Name="ChessBoardPage"
              x:Class="MilkChess.MainPage">
     <Grid>
@@ -18,12 +18,12 @@
                 HeightRequest="{Binding ChessBoardHeight}"
                 x:Name="ChessBoardLayout">
                 <Image
-                    ZIndex="{x:Static UserInterface:UIConstants.BackgroundZIndex}"
-                    Source="{Binding Source={x:Static UserInterface:UIConstants.ChessBoardBackgroundResource}}"
+                    ZIndex="{x:Static userInterface:UIConstants.BackgroundZIndex}"
+                    Source="{Binding Source={x:Static userInterface:UIConstants.ChessBoardBackgroundResource}}"
                     AbsoluteLayout.LayoutFlags="PositionProportional"
                     AbsoluteLayout.LayoutBounds="0,0,AutoSize,AutoSize" />
                 <BoxView
-                    ZIndex="{x:Static UserInterface:UIConstants.ExecutionTurnZIndex}"
+                    ZIndex="{x:Static userInterface:UIConstants.ExecutionTurnZIndex}"
                     WidthRequest="20"
                     HeightRequest="20"
                     CornerRadius="10"
@@ -31,19 +31,19 @@
                     AbsoluteLayout.LayoutFlags="None"
                     AbsoluteLayout.LayoutBounds="{Binding ExecutionTurnLayoutBound}" />
                 <Image
-                    ZIndex="{x:Static UserInterface:UIConstants.CursorSelectorZIndex}"
-                    Source="{x:Static UserInterface:UIConstants.CursorBackgroundResource}"
+                    ZIndex="{x:Static userInterface:UIConstants.CursorSelectorZIndex}"
+                    Source="{x:Static userInterface:UIConstants.CursorBackgroundResource}"
                     IsVisible="{Binding CursorSelector.IsVisible}"
                     AbsoluteLayout.LayoutFlags="None"
                     AbsoluteLayout.LayoutBounds="{Binding CursorSelector.LayoutBound}" />
                 <Image
-                    ZIndex="{x:Static UserInterface:UIConstants.MovementIndicatorZIndex}"
+                    ZIndex="{x:Static userInterface:UIConstants.MovementIndicatorZIndex}"
                     Source="{Binding MovementIndicator.UISource}"
                     IsVisible="{Binding MovementIndicator.From.IsVisible}"
                     AbsoluteLayout.LayoutFlags="None"
                     AbsoluteLayout.LayoutBounds="{Binding MovementIndicator.From.LayoutBound}" />
                 <Image
-                    ZIndex="{x:Static UserInterface:UIConstants.MovementIndicatorZIndex}"
+                    ZIndex="{x:Static userInterface:UIConstants.MovementIndicatorZIndex}"
                     Source="{Binding MovementIndicator.UISource}"
                     IsVisible="{Binding MovementIndicator.To.IsVisible}"
                     AbsoluteLayout.LayoutFlags="None"
@@ -51,6 +51,8 @@
             </AbsoluteLayout>
             <Grid
                 Margin="5"
+                RowSpacing="2"
+                ColumnSpacing="2"
                 x:Name="CommonFunction">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="40" />
@@ -67,7 +69,9 @@
                     <ColumnDefinition />
                     <ColumnDefinition />
                 </Grid.ColumnDefinitions>
-                <Button Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Text="Reset"
+                <Button Grid.Row="0" Grid.Column="0" Text="Edit"
+                        Command="{Binding EditCommand}" />
+                <Button Grid.Row="0" Grid.Column="1" Text="Reset"
                         Command="{Binding ResetCommand}" />
 
                 <Button Grid.Row="1" Grid.Column="0" Text="Go back" Command="{Binding MoveBackwardCommand}" />
@@ -179,7 +183,7 @@
                 <CollectionView.ItemTemplate>
                     <DataTemplate>
                         <Label
-                            x:DataType="Model:PredictMovementTrace"
+                            x:DataType="model:PredictMovementTrace"
                             Margin="2"
                             LineBreakMode="WordWrap"
                             MaxLines="5"
