@@ -44,6 +44,7 @@ namespace MilkChess
             builder.Services.AddTransient<IdleChessPanel>();
             builder.Services.AddTransient<EditChessBoardPage>();
             builder.Services.AddTransient<EditChessBoardViewModel>();
+            builder.Services.AddSingleton<GlobalConfig>(GlobalConfig.Instance);
 
             using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(ConfigResourcePath);
             var config = new ConfigurationBuilder().AddIniStream(stream).Build();

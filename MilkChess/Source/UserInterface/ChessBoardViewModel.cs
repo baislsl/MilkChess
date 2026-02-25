@@ -13,13 +13,19 @@ public partial class ChessBoardViewModel : ObservableObject, IChessBoardContext
 {
     private readonly ChessModel ChessModel;
 
-    public readonly List<List<ChessButton>> Matrix;
+    private readonly List<List<ChessButton>> Matrix;
 
-    public readonly ILogger Logger;
+    private readonly ILogger Logger;
 
     private readonly IServiceProvider ServiceProvider;
 
-    public readonly MilkChessConfig Config;
+    private readonly MilkChessConfig Config;
+
+    [ObservableProperty] private GlobalConfig _globalConfig;
+
+    [ObservableProperty] private CursorSelector _cursorSelector;
+
+    [ObservableProperty] private MovementIndicator _movementIndicator;
 
     private static readonly Color ActiveInteractiveModeColor = Colors.Blue;
 
@@ -33,6 +39,7 @@ public partial class ChessBoardViewModel : ObservableObject, IChessBoardContext
         HistoryManager historyManager,
         ChessModel chessModel,
         IOptions<MilkChessConfig> milkChessConfig,
+        GlobalConfig globalConfig,
         EngineFeedback engineFeedback)
     {
         ChessModel = chessModel;
@@ -41,6 +48,7 @@ public partial class ChessBoardViewModel : ObservableObject, IChessBoardContext
         ServiceProvider = serviceProvider;
         Config = milkChessConfig.Value;
         EngineFeedback = engineFeedback;
+        GlobalConfig = globalConfig;
 
         Matrix = new List<List<ChessButton>>(Constants.ChessBoardWidth);
         for (int i = 0; i < Constants.ChessBoardHeight; i++)
@@ -303,7 +311,7 @@ public partial class ChessBoardViewModel : ObservableObject, IChessBoardContext
         return false;
     }
 
-    private void ReverseBoard()
+    private void RotateBoard()
     {
         GlobalConfig.IsRotated = !GlobalConfig.IsRotated;
 

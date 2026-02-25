@@ -16,9 +16,9 @@
 - [ ] 快捷键
 - [x] 优化UI风格
 - [ ] 强制转换红黑下棋顺序
-- [ ] 编辑棋盘时翻转红黑
-- [ ] 编辑局面时锁定老将
+- [x] 编辑棋盘时翻转红黑
+- [x] 编辑局面时锁定老将
 - [ ] History过长展示被截断
 - [ ] Convertor,减轻VM对UI逻辑的感知
 - [ ] 编辑页面右键删除棋子
-- [ ] AbsoluteLayout scale
+- [x] AbsoluteLayout scale

@@ -15,10 +15,6 @@ namespace MilkChess.UserInterface;
 
 public partial class ChessBoardViewModel
 {
-    [ObservableProperty] private CursorSelector _cursorSelector;
-
-    [ObservableProperty] private MovementIndicator _movementIndicator;
-
     public string ConnectOrDisconnectEngineText => this.InteractiveMode == EngineInteractiveMode.None
         ? UIConstants.ConnectedEngineText
         : UIConstants.DisconnectedEngineText;
@@ -33,6 +29,7 @@ public partial class ChessBoardViewModel
     public bool CanInvokeBestMovement => this.InteractiveMode == EngineInteractiveMode.AnalyzeMode;
 
     [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(EditCommand))]
     [NotifyCanExecuteChangedFor(nameof(ResetCommand))]
     [NotifyCanExecuteChangedFor(nameof(MoveBackwardCommand))]
     [NotifyCanExecuteChangedFor(nameof(MoveForwardCommand))]
@@ -49,8 +46,6 @@ public partial class ChessBoardViewModel
     private EngineInteractiveMode _interactiveMode = EngineInteractiveMode.None;
 
     [ObservableProperty] private EngineFeedback _engineFeedback;
-
-    //public ObservableCollection<Movement> HistoryMovements => (ObservableCollection<Movement>)HistoryManager.Movements;
 
     public Color SwitchToIdleModeColor => (this.InteractiveMode == EngineInteractiveMode.IdleMode)
         ? ActiveInteractiveModeColor
@@ -77,11 +72,9 @@ public partial class ChessBoardViewModel
         AbsoluteLayout.AutoSize,
         AbsoluteLayout.AutoSize);
 
-    public int ChessBoardVisualHeight => (int)(UIConstants.ChessBoardHeight * ChessBoardScale);
+    public int ChessBoardHeight => UIConstants.ChessBoardHeight;
 
-    public int ChessBoardVisualWidth => (int)(UIConstants.ChessBoardWidth * ChessBoardScale);
-
-    [ObservableProperty] private double chessBoardScale = 1.0;
+    public int ChessBoardWidth => UIConstants.ChessBoardWidth;
 
     #region command definition
 
@@ -181,9 +174,9 @@ public partial class ChessBoardViewModel
             this.CommonCommandMiddleware());
 
     [RelayCommand]
-    private void OnReverseBoard() =>
+    private void OnRotateBoard() =>
         CommandMiddlewareHelper.Execute(
-            this.ReverseBoard,
+            this.RotateBoard,
             this.CommonCommandMiddleware());
 
     [RelayCommand]
@@ -288,23 +281,5 @@ public partial class ChessBoardViewModel
                 Logger.LogInformation($"Finished command {commandName}");
             };
         };
-    }
-
-    partial void OnChessBoardScaleChanged(double value)
-    {
-        Logger.LogInformation("Chess board scale changed {}", value);
-
-        if (value < 0.65)
-        {
-            ChessBoardScale = 0.65;
-        }
-
-        if (value > 2.0)
-        {
-            ChessBoardScale = 2.0;
-        }
-
-        OnPropertyChanged(nameof(ChessBoardVisualWidth));
-        OnPropertyChanged(nameof(ChessBoardVisualHeight));
     }
 }

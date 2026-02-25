@@ -52,7 +52,7 @@ internal static class UserInterfaceHelper
 
     public static int GetAbsoluteCoordinateY(this Position position)
     {
-        if (GlobalConfig.IsRotated)
+        if (GlobalConfig.Instance.IsRotated)
         {
             return position.Y * UIConstants.ChessSize + UIConstants.VerticalOffset;
         }

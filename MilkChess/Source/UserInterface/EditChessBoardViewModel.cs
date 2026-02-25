@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using MilkChess.Helper;
 using MilkChess.Model;
 using MilkChess.Ucci;
+using Color = MilkChess.Model.Color;
 
 namespace MilkChess.UserInterface;
 
@@ -15,6 +16,8 @@ public partial class EditChessBoardViewModel : ObservableObject, IChessBoard
 
     private readonly List<List<ChessButton>> Matrix;
 
+    [ObservableProperty] private GlobalConfig _globalConfig;
+
     [ObservableProperty] private IdleChessPanel _idleChessPanel;
 
     [ObservableProperty] private CursorSelector _chessBoardCursor;
@@ -22,11 +25,13 @@ public partial class EditChessBoardViewModel : ObservableObject, IChessBoard
     public EditChessBoardViewModel(
         ILogger<EditChessBoardViewModel> logger,
         IdleChessPanel idleChessPanel,
-        ChessModel chessModel)
+        ChessModel chessModel,
+        GlobalConfig globalConfig)
     {
         Logger = logger;
         ChessModel = chessModel;
         IdleChessPanel = idleChessPanel;
+        GlobalConfig = globalConfig;
 
         Matrix = new List<List<ChessButton>>(Constants.ChessBoardWidth);
         for (int i = 0; i < Constants.ChessBoardHeight; i++)
@@ -107,6 +112,12 @@ public partial class EditChessBoardViewModel : ObservableObject, IChessBoard
 
         this.IdleChessPanel.Reset();
         this.ResetCursor();
+
+        // Set King back.
+        this.SetChessAtPosition(new King(Color.RED), new Position(5, 0), out _);
+        this.SetChessAtPosition(new King(Color.BLACK), new Position(5, 9), out _);
+        this.IdleChessPanel.RemoveChess(new King(Color.RED));
+        this.IdleChessPanel.RemoveChess(new King(Color.BLACK));
     }
 
     public Chess GetChessAtPosition(Position position)
@@ -183,7 +194,7 @@ public partial class EditChessBoardViewModel : ObservableObject, IChessBoard
         }
         else
         {
-            if (ChessBoardCursor.Chess != null)
+            if (ChessBoardCursor.Chess != null && ChessBoardCursor.Chess is not King)
             {
                 // move chess
                 IdleChessPanel.InsertChess(ChessBoardCursor.Chess);
@@ -197,5 +208,15 @@ public partial class EditChessBoardViewModel : ObservableObject, IChessBoard
                 this.ResetCursor();
             }
         }
+    }
+
+    [RelayCommand]
+    private void OnRotateChessBoard()
+    {
+        GlobalConfig.IsRotated = !GlobalConfig.IsRotated;
+
+        Iterator.IterateOverChessBoard(position => { Matrix[position.Y][position.X].Refresh(); });
+
+        this.ChessBoardCursor.Refresh();
     }
 }

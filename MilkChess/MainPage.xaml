@@ -9,7 +9,7 @@
              x:Class="MilkChess.MainPage">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="{Binding ChessBoardVisualHeight}" />
+            <RowDefinition Height="{Binding GlobalConfig.ChessBoardVisualHeight}" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         <Grid Grid.Row="0" ColumnDefinitions="Auto,Auto,Auto">
@@ -19,9 +19,9 @@
                 <AbsoluteLayout
                     AnchorX="0"
                     AnchorY="0"
-                    WidthRequest="{Binding ChessBoardVisualWidth}"
-                    HeightRequest="{Binding ChessBoardVisualHeight}"
-                    Scale="{Binding ChessBoardScale}"
+                    WidthRequest="{Binding GlobalConfig.ChessBoardVisualWidth}"
+                    HeightRequest="{Binding GlobalConfig.ChessBoardVisualHeight}"
+                    Scale="{Binding GlobalConfig.ChessBoardScale}"
                     x:Name="ChessBoardLayout">
                     <Image
                         ZIndex="{x:Static userInterface:UIConstants.BackgroundZIndex}"
@@ -118,7 +118,7 @@
                         Command="{Binding InvokeBestMovementCommand}" />
 
                 <Button Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="2" Text="RotateBoard"
-                        Command="{Binding ReverseBoardCommand}" />
+                        Command="{Binding RotateBoardCommand}" />
 
                 <Button Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="2" Text="SaveLayout"
                         Command="{Binding SaveChessManualCommand}" />
@@ -128,7 +128,7 @@
                     Grid.ColumnSpan="2"
                     Minimum="0.65"
                     Maximum="2.0"
-                    Value="{Binding ChessBoardScale}" />
+                    Value="{Binding GlobalConfig.ChessBoardScale}" />
             </Grid>
             <VerticalStackLayout
                 Grid.Column="2"
