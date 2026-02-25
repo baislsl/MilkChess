@@ -20,5 +20,5 @@
 - [x] 编辑局面时锁定老将
 - [ ] History过长展示被截断
 - [ ] Convertor,减轻VM对UI逻辑的感知
-- [ ] 编辑页面右键删除棋子
+- [x] 编辑页面右键删除棋子
 - [x] AbsoluteLayout scale

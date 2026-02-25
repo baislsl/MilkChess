@@ -45,6 +45,7 @@ public partial class EditChessBoardViewModel : ObservableObject, IChessBoard
 
             // chessButton.Released += this.WrapEventHandler(this.OnChessSelected);
             chessButton.Command = ChessClickedCommand;
+            chessButton.RightClickCommand = ChessRightClickedCommand;
             chessButton.CommandParameter = chessButton;
 
             Matrix[position.Y][position.X] = chessButton;
@@ -147,10 +148,23 @@ public partial class EditChessBoardViewModel : ObservableObject, IChessBoard
     }
 
     [RelayCommand]
+    private void OnChessRightClicked(ChessButton clickedButton)
+    {
+        Logger.LogInformation("Right clicked {} {}", clickedButton.Position, clickedButton.Chess);
+        if (clickedButton.Chess != null)
+        {
+            // move chess
+            IdleChessPanel.InsertChess(clickedButton.Chess);
+            SetChessAtPosition(null, clickedButton.Position, out _);
+
+            this.ResetCursor();
+        }
+    }
+
+    [RelayCommand]
     private void OnChessClicked(ChessButton clickedButton)
     {
-        Logger.LogInformation(
-            $"Clicked {clickedButton.Position} {clickedButton.Chess};");
+        Logger.LogInformation("Clicked {} {}", clickedButton.Position, clickedButton.Chess);
 
         if (clickedButton.Chess == null)
         {
@@ -198,9 +212,8 @@ public partial class EditChessBoardViewModel : ObservableObject, IChessBoard
             {
                 // move chess
                 IdleChessPanel.InsertChess(ChessBoardCursor.Chess);
-                IdleChessPanel.ResetCursor();
-
                 SetChessAtPosition(null, ChessBoardCursor.Position, out _);
+
                 this.ResetCursor();
             }
             else
