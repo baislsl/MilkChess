@@ -133,14 +133,21 @@
                     Maximum="2.0"
                     Value="{Binding GlobalConfig.ChessBoardScale}" />
             </Grid>
-            <VerticalStackLayout
+            <Grid
                 Grid.Column="2"
                 WidthRequest="200">
-                <Label Text="History Movements:"
-                       FontAttributes="Bold"
-                       Margin="2"
-                       FontSize="18" />
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <Label
+                    Grid.Row="0"
+                    Text="History Movements:"
+                    FontAttributes="Bold"
+                    Margin="2"
+                    FontSize="18" />
                 <CollectionView
+                    Grid.Row="1"
                     BackgroundColor="LightBlue"
                     ItemsUpdatingScrollMode="KeepLastItemInView"
                     ItemsSource="{Binding HistoryManager.Movements}">
@@ -148,7 +155,7 @@
                         <DataTemplate>
                             <Border
                                 WidthRequest="190"
-                                HeightRequest="20"
+                                HeightRequest="24"
                                 BackgroundColor="LightGray"
                                 Padding="6,0"
                                 Margin="1">
@@ -175,7 +182,7 @@
                         </DataTemplate>
                     </CollectionView.ItemTemplate>
                 </CollectionView>
-            </VerticalStackLayout>
+            </Grid>
         </Grid>
         <Grid Grid.Row="1" RowDefinitions="Auto,*">
             <Label
