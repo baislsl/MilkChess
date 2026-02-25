@@ -117,8 +117,11 @@
                 <Button Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2" Text="UseBestMovement"
                         Command="{Binding InvokeBestMovementCommand}" />
 
-                <Button Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="2" Text="RotateBoard"
+                <Button Grid.Row="7" Grid.Column="0" Text="RotateBoard"
                         Command="{Binding RotateBoardCommand}" />
+
+                <Button Grid.Row="7" Grid.Column="1" Text="ExchangeTurn"
+                        Command="{Binding ExchangeTurnCommand}" />
 
                 <Button Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="2" Text="SaveLayout"
                         Command="{Binding SaveChessManualCommand}" />

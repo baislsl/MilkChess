@@ -97,4 +97,11 @@ public partial class HistoryManager : ObservableObject
         this.Cursor = 0;
         this.ExecutionTurn = Color.RED;
     }
+
+    public void ExchangeTurn()
+    {
+        this.ExecutionTurn = this.ExecutionTurn.Reverse();
+        this.Movements.Clear();
+        this.Cursor = 0;
+    }
 }

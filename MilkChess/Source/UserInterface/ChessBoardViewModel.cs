@@ -321,6 +321,11 @@ public partial class ChessBoardViewModel : ObservableObject, IChessBoardContext
         this.MovementIndicator.Refresh();
     }
 
+    private void ExchangeTurn()
+    {
+        this.HistoryManager.ExchangeTurn();
+    }
+
     private void InvokeBestMovement()
     {
         Movement movement = this.MovementIndicator?.Movement;

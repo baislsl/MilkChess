@@ -180,6 +180,13 @@ public partial class ChessBoardViewModel
             this.CommonCommandMiddleware());
 
     [RelayCommand]
+    private void OnExchangeTurn() =>
+        CommandMiddlewareHelper.Execute(
+            this.ExchangeTurn,
+            this.RefreshEngineCommandMiddleware(),
+            this.CommonCommandMiddleware());
+
+    [RelayCommand]
     private void OnSaveChessManual() =>
         CommandMiddlewareHelper.Execute(
             this.SaveChessManual,
