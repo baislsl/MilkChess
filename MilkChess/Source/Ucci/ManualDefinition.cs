@@ -54,54 +54,30 @@ public static class MovementExtension
         return true;
     }
 
-    public static bool ParseUnifyStringMovement(this IChessBoard chessBoard, string unifyString, out Movement movement)
+    public static Movement CreateMovement(this IChessBoard chessBoard, Position from, Position to)
     {
-        movement = null;
+        var movement = new Movement()
+        {
+            From = from,
+            To = to,
+        };
 
-        if (!ParseMovementFromUnifyString(unifyString, out movement))
-        {
-            return false;
-        }
-
-        if (chessBoard is IChessBoardContext chessBoardContext)
-        {
-            chessBoardContext.PopulateMovementWithContext(movement);
-        }
-        else
-        {
-            chessBoard.PopulateMovement(movement);
-        }
+        chessBoard.PopulateMovement(movement);
 
         if (movement.MovedChess == null)
         {
-            return false;
+            throw new ArgumentException("Moved chess is null");
         }
 
         if (!movement.MovedChess.IsValidPosition(movement.To))
         {
-            return false;
+            throw new ArgumentException($"New position {movement.To} is invalid for chess {movement.MovedChess}");
         }
 
-        return true;
+        return movement;
     }
 
-    /*
-     * Movement at list contains from and to position
-     */
-    private static void PopulateMovement(this IChessBoard chessBoard, Movement movement)
-    {
-        movement.MovedChess = chessBoard.GetChessAtPosition(movement.From);
-        movement.RemovedChess = chessBoard.GetChessAtPosition(movement.To);
-        movement.ChineseViewableString = movement.ToChineseViewableString(chessBoard);
-    }
-
-    private static void PopulateMovementWithContext(this IChessBoardContext chessBoardContext, Movement movement)
-    {
-        chessBoardContext.PopulateMovement(movement);
-        movement.ActionCount = chessBoardContext.HistoryManager.GetCursor() + 1;
-    }
-
-    private static bool ParseMovementFromUnifyString(string unifyString, out Movement movement)
+    public static bool ParseUnifyStringMovement(this IChessBoard chessBoard, string unifyString, out Movement movement)
     {
         movement = null;
 
@@ -117,13 +93,32 @@ public static class MovementExtension
             return false;
         }
 
-        movement = new Movement()
+        try
         {
-            From = from,
-            To = to,
-        };
+            movement = chessBoard.CreateMovement(from, to);
+        }
+        catch (Exception)
+        {
+            return false;
+        }
+
 
         return true;
+    }
+
+    /*
+     * Movement at list contains from and to position
+     */
+    public static void PopulateMovement(this IChessBoard chessBoard, Movement movement)
+    {
+        movement.MovedChess = chessBoard.GetChessAtPosition(movement.From);
+        movement.RemovedChess = chessBoard.GetChessAtPosition(movement.To);
+        movement.ChineseViewableString = movement.ToChineseViewableString(chessBoard);
+
+        if (chessBoard is IChessBoardContext chessBoardContext)
+        {
+            movement.ActionCount = chessBoardContext.HistoryManager.GetCursor() + 1;
+        }
     }
 
     // 马二进三

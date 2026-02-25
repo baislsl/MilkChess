@@ -29,6 +29,29 @@ public class Movement
     {
         return $"{ActionCount}. {MovedChess?.Symbol} {From}->{To} {ChineseViewableString}";
     }
+
+    public bool IsRevertibleMovement()
+    {
+        if (RemovedChess != null)
+        {
+            return false;
+        }
+
+        if (MovedChess is Pawn)
+        {
+            if (MovedChess.Color == Color.RED && From.Y == 3 && To.Y == 4)
+            {
+                return false;
+            }
+
+            if (MovedChess.Color == Color.BLACK && From.Y == 6 && To.Y == 5)
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
 }
 
 public class MovementColorConvertor : IMultiValueConverter

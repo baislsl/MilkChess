@@ -1,14 +1,15 @@
 using System.Collections;
 using System.Collections.ObjectModel;
+using System.Text;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.Extensions.Logging;
+using MilkChess.Ucci;
 
 namespace MilkChess.Model;
 
 public partial class HistoryManager : ObservableObject
 {
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(ExecutionTurnColor))]
+    [ObservableProperty] [NotifyPropertyChangedFor(nameof(ExecutionTurnColor))]
     private Color _executionTurn;
 
     public Microsoft.Maui.Graphics.Color ExecutionTurnColor =>
@@ -103,5 +104,31 @@ public partial class HistoryManager : ObservableObject
         this.ExecutionTurn = this.ExecutionTurn.Reverse();
         this.Movements.Clear();
         this.Cursor = 0;
+    }
+
+    public (IChessBoard, List<Movement>, Color) GetUnrevertibleChessBoardTrace(IChessBoard chessBoard)
+    {
+        ChessModel chessModel = new ChessModel(chessBoard);
+
+        Color executionTurn = this.ExecutionTurn;
+        List<Movement> movements = new List<Movement>();
+
+        for (int cursor = this.Cursor - 1; cursor >= 0; cursor--)
+        {
+            var lastMovement = this.Movements[cursor];
+
+            if (lastMovement.IsRevertibleMovement())
+            {
+                movements.Add(lastMovement);
+                chessModel.RevertMovement(lastMovement);
+                executionTurn = executionTurn.Reverse();
+            }
+            else
+            {
+                break;
+            }
+        }
+
+        return (chessModel, movements, executionTurn);
     }
 }

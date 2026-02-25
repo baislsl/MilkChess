@@ -185,7 +185,7 @@ public static class ForsythEdwardsNotationExtension
         return true;
     }
 
-    public static ForsythEdwardsNotation BuildForsythEdwardsNotation(this IChessBoardContext chessBoardContext)
+    public static ForsythEdwardsNotation BuildForsythEdwardsNotation(this IChessBoard chessBoard, Color executionColor)
     {
         List<string> piecePlacement = new List<string>();
         for (int i = 0; i < ChessBoardHeight; i++)
@@ -196,7 +196,7 @@ public static class ForsythEdwardsNotationExtension
             {
                 int start = j;
                 while (j < ChessBoardWidth &&
-                       chessBoardContext.GetChessAtPosition(new Position(j, ChessBoardHeight - 1 - i)) == null)
+                       chessBoard.GetChessAtPosition(new Position(j, ChessBoardHeight - 1 - i)) == null)
                 {
                     j++;
                 }
@@ -207,9 +207,9 @@ public static class ForsythEdwardsNotationExtension
                 }
 
                 while (j < ChessBoardWidth &&
-                       chessBoardContext.GetChessAtPosition(new Position(j, ChessBoardHeight - 1 - i)) != null)
+                       chessBoard.GetChessAtPosition(new Position(j, ChessBoardHeight - 1 - i)) != null)
                 {
-                    Chess chess = chessBoardContext.GetChessAtPosition(new Position(j, ChessBoardHeight - 1 - i));
+                    Chess chess = chessBoard.GetChessAtPosition(new Position(j, ChessBoardHeight - 1 - i));
                     row += chess.ToFenSymbol();
                     j++;
                 }
@@ -221,7 +221,12 @@ public static class ForsythEdwardsNotationExtension
         return new ForsythEdwardsNotation
         {
             PiecePlacement = piecePlacement,
-            ActiveColor = chessBoardContext.HistoryManager.ExecutionTurn
+            ActiveColor = executionColor
         };
+    }
+
+    public static ForsythEdwardsNotation BuildForsythEdwardsNotation(this IChessBoardContext chessBoardContext)
+    {
+        return chessBoardContext.BuildForsythEdwardsNotation(chessBoardContext.HistoryManager.ExecutionTurn);
     }
 }

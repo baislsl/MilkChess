@@ -99,18 +99,7 @@ public partial class ChessBoardViewModel : ObservableObject, IChessBoardContext
             && CursorSelector.Chess.Color == HistoryManager.ExecutionTurn
             && ChessModel.ValidateMovement(CursorSelector.Position, clickedButton.Position))
         {
-            Movement movement = new Movement
-            {
-                MovedChess = CursorSelector.Chess,
-                RemovedChess = clickedButton.Chess,
-                From = CursorSelector.Position,
-                To = clickedButton.Position,
-                ActionCount = HistoryManager.GetCursor() + 1,
-            };
-
-            // 存下招法中文表示
-            movement.ChineseViewableString =
-                movement.ToChineseViewableString(this);
+            var movement = this.CreateMovement(CursorSelector.Position, clickedButton.Position);
 
             Logger.LogInformation("Execute movement {}", movement);
 
@@ -328,13 +317,16 @@ public partial class ChessBoardViewModel : ObservableObject, IChessBoardContext
 
     private void InvokeBestMovement()
     {
-        Movement movement = this.MovementIndicator?.Movement;
+        var movement = this.MovementIndicator?.Movement;
+
         if (movement != null)
         {
             Logger.LogInformation("[InvokeBestMovement] {}", movement);
 
-            this.ApplyMovement(movement);
-            HistoryManager.InsertMovement(movement);
+            var newMovement = this.CreateMovement(movement.From, movement.To);
+
+            this.ApplyMovement(newMovement);
+            HistoryManager.InsertMovement(newMovement);
         }
     }
 

@@ -347,7 +347,24 @@ public partial class UcciEngine : ObservableObject, IUcciEngine
 
     private void SetFenPosition(IChessBoardContext chessBoardContext)
     {
-        this.SendCommand($"{Command.Position} fen {chessBoardContext.BuildForsythEdwardsNotation().GetFenString()}");
+        var (chessBoard, movements, executionTurn) =
+            chessBoardContext.HistoryManager.GetUnrevertibleChessBoardTrace(chessBoardContext);
+
+        StringBuilder command = new($"{Command.Position} fen ");
+
+        command.Append(chessBoard.BuildForsythEdwardsNotation(executionTurn).GetFenString());
+
+        if (movements.Any())
+        {
+            command.Append(" moves");
+            movements.Reverse();
+            foreach (var movement in movements)
+            {
+                command.Append(" ").Append(movement.ToUnifyString());
+            }
+        }
+
+        this.SendCommand(command.ToString());
     }
 
     private InfoFeedback ParseIntoFeedback(UcciFeedback ucciFeedback, IChessBoardContext chessBoardContext)

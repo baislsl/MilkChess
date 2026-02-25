@@ -184,7 +184,9 @@
                 </CollectionView>
             </Grid>
         </Grid>
-        <Grid Grid.Row="1" RowDefinitions="Auto,*">
+        <Grid
+            Grid.Row="1"
+            RowDefinitions="Auto,*">
             <Label
                 TextColor="{Binding EngineFeedback.ScoreColor}"
                 FontSize="20"

@@ -115,8 +115,8 @@ public partial class EditChessBoardViewModel : ObservableObject, IChessBoard
         this.ResetCursor();
 
         // Set King back.
-        this.SetChessAtPosition(new King(Color.RED), new Position(5, 0), out _);
-        this.SetChessAtPosition(new King(Color.BLACK), new Position(5, 9), out _);
+        this.SetChessAtPosition(new King(Color.RED), new Position(4, 0), out _);
+        this.SetChessAtPosition(new King(Color.BLACK), new Position(4, 9), out _);
         this.IdleChessPanel.RemoveChess(new King(Color.RED));
         this.IdleChessPanel.RemoveChess(new King(Color.BLACK));
     }
