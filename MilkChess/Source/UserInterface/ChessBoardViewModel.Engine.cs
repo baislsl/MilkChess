@@ -2,13 +2,13 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.Extensions.Logging;
 using MilkChess.Engine;
 using MilkChess.Model;
-using MilkChess.Ucci;
+using MilkChess.Protocol;
 
 namespace MilkChess.UserInterface;
 
 public partial class ChessBoardViewModel
 {
-    [ObservableProperty] private UcciEngine _engine;
+    [ObservableProperty] private UciEngine _engine;
 
     private void DispatchAction(Action action, bool wait = false)
     {
@@ -47,7 +47,7 @@ public partial class ChessBoardViewModel
     {
         if (this.Engine == null)
         {
-            this.InitializeUcciEngine();
+            this.InitializeUciEngine();
         }
         else
         {
@@ -55,19 +55,19 @@ public partial class ChessBoardViewModel
         }
     }
 
-    public void InitializeUcciEngine()
+    public void InitializeUciEngine()
     {
         Logger.LogInformation("Initailzing engine...");
-        Engine = ServiceProvider.GetService<UcciEngine>();
+        Engine = ServiceProvider.GetService<UciEngine>();
 
         CancellationTokenSource cancellationTokenSource =
             new CancellationTokenSource(TimeSpan.FromSeconds(this.Config.Engine.ConnectionTimeoutSeconds));
 
         var startUciFeedback = Engine.StartUci(cancellationTokenSource.Token); // EngineState = Connected
 
-        if (!startUciFeedback.ReceivedUcciOk)
+        if (!startUciFeedback.ReceivedUciOk)
         {
-            throw new Exception("Ucci start failed");
+            throw new Exception("Uci start failed");
         }
         else
         {
@@ -86,10 +86,10 @@ public partial class ChessBoardViewModel
 
         this.InteractiveMode = EngineInteractiveMode.IdleMode;
 
-        RefreshUcciEngine();
+        RefreshUciEngine();
     }
 
-    private void RefreshUcciEngine()
+    private void RefreshUciEngine()
     {
         if (this.Engine == null) return;
 

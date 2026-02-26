@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Logging;
 using MilkChess.Model;
-using MilkChess.Ucci;
+using MilkChess.Protocol;
 
 namespace MilkChessTest;
 

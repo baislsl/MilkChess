@@ -1,8 +1,8 @@
 using MilkChess.Model;
 using Color = MilkChess.Model.Color;
-using static MilkChess.Ucci.Constants;
+using static MilkChess.Protocol.Constants;
 
-namespace MilkChess.Ucci;
+namespace MilkChess.Protocol;
 
 public interface IChessManualTranslator
 {

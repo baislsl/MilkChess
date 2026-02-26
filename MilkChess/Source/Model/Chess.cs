@@ -1,4 +1,4 @@
-using MilkChess.Ucci;
+using MilkChess.Protocol;
 
 namespace MilkChess.Model;
 
@@ -81,13 +81,13 @@ public abstract class Chess : ICloneable
 
     public override bool Equals(object obj)
     {
-        if (obj is not Chess otherPerson)
+        if (obj is not Chess otherChess)
         {
             return false;
         }
         else
         {
-            return this.ChessDefinition.Equals(otherPerson.ChessDefinition) && this.Color.Equals(otherPerson.Color);
+            return this.ChessDefinition.Equals(otherChess.ChessDefinition) && this.Color.Equals(otherChess.Color);
         }
     }
 

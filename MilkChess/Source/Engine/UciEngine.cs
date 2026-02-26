@@ -4,53 +4,53 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MilkChess.Helper;
 using MilkChess.Model;
-using MilkChess.Ucci;
-using Command = MilkChess.Ucci.Command;
+using MilkChess.Protocol;
+using Command = MilkChess.Protocol.Command;
 
 namespace MilkChess.Engine;
 
-public partial class UcciEngine : ObservableObject, IUcciEngine
+public partial class UciEngine : ObservableObject, IUciEngine
 {
     [ObservableProperty] private EngineState state = EngineState.Disconnected;
 
-    private readonly INativeUcciEngine NativeUcciEngine;
+    private readonly INativeUciEngine NativeUciEngine;
     private readonly MilkChessConfig Config;
     private readonly ILogger Logger;
 
     private CancellationTokenSource cancellationTokenSource;
     private Task thinkingTask;
 
-    public UcciEngine(ILogger<UcciEngine> logger, LocalExecutableEngine localExecutableEngine,
+    public UciEngine(ILogger<UciEngine> logger, LocalExecutableEngine localExecutableEngine,
         IOptions<MilkChessConfig> config)
     {
         this.Logger = logger;
-        this.NativeUcciEngine = localExecutableEngine;
+        this.NativeUciEngine = localExecutableEngine;
         this.Config = config.Value;
     }
 
     public StartUciFeedback StartUci(CancellationToken cancellationToken)
     {
-        NativeUcciEngine.Initialize();
+        NativeUciEngine.Initialize();
         this.State = EngineState.Connected;
 
-        this.SendCommand(Command.Ucci);
+        this.SendCommand(Command.Uci);
 
         StartUciFeedback feedback = new StartUciFeedback();
-        while (!cancellationToken.IsCancellationRequested && !feedback.ReceivedUcciOk)
+        while (!cancellationToken.IsCancellationRequested && !feedback.ReceivedUciOk)
         {
             Logger.LogInformation("Loop");
-            UcciFeedback ucciFeedback = this.NativeUcciEngine.GetFeedbackAsync(cancellationToken).Result;
-            if (ucciFeedback == null) continue;
+            UciFeedback UciFeedback = this.NativeUciEngine.GetFeedbackAsync(cancellationToken).Result;
+            if (UciFeedback == null) continue;
 
-            if (ucciFeedback.Command == FeedbackCommand.UciOk)
+            if (UciFeedback.Command == FeedbackCommand.UciOk)
             {
-                feedback.ReceivedUcciOk = true;
+                feedback.ReceivedUciOk = true;
             }
-            else if (ucciFeedback.Command == FeedbackCommand.Id)
+            else if (UciFeedback.Command == FeedbackCommand.Id)
             {
-                feedback.ID[ucciFeedback.IdName] = ucciFeedback.IdValue;
+                feedback.ID[UciFeedback.IdName] = UciFeedback.IdValue;
             }
-            else if (ucciFeedback.Command == FeedbackCommand.Info)
+            else if (UciFeedback.Command == FeedbackCommand.Info)
             {
                 // TODO: skip
             }
@@ -64,8 +64,8 @@ public partial class UcciEngine : ObservableObject, IUcciEngine
         this.SendCommand(Command.IsReady);
         while (!cancellationToken.IsCancellationRequested)
         {
-            UcciFeedback ucciFeedback = this.NativeUcciEngine.GetFeedbackAsync(cancellationToken).Result;
-            if (ucciFeedback?.Command == FeedbackCommand.ReadyOk)
+            UciFeedback UciFeedback = this.NativeUciEngine.GetFeedbackAsync(cancellationToken).Result;
+            if (UciFeedback?.Command == FeedbackCommand.ReadyOk)
             {
                 Logger.LogError("Engine IsReady");
                 this.State = EngineState.Ready;
@@ -205,10 +205,10 @@ public partial class UcciEngine : ObservableObject, IUcciEngine
     {
         while (!cancellationToken.IsCancellationRequested)
         {
-            UcciFeedback feedback;
+            UciFeedback feedback;
             try
             {
-                feedback = await this.NativeUcciEngine.GetFeedbackAsync(cancellationToken).ConfigureAwait(false);
+                feedback = await this.NativeUciEngine.GetFeedbackAsync(cancellationToken).ConfigureAwait(false);
             }
             catch (Exception ex) when (ExceptionUtil.GetInnerMostException(ex) is TaskCanceledException)
             {
@@ -292,7 +292,7 @@ public partial class UcciEngine : ObservableObject, IUcciEngine
     {
         this.SendCommand(Command.Quit);
 
-        this.NativeUcciEngine.Dispose();
+        this.NativeUciEngine.Dispose();
     }
 
     private string BuildGoCommand(GoOption option)
@@ -342,7 +342,7 @@ public partial class UcciEngine : ObservableObject, IUcciEngine
     private void SendCommand(string command)
     {
         Logger.LogInformation($"[Send] {command}");
-        this.NativeUcciEngine.SendCommand(command);
+        this.NativeUciEngine.SendCommand(command);
     }
 
     private void SetFenPosition(IChessBoardContext chessBoardContext)
@@ -367,17 +367,17 @@ public partial class UcciEngine : ObservableObject, IUcciEngine
         this.SendCommand(command.ToString());
     }
 
-    private InfoFeedback ParseIntoFeedback(UcciFeedback ucciFeedback, IChessBoardContext chessBoardContext)
+    private InfoFeedback ParseIntoFeedback(UciFeedback UciFeedback, IChessBoardContext chessBoardContext)
     {
-        if (ucciFeedback.Command != FeedbackCommand.Info)
+        if (UciFeedback.Command != FeedbackCommand.Info)
         {
             throw new Exception("Not info feedback command");
         }
 
         var feedback = new InfoFeedback()
         {
-            Pv = ucciFeedback.InfoPv,
-            Info = ucciFeedback.InfoDict,
+            Pv = UciFeedback.InfoPv,
+            Info = UciFeedback.InfoDict,
         };
 
         Logger.LogDebug("[PopulateIntoFeedback] {}", feedback);

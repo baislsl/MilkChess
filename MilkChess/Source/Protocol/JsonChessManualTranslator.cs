@@ -2,7 +2,7 @@ using System.Xml.Serialization;
 using MilkChess.Helper;
 using MilkChess.Model;
 
-namespace MilkChess.Ucci;
+namespace MilkChess.Protocol;
 
 public class JsonChessManualTranslator : IChessManualTranslator
 {

@@ -1,6 +1,6 @@
 using MilkChess.Model;
 
-namespace MilkChess.Ucci;
+namespace MilkChess.Protocol;
 
 /**
  * PGN definition

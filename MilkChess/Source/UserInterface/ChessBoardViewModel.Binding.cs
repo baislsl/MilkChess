@@ -223,7 +223,7 @@ public partial class ChessBoardViewModel
             {
                 this.StopEngine();
                 command.Execute(_);
-                RefreshUcciEngine();
+                RefreshUciEngine();
             });
         };
     }
@@ -237,7 +237,7 @@ public partial class ChessBoardViewModel
                 this.StopEngine();
 
                 await next();
-                RefreshUcciEngine();
+                RefreshUciEngine();
             };
         };
     }

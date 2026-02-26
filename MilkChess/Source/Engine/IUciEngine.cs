@@ -4,15 +4,15 @@ using MilkChess.Model;
 
 namespace MilkChess.Engine;
 
-internal interface INativeUcciEngine : IDisposable
+internal interface INativeUciEngine : IDisposable
 {
     void Initialize();
 
     public void SendCommand(string command);
 
-    public UcciFeedback GetFeedback();
+    public UciFeedback GetFeedback();
 
-    public Task<UcciFeedback> GetFeedbackAsync(CancellationToken cancellationToken);
+    public Task<UciFeedback> GetFeedbackAsync(CancellationToken cancellationToken);
 }
 
 public enum EngineState
@@ -23,7 +23,7 @@ public enum EngineState
     Thinking,
 }
 
-internal interface IUcciEngine
+internal interface IUciEngine
 {
     public EngineState State { get; }
 
@@ -121,7 +121,7 @@ public class StartUciFeedback
     public Dictionary<string, string> ID { get; set; }
     public List<string> Options { get; set; }
 
-    public bool ReceivedUcciOk { get; set; }
+    public bool ReceivedUciOk { get; set; }
 
     public StartUciFeedback()
     {

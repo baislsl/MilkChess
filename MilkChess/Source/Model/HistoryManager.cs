@@ -3,7 +3,7 @@ using System.Collections.ObjectModel;
 using System.Text;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.Extensions.Logging;
-using MilkChess.Ucci;
+using MilkChess.Protocol;
 
 namespace MilkChess.Model;
 

@@ -39,12 +39,14 @@ public class Movement
 
         if (MovedChess is Pawn)
         {
-            if (MovedChess.Color == Color.RED && From.Y == 3 && To.Y == 4)
+            if (MovedChess.Color == Color.RED
+                && (From.Y == 3 && To.Y == 4 || From.Y == 4 && To.Y == 5))
             {
                 return false;
             }
 
-            if (MovedChess.Color == Color.BLACK && From.Y == 6 && To.Y == 5)
+            if (MovedChess.Color == Color.BLACK
+                && (From.Y == 6 && To.Y == 5 || From.Y == 5 && To.Y == 4))
             {
                 return false;
             }

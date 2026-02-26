@@ -1,6 +1,6 @@
 using MilkChess;
 using MilkChess.Model;
-using MilkChess.Ucci;
+using MilkChess.Protocol;
 using static MilkChess.Model.Color;
 
 namespace MilkChessTest;

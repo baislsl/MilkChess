@@ -19,7 +19,7 @@ public class EngineTest
         var engine = new LocalExecutableEngine(
             app.Services.GetService<IOptions<MilkChessConfig>>(),
             app.Services.GetService<ILogger<LocalExecutableEngine>>(),
-            app.Services.GetService<UcciLogger>());
+            app.Services.GetService<UciLogger>());
         engine.Initialize();
         engine.SendCommand("uci");
         string ret = null;

@@ -1,7 +1,7 @@
 using System.Collections;
 using Microsoft.Extensions.Logging;
 using MilkChess.Helper;
-using MilkChess.Ucci;
+using MilkChess.Protocol;
 using static MilkChess.Model.Color;
 
 namespace MilkChess.Model;

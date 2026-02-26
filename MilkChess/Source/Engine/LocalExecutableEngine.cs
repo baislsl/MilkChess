@@ -6,19 +6,19 @@ using MilkChess.Helper;
 
 namespace MilkChess.Engine;
 
-public class LocalExecutableEngine : INativeUcciEngine
+public class LocalExecutableEngine : INativeUciEngine
 {
-    private readonly UcciLogger UcciLogger;
+    private readonly UciLogger UciLogger;
     private readonly ILogger<LocalExecutableEngine> Logger;
     private readonly MilkChessConfig Config;
 
     private Process Process;
 
     public LocalExecutableEngine(IOptions<MilkChessConfig> config, ILogger<LocalExecutableEngine> logger,
-        UcciLogger ucciLogger)
+        UciLogger UciLogger)
     {
         this.Logger = logger;
-        this.UcciLogger = ucciLogger;
+        this.UciLogger = UciLogger;
         this.Config = config.Value;
     }
 
@@ -45,39 +45,39 @@ public class LocalExecutableEngine : INativeUcciEngine
 
     public void SendCommand(string command)
     {
-        this.UcciLogger.WriteCommand(command);
+        this.UciLogger.WriteCommand(command);
         this.Process.StandardInput.WriteLine(command);
     }
 
-    public async Task<UcciFeedback> GetFeedbackAsync(CancellationToken cancellationToken)
+    public async Task<UciFeedback> GetFeedbackAsync(CancellationToken cancellationToken)
     {
         string feedback = await this.Process.StandardOutput.ReadLineAsync(cancellationToken).ConfigureAwait(false);
-        this.UcciLogger.WriteFeedback(feedback);
+        this.UciLogger.WriteFeedback(feedback);
 
-        if (!UcciFeedback.TryParse(feedback, out UcciFeedback ucciFeedback))
+        if (!UciFeedback.TryParse(feedback, out UciFeedback uciFeedback))
         {
             Logger.LogError("Can't parse feedback: {Feedback}", feedback);
             return null;
         }
         else
         {
-            return ucciFeedback;
+            return uciFeedback;
         }
     }
 
-    public UcciFeedback GetFeedback()
+    public UciFeedback GetFeedback()
     {
         string feedback = this.Process.StandardOutput.ReadLine();
-        this.UcciLogger.WriteFeedback(feedback);
+        this.UciLogger.WriteFeedback(feedback);
 
-        if (!UcciFeedback.TryParse(feedback, out UcciFeedback ucciFeedback))
+        if (!UciFeedback.TryParse(feedback, out UciFeedback uciFeedback))
         {
             Logger.LogError("Can't parse feedback: {Feedback}", feedback);
             return null;
         }
         else
         {
-            return ucciFeedback;
+            return uciFeedback;
         }
     }
 
@@ -85,6 +85,6 @@ public class LocalExecutableEngine : INativeUcciEngine
     public void Dispose()
     {
         this.Process?.Dispose();
-        this.UcciLogger.Dispose();
+        this.UciLogger.Dispose();
     }
 }

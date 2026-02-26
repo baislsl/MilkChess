@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MilkChess.Helper;
 using MilkChess.Model;
-using MilkChess.Ucci;
+using MilkChess.Protocol;
 using Color = Microsoft.Maui.Graphics.Color;
 
 namespace MilkChess.UserInterface;
@@ -108,7 +108,7 @@ public partial class ChessBoardViewModel : ObservableObject, IChessBoardContext
 
             CursorSelector.Position = clickedButton.Position;
 
-            RefreshUcciEngine();
+            RefreshUciEngine();
         }
         else
         {

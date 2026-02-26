@@ -1,4 +1,4 @@
-﻿namespace MilkChess.Ucci;
+﻿namespace MilkChess.Protocol;
 
 public static class Constants
 {
@@ -29,7 +29,7 @@ public static class Constants
 
 public static class Command
 {
-    public const string Ucci = "uci";
+    public const string Uci = "uci";
 
     public const string IsReady = "isready";
 

@@ -21,7 +21,7 @@ public enum SubInfoCommand
     Message,
 }
 
-public class UcciFeedback
+public class UciFeedback
 {
     public string RawCommand;
     public FeedbackCommand Command;
@@ -60,9 +60,9 @@ public class UcciFeedback
         return this.RawCommand;
     }
 
-    public static bool TryParse(string s, out UcciFeedback feedback)
+    public static bool TryParse(string s, out UciFeedback feedback)
     {
-        feedback = new UcciFeedback();
+        feedback = new UciFeedback();
         feedback.RawCommand = s;
 
         if (string.IsNullOrEmpty(s))

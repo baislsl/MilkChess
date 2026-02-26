@@ -4,7 +4,7 @@ using MilkChess.Helper;
 
 namespace MilkChess.Engine;
 
-public class UcciLogger
+public class UciLogger
 {
     private readonly object obj = new();
 
@@ -12,7 +12,7 @@ public class UcciLogger
 
     private readonly StreamWriter writer;
 
-    public UcciLogger(IOptions<MilkChessConfig> config)
+    public UciLogger(IOptions<MilkChessConfig> config)
     {
         string logFile = config.Value.Engine.Log;
 

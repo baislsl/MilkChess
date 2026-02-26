@@ -3,7 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
 using MilkChess.Helper;
 using MilkChess.Model;
-using MilkChess.Ucci;
+using MilkChess.Protocol;
 using Color = MilkChess.Model.Color;
 
 namespace MilkChess.UserInterface;
