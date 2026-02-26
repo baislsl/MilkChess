@@ -354,7 +354,7 @@ public partial class UcciEngine : ObservableObject, IUcciEngine
 
         command.Append(chessBoard.BuildForsythEdwardsNotation(executionTurn).GetFenString());
 
-        if (movements.Any())
+        if (movements.Count != 0)
         {
             command.Append(" moves");
             movements.Reverse();

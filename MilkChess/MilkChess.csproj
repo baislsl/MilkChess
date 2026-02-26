@@ -1,11 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <!--        <TargetFrameworks>net6.0;net6.0-android;net6.0-ios;net6.0-maccatalyst</TargetFrameworks>-->
         <TargetFrameworks>net8.0;net8.0-maccatalyst</TargetFrameworks>
         <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net6.0-windows10.0.19041.0</TargetFrameworks>
-        <!-- Uncomment to also build the tizen app. You will need to install tizen by following this: https://github.com/Samsung/Tizen.NET -->
-        <!-- <TargetFrameworks>$(TargetFrameworks);net6.0-tizen</TargetFrameworks> -->
         <OutputType>Exe</OutputType>
         <RootNamespace>MilkChess</RootNamespace>
         <UseMaui>true</UseMaui>
@@ -16,7 +13,7 @@
         <ApplicationTitle>MilkChess</ApplicationTitle>
 
         <!-- App Identifier -->
-        <ApplicationId>com.companyname.milkchess</ApplicationId>
+        <ApplicationId>me.baislsl.milkchess</ApplicationId>
         <ApplicationIdGuid>8F9B160A-C1E6-4D7A-AA0B-1B59878E9635</ApplicationIdGuid>
 
         <!-- Versions -->
@@ -33,10 +30,10 @@
 
     <ItemGroup>
         <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
-        <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="7.0.0" />
-        <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="7.0.0" />
-        <PackageReference Include="Microsoft.Extensions.Configuration.Ini" Version="7.0.0" />
-        <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="7.0.0" />
+        <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="10.0.3" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="10.0.3" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.Ini" Version="10.0.3" />
+        <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.3" />
         <PackageReference Include="Microsoft.Maui.Controls" Version="8.0.100" />
     </ItemGroup>
 
