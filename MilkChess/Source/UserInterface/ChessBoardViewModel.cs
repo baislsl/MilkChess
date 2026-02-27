@@ -21,6 +21,8 @@ public partial class ChessBoardViewModel : ObservableObject, IChessBoardContext
 
     private readonly MilkChessConfig Config;
 
+    private readonly MilkChessConfigService MilkChessConfigService;
+
     [ObservableProperty] private GlobalConfig _globalConfig;
 
     [ObservableProperty] private CursorSelector _cursorSelector;
@@ -38,17 +40,19 @@ public partial class ChessBoardViewModel : ObservableObject, IChessBoardContext
         ILogger<ChessBoardViewModel> logger,
         HistoryManager historyManager,
         ChessModel chessModel,
-        IOptions<MilkChessConfig> milkChessConfig,
+        MilkChessConfig milkChessConfig,
         GlobalConfig globalConfig,
-        EngineFeedback engineFeedback)
+        EngineFeedback engineFeedback,
+        MilkChessConfigService milkChessConfigService)
     {
         ChessModel = chessModel;
         Logger = logger;
         HistoryManager = historyManager;
         ServiceProvider = serviceProvider;
-        Config = milkChessConfig.Value;
+        Config = milkChessConfig;
         EngineFeedback = engineFeedback;
         GlobalConfig = globalConfig;
+        MilkChessConfigService = milkChessConfigService;
 
         Matrix = new List<List<ChessButton>>(Constants.ChessBoardWidth);
         for (int i = 0; i < Constants.ChessBoardHeight; i++)
@@ -201,6 +205,19 @@ public partial class ChessBoardViewModel : ObservableObject, IChessBoardContext
         }
     }
 
+    private async Task ConfigureEngineAsync()
+    {
+        var configureEnginePage = ServiceProvider.GetRequiredService<EngineConfigPage>();
+
+        if (Application.Current == null || Application.Current.MainPage == null)
+        {
+            Logger.LogError("Null application context");
+            return;
+        }
+
+        await Application.Current.MainPage.Navigation.PushModalAsync(configureEnginePage);
+    }
+
     private void MoveForward()
     {
         Movement movement = HistoryManager.MoveForward();
@@ -245,56 +262,21 @@ public partial class ChessBoardViewModel : ObservableObject, IChessBoardContext
         }
     }
 
-    private string GetDataDirectory()
-    {
-        return Path.Combine(FileSystem.Current.AppDataDirectory,
-            Config.PathDefinition.Root,
-            Config.PathDefinition.DataPath);
-    }
-
-    private string GetChessManualFile()
-    {
-        return Path.Combine(GetDataDirectory(), "Chess.txt");
-    }
-
     private void SaveChessManual()
     {
-        string targetDirectory = GetDataDirectory();
-        if (!Directory.Exists(targetDirectory))
-        {
-            Directory.CreateDirectory(targetDirectory);
-        }
-
-        string targetFile = GetChessManualFile();
-        if (File.Exists(targetFile))
-        {
-            File.Delete(targetFile);
-        }
-
-        using FileStream outputStream = File.OpenWrite(targetFile);
-
-        ForsythEdwardsNotationManualTranslator translator = new ForsythEdwardsNotationManualTranslator();
-        translator.SaveToStream(outputStream, this);
-
-        Logger.LogTrace("Saved chess manual to {}", targetFile);
+        Config.LastChessBoardFen = this.BuildForsythEdwardsNotation().GetFenString();
+        MilkChessConfigService.Save(Config);
     }
 
     private bool LoadChessManual()
     {
-        string targetFile = GetChessManualFile();
-        if (File.Exists(targetFile))
+        if (ForsythEdwardsNotation.ParseString(Config.LastChessBoardFen, out ForsythEdwardsNotation forsythEdwardsNotation))
         {
-            try
-            {
-                ForsythEdwardsNotationManualTranslator translator = new ForsythEdwardsNotationManualTranslator();
-                using FileStream inputStream = File.OpenRead(targetFile);
-                translator.LoadFromStream(inputStream, this);
-                return true;
-            }
-            catch (Exception e)
-            {
-                Logger.LogError(e, "LoadChessManual exception");
-            }
+            this.AdoptForsythEdwardsNotation(forsythEdwardsNotation);
+        }
+        else
+        {
+            Logger.LogError("Invalid fen string {Config.LastFenChessBoard}", Config.LastChessBoardFen);
         }
 
         return false;

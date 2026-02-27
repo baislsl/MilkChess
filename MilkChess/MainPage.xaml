@@ -94,7 +94,7 @@
                             Text="Go back"
                             Command="{Binding MoveBackwardCommand}" />
                     <Button Grid.Row="1" Grid.Column="1"
-                            Text="Move forward"
+                            Text="Go forward"
                             Command="{Binding MoveForwardCommand}" />
 
                     <Button Grid.Row="2" Grid.Column="0"
@@ -135,7 +135,11 @@
                             Text="BlackAutoMode"
                             Command="{Binding SwitchToBlackAutoModeCommand}" />
 
-                    <Button Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="2"
+                    <Button Grid.Row="7" Grid.Column="0"
+                            Text="ConfigureEngine"
+                            Command="{Binding ConfigureEngineCommand}" />
+
+                    <Button Grid.Row="7" Grid.Column="1"
                             Text="InvokeBestMovement"
                             Command="{Binding InvokeBestMovementCommand}" />
 

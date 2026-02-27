@@ -12,9 +12,9 @@ public class UciLogger
 
     private readonly StreamWriter writer;
 
-    public UciLogger(IOptions<MilkChessConfig> config)
+    public UciLogger(MilkChessConfig config)
     {
-        string logFile = config.Value.Engine.Log;
+        string logFile = config.EngineConfig.Log;
 
         if (!string.IsNullOrWhiteSpace(logFile))
         {

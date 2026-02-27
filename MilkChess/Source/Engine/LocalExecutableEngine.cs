@@ -14,26 +14,28 @@ public class LocalExecutableEngine : INativeUciEngine
 
     private Process Process;
 
-    public LocalExecutableEngine(IOptions<MilkChessConfig> config, ILogger<LocalExecutableEngine> logger,
+    public LocalExecutableEngine(
+        ILogger<LocalExecutableEngine> logger,
+        MilkChessConfig config,
         UciLogger UciLogger)
     {
         this.Logger = logger;
         this.UciLogger = UciLogger;
-        this.Config = config.Value;
+        this.Config = config;
     }
 
     public void Initialize()
     {
         var startInfo = new ProcessStartInfo()
         {
-            FileName = this.Config.Engine.Path,
+            FileName = this.Config.EngineConfig.Path,
             RedirectStandardInput = true,
             RedirectStandardOutput = true,
         };
 
-        if (this.Config.Engine.Arguments?.Count > 0)
+        if (this.Config.EngineConfig.Arguments?.Count > 0)
         {
-            foreach (var argument in this.Config.Engine.Arguments)
+            foreach (var argument in this.Config.EngineConfig.Arguments)
             {
                 startInfo.ArgumentList.Add(argument);
             }

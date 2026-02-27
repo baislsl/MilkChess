@@ -9,7 +9,7 @@ using MilkChess.Helper;
 namespace MilkChessTest.Engine;
 
 [TestClass]
-public class EngineTest
+public class EngineConfigTest
 {
     [TestMethod]
     public void TestRemoteEngine()

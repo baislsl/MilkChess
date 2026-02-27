@@ -24,6 +24,11 @@ public class ForsythEdwardsNotation
     {
         forsythEdwardsNotation = null;
 
+        if (string.IsNullOrEmpty(fen))
+        {
+            return false;
+        }
+
         string[] data = fen.Split(" ");
 
         if (data.Length < 2) return false;

@@ -20,6 +20,9 @@ namespace MilkChess
 #endif
         public static MauiApp CreateMauiApp()
         {
+            // Resolve System.Text.Json serialize or deserialize exception
+            AppContext.SetSwitch("System.Reflection.NullabilityInfoContext.IsSupported", true);
+
             var builder = MauiApp.CreateBuilder()
                 .UseMauiApp<App>()
                 .ConfigureFonts(fonts =>
@@ -44,11 +47,17 @@ namespace MilkChess
             builder.Services.AddTransient<IdleChessPanel>();
             builder.Services.AddTransient<EditChessBoardPage>();
             builder.Services.AddTransient<EditChessBoardViewModel>();
+            builder.Services.AddTransient<MilkChessConfigService>();
+            builder.Services.AddSingleton<MilkChessConfig>(serviceProvider =>
+                MilkChessConfig.CreateMilkChessConfig(serviceProvider.GetRequiredService<MilkChessConfigService>()));
+            builder.Services.AddTransient<EngineManager>();
+            builder.Services.AddTransient<EngineConfigViewModel>();
+            builder.Services.AddTransient<EngineConfigPage>();
             builder.Services.AddSingleton<GlobalConfig>(GlobalConfig.Instance);
 
             using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(ConfigResourcePath);
             var config = new ConfigurationBuilder().AddIniStream(stream).Build();
-            builder.Services.Configure<MilkChessConfig>(config);
+            builder.Services.Configure<AppSettings>(config);
 
             return builder.Build();
         }

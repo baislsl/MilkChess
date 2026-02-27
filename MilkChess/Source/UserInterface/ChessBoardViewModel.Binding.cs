@@ -86,6 +86,15 @@ public partial class ChessBoardViewModel
             this.CommonCommandMiddlewareAsync());
 
     [RelayCommand(CanExecute = nameof(IsChessboardFreeFromAutoMoving))]
+    private async Task OnConfigureEngineAsync() =>
+        await CommandMiddlewareHelper.ExecuteAsync(
+            this.ConfigureEngineAsync,
+            this.RefreshEngineCommandMiddlewareAsync(),
+            this.CommonCommandMiddlewareAsync());
+
+
+
+    [RelayCommand(CanExecute = nameof(IsChessboardFreeFromAutoMoving))]
     private void OnReset() =>
         CommandMiddlewareHelper.Execute(
             this.Reset,

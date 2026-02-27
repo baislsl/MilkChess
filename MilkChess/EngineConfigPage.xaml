@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:milkChess="clr-namespace:MilkChess"
+    xmlns:userInterface="clr-namespace:MilkChess.UserInterface"
+    xmlns:model="clr-namespace:MilkChess.Model"
+    xmlns:helper="clr-namespace:MilkChess.Helper"
+    x:DataType="userInterface:EngineConfigViewModel"
+    x:Name="EngineConfig"
+    x:Class="MilkChess.EngineConfigPage"
+    Title="Engine Settings">
+
+    <Grid ColumnDefinitions="250,*"
+          RowDefinitions="Auto,*,Auto"
+          Padding="15"
+          ColumnSpacing="15"
+          RowSpacing="10">
+
+        <!-- 标题 -->
+        <Label Text="Engine Configuration"
+               FontSize="20"
+               FontAttributes="Bold"
+               Grid.ColumnSpan="2" />
+
+        <!-- 左侧：引擎列表 -->
+        <VerticalStackLayout Grid.Row="1"
+                             Grid.Column="0"
+                             Spacing="10">
+
+            <CollectionView ItemsSource="{Binding Engines}"
+                            SelectionMode="Single"
+                            SelectedItem="{Binding SelectedEngine}"
+                            HeightRequest="400">
+
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="helper:EngineConfig">
+                        <Frame Padding="8"
+                               Margin="0,3"
+                               BorderColor="LightGray">
+
+                            <Label Text="{Binding Name}"
+                                   FontAttributes="Bold"/>
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <Button Text="Add Engine"
+                    Command="{Binding AddEngineCommand}" />
+
+            <Button Text="Delete Selected"
+                    Command="{Binding RemoveEngineCommand}"
+                    CommandParameter="{Binding SelectedEngine}"
+                    IsEnabled="{Binding SelectedEngine}" />
+
+        </VerticalStackLayout>
+
+        <!-- 右侧：编辑区 -->
+        <ScrollView Grid.Row="1"
+                    Grid.Column="1">
+
+            <VerticalStackLayout Spacing="12"
+                                 IsEnabled="{Binding SelectedEngine}">
+
+                <Label Text="Engine Details"
+                       FontSize="16"
+                       FontAttributes="Bold" />
+
+                <Entry Placeholder="Name"
+                       Text="{Binding SelectedEngine.Name}" />
+
+                <Entry Placeholder="Executable Path"
+                       Text="{Binding SelectedEngine.Path}" />
+
+                <Entry Placeholder="Arguments"
+                       Text="{Binding SelectedEngine.Arguments}" />
+
+                <Entry Placeholder="Log File"
+                       Text="{Binding SelectedEngine.Log}" />
+
+                <Grid ColumnDefinitions="*,*"
+                      ColumnSpacing="10">
+
+                    <VerticalStackLayout>
+                        <Label Text="Search Depth"/>
+                        <Entry Text="{Binding SelectedEngine.GoDepth}"
+                               Keyboard="Numeric"/>
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout>
+                        <Label Text="Threads"/>
+                        <Entry Text="{Binding SelectedEngine.Threads}"
+                               Keyboard="Numeric"/>
+                    </VerticalStackLayout>
+
+                </Grid>
+
+                <VerticalStackLayout>
+                    <Label Text="Connection Timeout (seconds)" />
+                    <Entry Text="{Binding SelectedEngine.ConnectionTimeoutSeconds}"
+                           Keyboard="Numeric"/>
+                </VerticalStackLayout>
+
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- 底部按钮区 -->
+        <HorizontalStackLayout Grid.Row="2"
+                               Grid.ColumnSpan="2"
+                               HorizontalOptions="End"
+                               Spacing="10">
+
+            <Button Text="Cancel"
+                    Clicked="OnCancelClicked"/>
+
+            <Button Text="Save"
+                    Command="{Binding CloseCommand}" />
+
+        </HorizontalStackLayout>
+
+    </Grid>
+
+</ContentPage>

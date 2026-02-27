@@ -58,10 +58,17 @@ public partial class ChessBoardViewModel
     public void InitializeUciEngine()
     {
         Logger.LogInformation("Initailzing engine...");
+        if (Config.EngineConfig == null)
+        {
+            Logger.LogError("No engine config selected");
+
+            return;
+        }
+
         Engine = ServiceProvider.GetService<UciEngine>();
 
         CancellationTokenSource cancellationTokenSource =
-            new CancellationTokenSource(TimeSpan.FromSeconds(this.Config.Engine.ConnectionTimeoutSeconds));
+            new CancellationTokenSource(TimeSpan.FromSeconds(this.Config.EngineConfig.ConnectionTimeoutSeconds));
 
         var startUciFeedback = Engine.StartUci(cancellationTokenSource.Token); // EngineState = Connected
 
@@ -109,7 +116,7 @@ public partial class ChessBoardViewModel
         }
         else if (InteractiveMode == EngineInteractiveMode.AutoMode)
         {
-            option.Depth = this.Config.Engine.GoDepth;
+            option.Depth = this.Config.EngineConfig.GoDepth;
             Engine.ExecuteForever(option, this, this.onFeedbackReceived, this.onBestMovementReceived);
         }
         else if (InteractiveMode == EngineInteractiveMode.BlackAutoMode ||
@@ -121,7 +128,7 @@ public partial class ChessBoardViewModel
 
             if (engineOperateColor == HistoryManager.ExecutionTurn)
             {
-                option.Depth = this.Config.Engine.GoDepth;
+                option.Depth = this.Config.EngineConfig.GoDepth;
                 Engine.ExecuteOnce(option, this, this.onFeedbackReceived, this.onBestMovementReceived);
             }
         }
@@ -167,8 +174,6 @@ public partial class ChessBoardViewModel
 
                 EngineFeedback.Clear();
             }, true);
-
-            this.SaveChessManual();
         }
         else
         {

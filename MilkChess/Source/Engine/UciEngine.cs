@@ -21,11 +21,11 @@ public partial class UciEngine : ObservableObject, IUciEngine
     private Task thinkingTask;
 
     public UciEngine(ILogger<UciEngine> logger, LocalExecutableEngine localExecutableEngine,
-        IOptions<MilkChessConfig> config)
+        MilkChessConfig config)
     {
         this.Logger = logger;
         this.NativeUciEngine = localExecutableEngine;
-        this.Config = config.Value;
+        this.Config = config;
     }
 
     public StartUciFeedback StartUci(CancellationToken cancellationToken)
