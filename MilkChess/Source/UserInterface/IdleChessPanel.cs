@@ -43,11 +43,12 @@ public partial class IdleChessPanel : ObservableObject
         var tmpChessModel = new ChessModel();
         Iterator.IterateOverChessBoard(position =>
         {
-            if (tmpChessModel.GetChessAtPosition(position) != null)
+            var chess = tmpChessModel.GetChessAtPosition(position);
+            if (chess != null && chess is not King)
             {
                 IdleChessList.Add(new IdleChess()
                 {
-                    Chess = tmpChessModel.GetChessAtPosition(position),
+                    Chess = chess,
                     IsIdle = true,
                     Index = IdleChessList.Count
                 });

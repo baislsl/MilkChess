@@ -17,7 +17,7 @@ public partial class HistoryManager : ObservableObject
 
     public ObservableCollection<Movement> Movements { get; private set; }
 
-    private int Cursor;
+    [ObservableProperty] private int _cursor;
 
     private readonly ILogger Logger;
 
@@ -130,5 +130,21 @@ public partial class HistoryManager : ObservableObject
         }
 
         return (chessModel, movements, executionTurn);
+    }
+
+    partial void OnCursorChanged(int oldValue, int newValue)
+    {
+        if (oldValue - 1 < this.Movements.Count && oldValue > 0)
+        {
+            this.Movements[oldValue - 1].IsSelected = false;
+        }
+
+        if (newValue > 0)
+        {
+            this.Movements[newValue - 1].IsSelected = true;
+        }
+
+        OnPropertyChanged();
+
     }
 }

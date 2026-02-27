@@ -1,8 +1,9 @@
 using System.Globalization;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace MilkChess.Model;
 
-public class Movement
+public partial class Movement : ObservableObject
 {
     public bool IsPredict { get; set; }
 
@@ -15,6 +16,9 @@ public class Movement
     public Chess RemovedChess { get; set; }
 
     public int ActionCount { get; set; }
+
+    [ObservableProperty]
+    private bool _isSelected;
 
     public Color ExecutedColor => MovedChess.Color;
 

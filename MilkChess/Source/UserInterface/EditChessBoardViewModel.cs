@@ -63,7 +63,7 @@ public partial class EditChessBoardViewModel : ObservableObject, IChessBoard
             var chess = chessBoard.GetChessAtPosition(position);
             this.SetChessAtPosition(chess, position, out _);
 
-            if (chess != null)
+            if (chess != null && chess is not King)
             {
                 IdleChessPanel.RemoveChess(chess);
             }
@@ -114,11 +114,8 @@ public partial class EditChessBoardViewModel : ObservableObject, IChessBoard
         this.IdleChessPanel.Reset();
         this.ResetCursor();
 
-        // Set King back.
         this.SetChessAtPosition(new King(Color.RED), new Position(4, 0), out _);
         this.SetChessAtPosition(new King(Color.BLACK), new Position(4, 9), out _);
-        this.IdleChessPanel.RemoveChess(new King(Color.RED));
-        this.IdleChessPanel.RemoveChess(new King(Color.BLACK));
     }
 
     public Chess GetChessAtPosition(Position position)

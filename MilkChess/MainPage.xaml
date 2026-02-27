@@ -56,179 +56,238 @@
                         AbsoluteLayout.LayoutBounds="{Binding MovementIndicator.To.LayoutBound}" />
                 </AbsoluteLayout>
             </ContentView>
-            <Grid
+            <!-- Function button -->
+            <Border
                 Grid.Column="1"
-                Margin="5"
-                RowSpacing="2"
-                ColumnSpacing="2"
-                WidthRequest="300"
+                Margin="6"
                 x:Name="CommonFunction">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="40" />
-                    <RowDefinition Height="40" />
-                    <RowDefinition Height="40" />
-                    <RowDefinition Height="40" />
-                    <RowDefinition Height="40" />
-                    <RowDefinition Height="40" />
-                    <RowDefinition Height="40" />
-                    <RowDefinition Height="40" />
-                    <RowDefinition Height="40" />
-                    <RowDefinition Height="40" />
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition />
-                    <ColumnDefinition />
-                </Grid.ColumnDefinitions>
-                <Button Grid.Row="0" Grid.Column="0" Text="Edit"
-                        Command="{Binding EditCommand}" />
-                <Button Grid.Row="0" Grid.Column="1" Text="Reset"
-                        Command="{Binding ResetCommand}" />
+                <Grid
+                    RowSpacing="2"
+                    ColumnSpacing="2"
+                    WidthRequest="300">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="40" />
+                        <RowDefinition Height="40" />
+                        <RowDefinition Height="40" />
+                        <RowDefinition Height="12" /> <!-- spacer -->
+                        <RowDefinition Height="40" />
+                        <RowDefinition Height="40" />
+                        <RowDefinition Height="40" />
+                        <RowDefinition Height="40" />
+                        <RowDefinition Height="12" /> <!-- spacer -->
+                        <RowDefinition Height="40" />
+                        <RowDefinition Height="40" />
+                        <RowDefinition Height="40" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+                    <Button Grid.Row="0" Grid.Column="0"
+                            Text="Edit"
+                            Command="{Binding EditCommand}" />
+                    <Button Grid.Row="0" Grid.Column="1"
+                            Text="Reset"
+                            Command="{Binding ResetCommand}" />
 
-                <Button Grid.Row="1" Grid.Column="0" Text="Go back" Command="{Binding MoveBackwardCommand}" />
-                <Button Grid.Row="1" Grid.Column="1" Text="Move forward" Command="{Binding MoveForwardCommand}" />
+                    <Button Grid.Row="1" Grid.Column="0"
+                            Text="Go back"
+                            Command="{Binding MoveBackwardCommand}" />
+                    <Button Grid.Row="1" Grid.Column="1"
+                            Text="Move forward"
+                            Command="{Binding MoveForwardCommand}" />
 
-                <Button Grid.Row="2" Grid.Column="0" Text="To Start" Command="{Binding MoveToStartCommand}" />
-                <Button Grid.Row="2" Grid.Column="1" Text="To End" Command="{Binding  MoveToEndCommand}" />
+                    <Button Grid.Row="2" Grid.Column="0"
+                            Text="To Start"
+                            Command="{Binding MoveToStartCommand}" />
+                    <Button Grid.Row="2" Grid.Column="1"
+                            Text="To End"
+                            Command="{Binding  MoveToEndCommand}" />
 
-                <Button Grid.Row="3" Grid.Column="0" Text="{Binding ConnectOrDisconnectEngineText}"
-                        Command="{Binding ConnectOrDisconnectEngineCommand}" />
+                    <BoxView
+                        Grid.Row="3"
+                        Grid.ColumnSpan="2"
+                        HeightRequest="1"
+                        Margin="4,6" />
 
-                <Button Grid.Row="3" Grid.Column="1"
-                        BackgroundColor="{Binding SwitchToIdleModeColor}"
-                        Text="{Binding SwitchToIdleModeText}"
-                        Command="{Binding StopEngineCommand }" />
-                <Button Grid.Row="4" Grid.Column="0"
-                        BackgroundColor="{Binding SwitchToAnalyzeModeColor}"
-                        Text="AnalyzeMode"
-                        Command="{Binding SwitchToAnalyzeModeCommand }" />
-                <Button Grid.Row="4" Grid.Column="1"
-                        BackgroundColor="{Binding SwitchToAutoModeColor}"
-                        Text="AutoMode"
-                        Command="{Binding SwitchToAutoModeCommand }" />
-                <Button Grid.Row="5" Grid.Column="0"
-                        BackgroundColor="{Binding SwitchToRedAutoModeColor}"
-                        Text="RedAutoMode"
-                        Command="{Binding SwitchToRedAutoModeCommand}" />
-                <Button Grid.Row="5" Grid.Column="1"
-                        BackgroundColor="{Binding SwitchToBlackAutoModeColor}"
-                        Text="BlackAutoMode"
-                        Command="{Binding SwitchToBlackAutoModeCommand}" />
+                    <Button Grid.Row="4" Grid.Column="0"
+                            Text="{Binding ConnectOrDisconnectEngineText}"
+                            Command="{Binding ConnectOrDisconnectEngineCommand}" />
 
-                <Button Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2" Text="UseBestMovement"
-                        Command="{Binding InvokeBestMovementCommand}" />
+                    <Button Grid.Row="4" Grid.Column="1"
+                            BackgroundColor="{Binding SwitchToIdleModeColor}"
+                            Text="{Binding SwitchToIdleModeText}"
+                            Command="{Binding StopEngineCommand }" />
+                    <Button Grid.Row="5" Grid.Column="0"
+                            BackgroundColor="{Binding SwitchToAnalyzeModeColor}"
+                            Text="AnalyzeMode"
+                            Command="{Binding SwitchToAnalyzeModeCommand }" />
+                    <Button Grid.Row="5" Grid.Column="1"
+                            BackgroundColor="{Binding SwitchToAutoModeColor}"
+                            Text="AutoMode"
+                            Command="{Binding SwitchToAutoModeCommand }" />
+                    <Button Grid.Row="6" Grid.Column="0"
+                            BackgroundColor="{Binding SwitchToRedAutoModeColor}"
+                            Text="RedAutoMode"
+                            Command="{Binding SwitchToRedAutoModeCommand}" />
+                    <Button Grid.Row="6" Grid.Column="1"
+                            BackgroundColor="{Binding SwitchToBlackAutoModeColor}"
+                            Text="BlackAutoMode"
+                            Command="{Binding SwitchToBlackAutoModeCommand}" />
 
-                <Button Grid.Row="7" Grid.Column="0" Text="RotateBoard"
-                        Command="{Binding RotateBoardCommand}" />
+                    <Button Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="2"
+                            Text="UseBestMovement"
+                            Command="{Binding InvokeBestMovementCommand}" />
 
-                <Button Grid.Row="7" Grid.Column="1" Text="ExchangeTurn"
-                        Command="{Binding ExchangeTurnCommand}" />
+                    <BoxView
+                        Grid.Row="8"
+                        Grid.ColumnSpan="2"
+                        HeightRequest="1"
+                        Margin="4,6" />
 
-                <Button Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="2" Text="SaveLayout"
-                        Command="{Binding SaveChessManualCommand}" />
-                <Slider
-                    Grid.Row="9"
-                    Grid.Column="0"
-                    Grid.ColumnSpan="2"
-                    Minimum="0.65"
-                    Maximum="2.0"
-                    Value="{Binding GlobalConfig.ChessBoardScale}" />
-            </Grid>
-            <Grid
+                    <Button Grid.Row="9" Grid.Column="0"
+                            Text="RotateBoard"
+                            Command="{Binding RotateBoardCommand}" />
+
+                    <Button Grid.Row="9" Grid.Column="1"
+                            Text="ExchangeTurn"
+                            Command="{Binding ExchangeTurnCommand}" />
+
+                    <Button Grid.Row="10" Grid.Column="0" Grid.ColumnSpan="2"
+                            Text="SaveLayout"
+                            Command="{Binding SaveChessManualCommand}" />
+
+                    <Slider
+                        Grid.Row="11"
+                        Grid.Column="0"
+                        Grid.ColumnSpan="2"
+                        Minimum="0.75"
+                        Maximum="2.0"
+                        Value="{Binding GlobalConfig.ChessBoardScale}">
+                    </Slider>
+                </Grid>
+            </Border>
+            <Border
                 Grid.Column="2"
-                WidthRequest="200">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="*" />
-                </Grid.RowDefinitions>
+                Margin="6"
+                WidthRequest="220"
+                x:Name="HistoryMovements">
+                <Grid
+                    Grid.Column="2"
+                    WidthRequest="200">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Label
+                        Grid.Row="0"
+                        Text="History Movement"
+                        FontAttributes="Bold"
+                        Margin="2"
+                        FontSize="18" />
+                    <CollectionView
+                        Grid.Row="1"
+                        ItemsUpdatingScrollMode="KeepLastItemInView"
+                        ItemsSource="{Binding HistoryManager.Movements}">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <Border
+                                    WidthRequest="190"
+                                    HeightRequest="28"
+                                    Margin="2"
+                                    Stroke="#DDDDDD"
+                                    StrokeThickness="1"
+                                    Padding="6,0">
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer
+                                            Command="{Binding Source={x:Reference ChessBoardPage}, Path=ChessBoardViewModel.SwitchToSelectedMovementCommand}"
+                                            CommandParameter="{Binding}" />
+                                    </Border.GestureRecognizers>
+                                    <Label
+                                        x:Name="MovementLabel"
+                                        VerticalTextAlignment="Center"
+                                        HorizontalTextAlignment="Start"
+                                        FontSize="18"
+                                        TextColor="Black">
+                                        <Label.Triggers>
+                                            <DataTrigger
+                                                Binding="{Binding IsSelected}"
+                                                TargetType="Label"
+                                                Value="True">
+                                                <Setter Property="FontAttributes" Value="Bold" />
+                                                <Setter Property="TextColor" Value="#2176FF" />
+                                            </DataTrigger>
+                                        </Label.Triggers>
+                                        <Label.Text>
+                                            <MultiBinding StringFormat="{}{0}. {1}">
+                                                <Binding Path="ActionCount" />
+                                                <Binding Path="ChineseViewableString" />
+                                            </MultiBinding>
+                                        </Label.Text>
+                                    </Label>
+                                </Border>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </Grid>
+            </Border>
+        </Grid>
+        <Border
+            Grid.Row="1"
+            Margin="6"
+            x:Name="EngineFeedback">
+            <Grid
+                RowDefinitions="Auto,*">
                 <Label
-                    Grid.Row="0"
-                    Text="History Movements:"
+                    FontSize="18"
                     FontAttributes="Bold"
-                    Margin="2"
-                    FontSize="18" />
+                    Padding="10, 2"
+                    TextColor="{Binding EngineFeedback.ScoreColor}">
+                    <Label.Text>
+                        <MultiBinding StringFormat="Score: {0}  Engine: {1}">
+                            <Binding Path="EngineFeedback.ScoreText" />
+                            <Binding Path="Engine.State" />
+                        </MultiBinding>
+                    </Label.Text>
+                </Label>
                 <CollectionView
                     Grid.Row="1"
-                    BackgroundColor="LightBlue"
-                    ItemsUpdatingScrollMode="KeepLastItemInView"
-                    ItemsSource="{Binding HistoryManager.Movements}">
+                    MinimumHeightRequest="100"
+                    HorizontalScrollBarVisibility="Default"
+                    ItemsUpdatingScrollMode="KeepScrollOffset"
+                    ItemsSource="{Binding  EngineFeedback.PredictMovementTraces}">
                     <CollectionView.ItemTemplate>
                         <DataTemplate>
                             <Border
-                                WidthRequest="190"
-                                HeightRequest="24"
-                                BackgroundColor="LightGray"
-                                Padding="6,0"
-                                Margin="1">
-
-                                <Border.GestureRecognizers>
-                                    <TapGestureRecognizer
-                                        Command="{Binding Source={x:Reference ChessBoardPage}, Path=ChessBoardViewModel.SwitchToSelectedMovementCommand}"
-                                        CommandParameter="{Binding}" />
-                                </Border.GestureRecognizers>
+                                Margin="2"
+                                Stroke="#DDDDDD"
+                                StrokeThickness="1"
+                                Padding="6,0">
                                 <Label
-                                    VerticalTextAlignment="Center"
-                                    HorizontalTextAlignment="Start"
-                                    FontSize="18"
-                                    FontAttributes="Bold"
-                                    TextColor="Black">
-                                    <Label.Text>
-                                        <MultiBinding StringFormat="{}{0}. {1}">
-                                            <Binding Path="ActionCount" />
-                                            <Binding Path="ChineseViewableString" />
-                                        </MultiBinding>
-                                    </Label.Text>
+                                    Grid.Row="1"
+                                    x:DataType="model:PredictMovementTrace"
+                                    Margin="2"
+                                    LineBreakMode="WordWrap"
+                                    MaxLines="5"
+                                    TextColor="Black"
+                                    FontFamily="Monospace"
+                                    FontSize="18">
+                                    <Label.FormattedText>
+                                        <FormattedString>
+                                            <Span Text="Score: " TextColor="Black" />
+                                            <Span Text="{Binding Score}" TextColor="Black" FontAttributes="Bold" />
+                                            <Span Text=" Depth: " TextColor="Black" />
+                                            <Span Text="{Binding Depth}" TextColor="Black" FontAttributes="Bold" />
+                                            <Span Text="{Binding Path=Movements, StringFormat='  {0}' }"
+                                                  FontAttributes="Italic" />
+                                        </FormattedString>
+                                    </Label.FormattedText>
                                 </Label>
                             </Border>
                         </DataTemplate>
                     </CollectionView.ItemTemplate>
                 </CollectionView>
             </Grid>
-        </Grid>
-        <Grid
-            Grid.Row="1"
-            RowDefinitions="Auto,*">
-            <Label
-                TextColor="{Binding EngineFeedback.ScoreColor}"
-                FontSize="20"
-                Margin="2"
-                FontAttributes="Bold">
-                <Label.Text>
-                    <MultiBinding StringFormat="Score: {0}  Engine: {1}">
-                        <Binding Path="EngineFeedback.ScoreText" />
-                        <Binding Path="Engine.State" />
-                    </MultiBinding>
-                </Label.Text>
-            </Label>
-            <CollectionView
-                Grid.Row="1"
-                MinimumHeightRequest="100"
-                BackgroundColor="LightBlue"
-                HorizontalScrollBarVisibility="Default"
-                ItemsUpdatingScrollMode="KeepScrollOffset"
-                ItemsSource="{Binding  EngineFeedback.PredictMovementTraces}">
-                <CollectionView.ItemTemplate>
-                    <DataTemplate>
-                        <Label
-                            x:DataType="model:PredictMovementTrace"
-                            Margin="2"
-                            LineBreakMode="WordWrap"
-                            MaxLines="5"
-                            TextColor="Black"
-                            FontSize="18">
-                            <Label.FormattedText>
-                                <FormattedString>
-                                    <Span Text="Score: " TextColor="Black" />
-                                    <Span Text="{Binding Score}" TextColor="Black" FontAttributes="Bold" />
-                                    <Span Text=" Depth: " TextColor="Black" />
-                                    <Span Text="{Binding Depth}" TextColor="Black" FontAttributes="Bold" />
-                                    <Span Text="{Binding Path=Movements, StringFormat='  {0}' }"
-                                          FontAttributes="Italic" />
-                                </FormattedString>
-                            </Label.FormattedText>
-                        </Label>
-                    </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
-        </Grid>
+        </Border>
     </Grid>
 </ContentPage>

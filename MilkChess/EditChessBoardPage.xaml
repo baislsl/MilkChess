@@ -7,17 +7,16 @@
     x:DataType="userInterface:EditChessBoardViewModel"
     x:Name="EditChessBoard"
     x:Class="MilkChess.EditChessBoardPage">
-
     <Grid
         Padding="10"
         ColumnSpacing="10">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="{Binding GlobalConfig.ChessBoardVisualWidth}" />
-            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
         <AbsoluteLayout
             Grid.Column="0"
-            Grid.RowSpan="2"
+            VerticalOptions="Start"
             AnchorX="0"
             AnchorY="0"
             WidthRequest="{Binding GlobalConfig.ChessBoardVisualWidth}"
@@ -37,9 +36,7 @@
                 AbsoluteLayout.LayoutBounds="{Binding ChessBoardCursor.LayoutBound}" />
         </AbsoluteLayout>
         <Grid
-            Grid.Column="1"
-            Grid.Row="0"
-            HeightRequest="{Binding GlobalConfig.ChessBoardVisualHeight}">
+            Grid.Column="1">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
@@ -48,11 +45,12 @@
                 Grid.Row="0"
                 WidthRequest="{Binding Source={x:Static userInterface:UIConstants.IdleChessPanelWidth}}"
                 HeightRequest="{Binding Source={x:Static userInterface:UIConstants.IdleChessPanelHeight}}"
-                HorizontalOptions="Start"
                 VerticalScrollBarVisibility="Never"
                 ItemsSource="{Binding  IdleChessPanel.IdleChessList}">
                 <CollectionView.ItemsLayout>
                     <GridItemsLayout Orientation="Vertical"
+                                     HorizontalItemSpacing="0"
+                                     VerticalItemSpacing="0"
                                      Span="4" />
                 </CollectionView.ItemsLayout>
                 <CollectionView.ItemTemplate>
@@ -61,7 +59,10 @@
                             WidthRequest="{Binding Source={x:Static userInterface:UIConstants.ChessSize}}"
                             HeightRequest="{Binding Source={x:Static userInterface:UIConstants.ChessSize}}">
                             <Button
+                                Margin="0"
                                 Padding="0"
+                                WidthRequest="{Binding Source={x:Static userInterface:UIConstants.ChessSize}}"
+                                HeightRequest="{Binding Source={x:Static userInterface:UIConstants.ChessSize}}"
                                 HorizontalOptions="Fill"
                                 VerticalOptions="Fill"
                                 ImageSource="{Binding ImageSource}"
@@ -78,14 +79,13 @@
             <Grid
                 Grid.Row="1"
                 WidthRequest="{Binding Source={x:Static userInterface:UIConstants.IdleChessPanelWidth}}"
-                HorizontalOptions="Start"
                 RowSpacing="2"
                 ColumnSpacing="2">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
