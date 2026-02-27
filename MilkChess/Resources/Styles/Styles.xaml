@@ -35,7 +35,7 @@
     </Style>
 
     <Style TargetType="Button">
-        <Setter Property="HeightRequest" Value="36" />
+        <Setter Property="HeightRequest" Value="40" />
         <Setter Property="CornerRadius" Value="8" />
         <Setter Property="FontSize" Value="14" />
         <Setter Property="Margin" Value="2" />

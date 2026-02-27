@@ -66,18 +66,18 @@
                     ColumnSpacing="2"
                     WidthRequest="300">
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="40" />
-                        <RowDefinition Height="40" />
-                        <RowDefinition Height="40" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
                         <RowDefinition Height="12" /> <!-- spacer -->
-                        <RowDefinition Height="40" />
-                        <RowDefinition Height="40" />
-                        <RowDefinition Height="40" />
-                        <RowDefinition Height="40" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
                         <RowDefinition Height="12" /> <!-- spacer -->
-                        <RowDefinition Height="40" />
-                        <RowDefinition Height="40" />
-                        <RowDefinition Height="40" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition />
@@ -136,11 +136,12 @@
                             Command="{Binding SwitchToBlackAutoModeCommand}" />
 
                     <Button Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="2"
-                            Text="UseBestMovement"
+                            Text="InvokeBestMovement"
                             Command="{Binding InvokeBestMovementCommand}" />
 
                     <BoxView
                         Grid.Row="8"
+                        Grid.Column="0"
                         Grid.ColumnSpan="2"
                         HeightRequest="1"
                         Margin="4,6" />

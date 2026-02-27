@@ -13,6 +13,21 @@ public class UcciFeedbackTest
         var result = UciFeedback.TryParse(feedback, out UciFeedback feedbackResult);
         Assert.IsTrue(result);
         Assert.AreEqual("19", feedbackResult.InfoDict["score"]);
+
+        feedback =
+            "info depth 1 seldepth 6 multipv 1 score mate 1 nodes 85 nps 85000 hashfull 0 tbhits 0 time 1 pv g8g0";
+
+        result = UciFeedback.TryParse(feedback, out feedbackResult);
+        Assert.IsTrue(result);
+        Assert.AreEqual("29999", feedbackResult.InfoDict["score"]);
+        Assert.AreEqual("1", feedbackResult.InfoDict["mate"]);
+
+        feedback =
+            "info depth 245 seldepth 3 multipv 1 score mate -1 nodes 980 nps 980000 hashfull 0 tbhits 0 time 1 pv d0d1 b4b1";
+        result = UciFeedback.TryParse(feedback, out feedbackResult);
+        Assert.IsTrue(result);
+        Assert.AreEqual("29999", feedbackResult.InfoDict["score"]);
+        Assert.AreEqual("-1", feedbackResult.InfoDict["mate"]);
     }
 
     [TestMethod]
@@ -23,8 +38,5 @@ public class UcciFeedbackTest
         var result = UciFeedback.TryParse(feedback, out UciFeedback feedbackResult);
         Assert.IsTrue(result);
         Assert.AreEqual("108", feedbackResult.InfoDict["score"]);
-
     }
-
-
 }

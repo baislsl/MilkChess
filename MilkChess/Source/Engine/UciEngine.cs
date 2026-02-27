@@ -203,6 +203,7 @@ public partial class UciEngine : ObservableObject, IUciEngine
         IChessBoardContext chessBoardContext,
         Action<InfoFeedback> onInfoReceived)
     {
+        bool isMateReceived = false;
         while (!cancellationToken.IsCancellationRequested)
         {
             UciFeedback feedback;
@@ -231,7 +232,13 @@ public partial class UciEngine : ObservableObject, IUciEngine
 
             if (feedback.Command == FeedbackCommand.Info && feedback.InfoPv?.Count > 0)
             {
-                onInfoReceived.Invoke(this.ParseIntoFeedback(feedback, chessBoardContext));
+                if (!isMateReceived)
+                {
+                    onInfoReceived.Invoke(this.ParseIntoFeedback(feedback, chessBoardContext));
+                }
+
+                // Terminate info update if mate.
+                isMateReceived = feedback.InfoDict.ContainsKey("mate");
             }
             else if (feedback.Command == FeedbackCommand.BestMove)
             {

@@ -109,11 +109,26 @@ public class UciFeedback
                         string key = list[idx];
                         if (list[idx] == "lowerbound" || list[idx] == "upperbound")
                         {
-                            idx++; // adapt for GGchess and XuanFeng
-                        }
-                        else if (list[idx] == "score" && idx + 1 < list.Length && list[idx + 1] == "cp")
-                        {
                             idx++;
+                        }
+                        else if (list[idx] == "score")
+                        {
+                            if (idx + 1 < list.Length && list[idx + 1] == "cp")
+                            {
+                                idx++;
+                            }
+                            else if (idx + 2 < list.Length
+                                     && list[idx + 1] == "mate"
+                                     && int.TryParse(list[idx + 2], out int mate))
+                            {
+                                // score
+                                feedback.InfoDict[list[idx]] = ((mate > 0 ? 1 : -1) * (30000 - Math.Abs(mate))).ToString();
+
+                                // mate
+                                feedback.InfoDict[list[idx + 1]] = list[idx + 2];
+                                idx += 3;
+                                continue;
+                            }
                         }
 
                         if (idx + 1 >= list.Length) return false;

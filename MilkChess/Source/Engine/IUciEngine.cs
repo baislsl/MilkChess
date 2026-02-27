@@ -86,6 +86,8 @@ public class InfoFeedback
 
     public int Score;
 
+    public int Mate;
+
     public int Depth;
 
     public List<Movement> Movements;
