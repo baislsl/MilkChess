@@ -21,7 +21,6 @@ public class Engine
 
     public int ConnectionTimeoutSeconds { get; set; }
 
-    public int StopWaitingMilliseconds { get; set; }
 }
 
 public class PathDefinition
