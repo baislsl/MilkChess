@@ -15,18 +15,7 @@ namespace MilkChess.UserInterface;
 
 public partial class ChessBoardViewModel
 {
-    public string ConnectOrDisconnectEngineText => this.InteractiveMode == EngineInteractiveMode.None
-        ? UIConstants.ConnectedEngineText
-        : UIConstants.DisconnectedEngineText;
-
-    public string SwitchToIdleModeText =>
-        this.InteractiveMode is EngineInteractiveMode.IdleMode or EngineInteractiveMode.None
-            ? UIConstants.EngineIdleStateText
-            : UIConstants.StopEngineText;
-
     public bool IsChessboardFreeFromAutoMoving => !IsEngineOperatingChessBoard();
-
-    public bool CanInvokeBestMovement => this.InteractiveMode == EngineInteractiveMode.AnalyzeMode;
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(EditCommand))]
@@ -41,9 +30,25 @@ public partial class ChessBoardViewModel
     [NotifyPropertyChangedFor(nameof(SwitchToAutoModeColor))]
     [NotifyPropertyChangedFor(nameof(SwitchToBlackAutoModeColor))]
     [NotifyPropertyChangedFor(nameof(SwitchToRedAutoModeColor))]
-    [NotifyPropertyChangedFor(nameof(ConnectOrDisconnectEngineText))]
     [NotifyPropertyChangedFor(nameof(SwitchToIdleModeText))]
+    [NotifyPropertyChangedFor(nameof(InvokeBestMovementColor))]
     private EngineInteractiveMode _interactiveMode = EngineInteractiveMode.None;
+
+    public bool CanInvokeBestMovement =>
+        this.InteractiveMode == EngineInteractiveMode.AnalyzeMode && this.Engine != null;
+
+    public Color InvokeBestMovementColor => CanInvokeBestMovement
+        ? ActiveInteractiveModeColor
+        : InactiveInteractiveModeColor;
+
+    public string ConnectOrDisconnectEngineText => this.Engine == null
+        ? UIConstants.ConnectedEngineText
+        : UIConstants.DisconnectedEngineText;
+
+    public string SwitchToIdleModeText =>
+        this.InteractiveMode is EngineInteractiveMode.IdleMode or EngineInteractiveMode.None || this.Engine == null
+            ? UIConstants.EngineIdleStateText
+            : UIConstants.StopEngineText;
 
     [ObservableProperty] private EngineFeedback _engineFeedback;
 

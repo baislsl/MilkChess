@@ -8,7 +8,12 @@ namespace MilkChess.UserInterface;
 
 public partial class ChessBoardViewModel
 {
-    [ObservableProperty] private UciEngine _engine;
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(InvokeBestMovementCommand))]
+    [NotifyPropertyChangedFor(nameof(ConnectOrDisconnectEngineText))]
+    [NotifyPropertyChangedFor(nameof(CanInvokeBestMovement))]
+    [NotifyPropertyChangedFor(nameof(InvokeBestMovementColor))]
+    private UciEngine _engine;
 
     private void DispatchAction(Action action, bool wait = false)
     {
@@ -82,7 +87,10 @@ public partial class ChessBoardViewModel
 
         await Engine.WaitToReadyAsync(cancellationTokenSource.Token); // EngineState = Ready
 
-        this.InteractiveMode = EngineInteractiveMode.IdleMode;
+        if (this.InteractiveMode == EngineInteractiveMode.None)
+        {
+            this.InteractiveMode = EngineInteractiveMode.IdleMode;
+        }
 
         await RefreshUciEngineAsync();
     }

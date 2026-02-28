@@ -9,12 +9,14 @@
              x:Class="MilkChess.MainPage">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="{Binding GlobalConfig.ChessBoardVisualHeight}" />
+            <!-- <RowDefinition Height="{Binding GlobalConfig.ChessBoardVisualHeight}" /> -->
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         <Grid Grid.Row="0" ColumnDefinitions="Auto,Auto,Auto">
             <ContentView
                 Grid.Column="0"
+                VerticalOptions="Start"
                 IsClippedToBounds="True">
                 <AbsoluteLayout
                     AnchorX="0"
@@ -115,9 +117,9 @@
                             Command="{Binding ConnectOrDisconnectEngineCommand}" />
 
                     <Button Grid.Row="4" Grid.Column="1"
-                            BackgroundColor="{Binding SwitchToIdleModeColor}"
-                            Text="{Binding SwitchToIdleModeText}"
-                            Command="{Binding StopEngineCommand }" />
+                            Text="ConfigureEngine"
+                            Command="{Binding ConfigureEngineCommand}" />
+
                     <Button Grid.Row="5" Grid.Column="0"
                             BackgroundColor="{Binding SwitchToAnalyzeModeColor}"
                             Text="AnalyzeMode"
@@ -136,12 +138,13 @@
                             Command="{Binding SwitchToBlackAutoModeCommand}" />
 
                     <Button Grid.Row="7" Grid.Column="0"
-                            Text="ConfigureEngine"
-                            Command="{Binding ConfigureEngineCommand}" />
-
-                    <Button Grid.Row="7" Grid.Column="1"
-                            Text="InvokeBestMovement"
+                            BackgroundColor="{Binding InvokeBestMovementColor}"
+                            Text="InvokeImmediate"
                             Command="{Binding InvokeBestMovementCommand}" />
+                    <Button Grid.Row="7" Grid.Column="1"
+                            BackgroundColor="{Binding SwitchToIdleModeColor}"
+                            Text="{Binding SwitchToIdleModeText}"
+                            Command="{Binding StopEngineCommand }" />
 
                     <BoxView
                         Grid.Row="8"
@@ -166,7 +169,7 @@
                         Grid.Row="11"
                         Grid.Column="0"
                         Grid.ColumnSpan="2"
-                        Minimum="0.75"
+                        Minimum="0.5"
                         Maximum="2.0"
                         Value="{Binding GlobalConfig.ChessBoardScale}">
                     </Slider>
@@ -178,7 +181,6 @@
                 WidthRequest="220"
                 x:Name="HistoryMovements">
                 <Grid
-                    Grid.Column="2"
                     WidthRequest="200">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -269,7 +271,6 @@
                                 StrokeThickness="1"
                                 Padding="6,0">
                                 <Label
-                                    Grid.Row="1"
                                     x:DataType="model:PredictMovementTrace"
                                     Margin="2"
                                     LineBreakMode="WordWrap"

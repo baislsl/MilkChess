@@ -21,9 +21,9 @@ public partial class GlobalConfig : ObservableObject
 
     partial void OnChessBoardScaleChanged(double value)
     {
-        if (value < 0.75)
+        if (value < 0.5)
         {
-            ChessBoardScale = 0.75;
+            ChessBoardScale = 0.5;
         }
 
         if (value > 2.0)
