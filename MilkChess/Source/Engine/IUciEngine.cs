@@ -8,9 +8,7 @@ internal interface INativeUciEngine : IDisposable
 {
     void Initialize();
 
-    public void SendCommand(string command);
-
-    public UciFeedback GetFeedback();
+    public Task SendCommandAsync(string command);
 
     public Task<UciFeedback> GetFeedbackAsync(CancellationToken cancellationToken);
 }
@@ -27,34 +25,34 @@ internal interface IUciEngine
 {
     public EngineState State { get; }
 
-    public StartUciFeedback StartUci(CancellationToken cancellationToken);
+    public Task<StartUciFeedback> StartUciAsync(CancellationToken cancellationToken);
 
-    public void WaitToReady(CancellationToken cancellationToken);
+    public Task WaitToReadyAsync(CancellationToken cancellationToken);
 
-    public void SetOption(string option, string config, CancellationToken cancellationToken);
+    public Task SetOptionAsync(string option, string config, CancellationToken cancellationToken);
 
-    public void BanMoves(IEnumerable<string> banMoves, CancellationToken cancellationToken);
+    public Task BanMovesAsync(IEnumerable<string> banMoves, CancellationToken cancellationToken);
 
-    public void ExecuteForever(
+    public Task ExecuteForeverAsync(
         GoOption option,
         IChessBoardContext chessBoardContext,
         Action<InfoFeedback> onInfoReceived,
         Action<BestMove> onBestMovementReceived);
 
-    public void ExecuteOnce(
+    public Task ExecuteOnceAsync(
         GoOption option,
         IChessBoardContext chessBoardContext,
         Action<InfoFeedback> onInfoReceived,
         Action<BestMove> onBestMovementReceived);
 
-    public void GoInfinite(GoOption option,
+    public Task GoInfiniteAsync(GoOption option,
         IChessBoardContext chessBoardContext,
         Action<InfoFeedback> onInfoReceived);
 
     // Stop from thinking state.
-    public void Stop();
+    public Task StopAsync();
 
-    public void Quit();
+    public Task QuitAsync();
 }
 
 public class GoOption

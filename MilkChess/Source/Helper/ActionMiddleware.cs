@@ -65,6 +65,18 @@ public static class CommandMiddlewareHelper
         await BuildAsyncCommand(action, middleware)();
     }
 
+    public static async Task ExecuteAsync(Action action, params AsyncCommandMiddleware[] middleware)
+    {
+        Func<Task> asyncWrapper = () =>
+        {
+            action();
+            return Task.CompletedTask;
+        };
+
+        await BuildAsyncCommand(asyncWrapper, middleware)();
+    }
+
+
     public static void Execute(Action action, params CommandMiddleware[] middleware)
     {
         BuildCommand(action, middleware).Execute(null);

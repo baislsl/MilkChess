@@ -20,6 +20,8 @@ public partial class UciEngine : ObservableObject, IUciEngine
     private CancellationTokenSource cancellationTokenSource;
     private Task thinkingTask;
 
+    private static readonly SemaphoreSlim semaphore = new SemaphoreSlim(1, 1);
+
     public UciEngine(ILogger<UciEngine> logger, LocalExecutableEngine localExecutableEngine,
         MilkChessConfig config)
     {
@@ -28,18 +30,19 @@ public partial class UciEngine : ObservableObject, IUciEngine
         this.Config = config;
     }
 
-    public StartUciFeedback StartUci(CancellationToken cancellationToken)
+    public async Task<StartUciFeedback> StartUciAsync(CancellationToken cancellationToken)
     {
         NativeUciEngine.Initialize();
         this.State = EngineState.Connected;
 
-        this.SendCommand(Command.Uci);
+        await this.SendCommandAsync(Command.Uci).ConfigureAwait(false);
 
         StartUciFeedback feedback = new StartUciFeedback();
         while (!cancellationToken.IsCancellationRequested && !feedback.ReceivedUciOk)
         {
             Logger.LogInformation("Loop");
-            UciFeedback UciFeedback = this.NativeUciEngine.GetFeedbackAsync(cancellationToken).Result;
+            UciFeedback UciFeedback =
+                await this.NativeUciEngine.GetFeedbackAsync(cancellationToken).ConfigureAwait(false);
             if (UciFeedback == null) continue;
 
             if (UciFeedback.Command == FeedbackCommand.UciOk)
@@ -59,12 +62,14 @@ public partial class UciEngine : ObservableObject, IUciEngine
         return feedback;
     }
 
-    public void WaitToReady(CancellationToken cancellationToken)
+    public async Task WaitToReadyAsync(CancellationToken cancellationToken)
     {
-        this.SendCommand(Command.IsReady);
+        await this.SendCommandAsync(Command.IsReady).ConfigureAwait(false);
+
         while (!cancellationToken.IsCancellationRequested)
         {
-            UciFeedback UciFeedback = this.NativeUciEngine.GetFeedbackAsync(cancellationToken).Result;
+            UciFeedback UciFeedback =
+                await this.NativeUciEngine.GetFeedbackAsync(cancellationToken).ConfigureAwait(false);
             if (UciFeedback?.Command == FeedbackCommand.ReadyOk)
             {
                 Logger.LogError("Engine IsReady");
@@ -76,7 +81,7 @@ public partial class UciEngine : ObservableObject, IUciEngine
         throw new Exception("IsReady receive no feedback");
     }
 
-    public void SetOption(string name, string value, CancellationToken cancellationToken)
+    public async Task SetOptionAsync(string name, string value, CancellationToken cancellationToken)
     {
         var builder = new StringBuilder();
 
@@ -89,29 +94,30 @@ public partial class UciEngine : ObservableObject, IUciEngine
             builder.Append(" value ").Append(value);
         }
 
-        this.SendCommand(builder.ToString());
+        await this.SendCommandAsync(builder.ToString()).ConfigureAwait(false);
     }
 
-    public void BanMoves(IEnumerable<string> banMoves, CancellationToken cancellationToken)
+    public Task BanMovesAsync(IEnumerable<string> banMoves, CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
     }
 
     // Execute forever at a new thread.
-    public void ExecuteForever(
+    public async Task ExecuteForeverAsync(
         GoOption option,
         IChessBoardContext chessBoardContext,
         Action<InfoFeedback> onInfoReceived,
         Action<BestMove> onBestMovementReceived)
     {
-        lock (this)
+        await this.ThreadSafeExecute(async () =>
         {
             this.ThrowIfNotReady();
-            this.ExecuteForeverInternal(option, chessBoardContext, onInfoReceived, onBestMovementReceived);
-        }
+            await this.ExecuteForeverInternalAsync(option, chessBoardContext, onInfoReceived, onBestMovementReceived)
+                .ConfigureAwait(false);
+        }).ConfigureAwait(false);
     }
 
-    private void ExecuteForeverInternal(
+    private async Task ExecuteForeverInternalAsync(
         GoOption option,
         IChessBoardContext chessBoardContext,
         Action<InfoFeedback> onInfoReceived,
@@ -126,8 +132,8 @@ public partial class UciEngine : ObservableObject, IUciEngine
         {
             while (!cancellationToken.IsCancellationRequested)
             {
-                this.SetFenPosition(chessBoardContext);
-                this.SendCommand(this.BuildGoCommand(option));
+                await this.SetFenPositionAsync(chessBoardContext).ConfigureAwait(false);
+                await this.SendCommandAsync(this.BuildGoCommand(option)).ConfigureAwait(false);
 
                 var bestmove = await this
                     .ListenEngineFeedbackAsync(CancellationToken.None, chessBoardContext, onInfoReceived)
@@ -141,40 +147,41 @@ public partial class UciEngine : ObservableObject, IUciEngine
     }
 
     // Execute one step at a new thread.
-    public void ExecuteOnce(
+    public async Task ExecuteOnceAsync(
         GoOption option,
         IChessBoardContext chessBoardContext,
         Action<InfoFeedback> onFeedbackReceived,
         Action<BestMove> onBestMovementReceived)
     {
-        lock (this)
+        await this.ThreadSafeExecute(async () =>
         {
             this.ThrowIfNotReady();
-            this.GoInternal(option, chessBoardContext, onFeedbackReceived, onBestMovementReceived);
-        }
+            await this.GoInternalAsync(option, chessBoardContext, onFeedbackReceived, onBestMovementReceived)
+                .ConfigureAwait(false);
+        }).ConfigureAwait(false);
     }
 
     // Go infinite for current chess board at a new thread.
-    public void GoInfinite(GoOption option,
+    public async Task GoInfiniteAsync(GoOption option,
         IChessBoardContext chessBoardContext,
         Action<InfoFeedback> onFeedbackReceived)
     {
-        lock (this)
+        await this.ThreadSafeExecute(async () =>
         {
             this.ThrowIfNotReady();
-            this.GoInternal(option, chessBoardContext, onFeedbackReceived, null);
-        }
+            await this.GoInternalAsync(option, chessBoardContext, onFeedbackReceived, null).ConfigureAwait(false);
+        }).ConfigureAwait(false);
     }
 
-    private void GoInternal(GoOption option,
+    private async Task GoInternalAsync(GoOption option,
         IChessBoardContext chessBoardContext,
         Action<InfoFeedback> onInfoReceived,
         Action<BestMove> onBestMovementReceived)
     {
         this.State = EngineState.Thinking;
 
-        this.SetFenPosition(chessBoardContext);
-        this.SendCommand(this.BuildGoCommand(option));
+        await this.SetFenPositionAsync(chessBoardContext).ConfigureAwait(false);
+        await this.SendCommandAsync(this.BuildGoCommand(option)).ConfigureAwait(false);
 
         this.cancellationTokenSource = new CancellationTokenSource();
 
@@ -256,31 +263,32 @@ public partial class UciEngine : ObservableObject, IUciEngine
     }
 
     // Stop from thinking state.
-    public void Stop()
+    public async Task StopAsync()
     {
-        lock (this)
-        {
-            this.StopInternal();
-        }
+        await this.ThreadSafeExecute(async () =>
+            {
+                await this.StopInternalAsync().ConfigureAwait(false);
+            })
+            .ConfigureAwait(false);
     }
 
-    private void StopInternal()
+    private async Task StopInternalAsync()
     {
         if (this.State != EngineState.Thinking)
         {
             return;
         }
 
-        this.SendCommand(Command.Stop);
+        await this.SendCommandAsync(Command.Stop).ConfigureAwait(false);
 
         // TODO: firstly stop or cancel?
-        this.cancellationTokenSource.Cancel();
+        await this.cancellationTokenSource.CancelAsync().ConfigureAwait(false);
 
         try
         {
-            this.thinkingTask.Wait();
+            await this.thinkingTask.ConfigureAwait(false);
         }
-        catch (Exception ex) when (ExceptionUtil.GetInnerMostException(ex) is TaskCanceledException)
+        catch (Exception ex) when (ExceptionUtil.GetInnerMostException(ex) is TaskCanceledException or OperationCanceledException)
         {
         }
         catch (Exception ex)
@@ -295,11 +303,24 @@ public partial class UciEngine : ObservableObject, IUciEngine
         this.State = EngineState.Ready;
     }
 
-    public void Quit()
+    public async Task QuitAsync()
     {
-        this.SendCommand(Command.Quit);
+        await this.SendCommandAsync(Command.Quit).ConfigureAwait(false);
 
         this.NativeUciEngine.Dispose();
+    }
+
+    private async Task ThreadSafeExecute(Func<Task> task)
+    {
+        await semaphore.WaitAsync();
+        try
+        {
+            await task().ConfigureAwait(false);
+        }
+        finally
+        {
+            semaphore.Release();
+        }
     }
 
     private string BuildGoCommand(GoOption option)
@@ -346,13 +367,13 @@ public partial class UciEngine : ObservableObject, IUciEngine
         return cmd.ToString();
     }
 
-    private void SendCommand(string command)
+    private async Task SendCommandAsync(string command)
     {
         Logger.LogInformation($"[Send] {command}");
-        this.NativeUciEngine.SendCommand(command);
+        await this.NativeUciEngine.SendCommandAsync(command).ConfigureAwait(false);
     }
 
-    private void SetFenPosition(IChessBoardContext chessBoardContext)
+    private async Task SetFenPositionAsync(IChessBoardContext chessBoardContext)
     {
         var (chessBoard, movements, executionTurn) =
             chessBoardContext.HistoryManager.GetUnrevertibleChessBoardTrace(chessBoardContext);
@@ -371,7 +392,7 @@ public partial class UciEngine : ObservableObject, IUciEngine
             }
         }
 
-        this.SendCommand(command.ToString());
+        await this.SendCommandAsync(command.ToString()).ConfigureAwait(false);
     }
 
     private InfoFeedback ParseIntoFeedback(UciFeedback UciFeedback, IChessBoardContext chessBoardContext)

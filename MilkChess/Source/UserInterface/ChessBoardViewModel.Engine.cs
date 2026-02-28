@@ -31,36 +31,28 @@ public partial class ChessBoardViewModel
             };
         }
 
-        bool result = Application.Current.MainPage.Dispatcher.Dispatch(dispatchAction);
-
-        if (!result)
-        {
-            Logger.LogError("Failed to dispatch action");
-        }
-        else
-        {
-            dispatchCountDownEvent?.Wait();
-        }
+        Application.Current.MainPage.Dispatcher.Dispatch(dispatchAction);
+        dispatchCountDownEvent?.Wait();
     }
 
-    public void ConnectOrDisconnectEngine()
+    public async Task ConnectOrDisconnectEngineAsync()
     {
         if (this.Engine == null)
         {
-            this.InitializeUciEngine();
+            await this.InitializeUciEngineAsync();
         }
         else
         {
-            this.DisconnectEngine();
+            await this.DisconnectEngineAsync();
         }
     }
 
-    public void InitializeUciEngine()
+    public async Task InitializeUciEngineAsync()
     {
         Logger.LogInformation("Initailzing engine...");
         if (Config.EngineConfig == null)
         {
-            AlertService.PopAlert("No engine config selected");
+            await AlertService.PopAlertAsync("No engine config selected");
             return;
         }
 
@@ -69,7 +61,7 @@ public partial class ChessBoardViewModel
         CancellationTokenSource cancellationTokenSource =
             new CancellationTokenSource(TimeSpan.FromSeconds(this.Config.EngineConfig.ConnectionTimeoutSeconds));
 
-        var startUciFeedback = Engine.StartUci(cancellationTokenSource.Token); // EngineState = Connected
+        var startUciFeedback = await Engine.StartUciAsync(cancellationTokenSource.Token); // EngineState = Connected
 
         if (!startUciFeedback.ReceivedUciOk)
         {
@@ -84,22 +76,22 @@ public partial class ChessBoardViewModel
         {
             foreach (var option in this.Config.EngineOption)
             {
-                Engine.SetOption(option.Key, option.Value, cancellationTokenSource.Token);
+                await Engine.SetOptionAsync(option.Key, option.Value, cancellationTokenSource.Token);
             }
         }
 
-        Engine.WaitToReady(cancellationTokenSource.Token); // EngineState = Ready
+        await Engine.WaitToReadyAsync(cancellationTokenSource.Token); // EngineState = Ready
 
         this.InteractiveMode = EngineInteractiveMode.IdleMode;
 
-        RefreshUciEngine();
+        await RefreshUciEngineAsync();
     }
 
-    private void RefreshUciEngine()
+    private async Task RefreshUciEngineAsync()
     {
         if (this.Engine == null) return;
 
-        this.StopEngine();
+        await this.StopEngineAsync();
 
         // Don't clear EngineFeedback ff simply stopping the engine
         if (InteractiveMode != EngineInteractiveMode.IdleMode)
@@ -111,12 +103,12 @@ public partial class ChessBoardViewModel
         if (InteractiveMode == EngineInteractiveMode.AnalyzeMode)
         {
             option.Depth = -1;
-            Engine.GoInfinite(option, this, this.OnFeedbackReceived);
+            await Engine.GoInfiniteAsync(option, this, this.OnFeedbackReceived);
         }
         else if (InteractiveMode == EngineInteractiveMode.AutoMode)
         {
             option.Depth = this.Config.EngineConfig.GoDepth;
-            Engine.ExecuteForever(option, this, this.OnFeedbackReceived, this.OnBestMovementReceived);
+            await Engine.ExecuteForeverAsync(option, this, this.OnFeedbackReceived, this.OnBestMovementReceived);
         }
         else if (InteractiveMode == EngineInteractiveMode.BlackAutoMode ||
                  InteractiveMode == EngineInteractiveMode.RedAutoMode)
@@ -128,7 +120,7 @@ public partial class ChessBoardViewModel
             if (engineOperateColor == HistoryManager.ExecutionTurn)
             {
                 option.Depth = this.Config.EngineConfig.GoDepth;
-                Engine.ExecuteOnce(option, this, this.OnFeedbackReceived, this.OnBestMovementReceived);
+                await Engine.ExecuteOnceAsync(option, this, this.OnFeedbackReceived, this.OnBestMovementReceived);
             }
         }
     }
@@ -182,16 +174,19 @@ public partial class ChessBoardViewModel
         }
     }
 
-    private void StopEngine()
+    private async Task StopEngineAsync()
     {
-        Engine?.Stop();
+        if (Engine != null)
+        {
+            await Engine.StopAsync();
+        }
     }
 
-    private void DisconnectEngine()
+    private async Task DisconnectEngineAsync()
     {
-        this.StopEngine();
+        await this.StopEngineAsync();
 
-        Engine.Quit();
+        await Engine.QuitAsync();
 
         Engine = null;
         this.InteractiveMode = EngineInteractiveMode.None;

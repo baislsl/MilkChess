@@ -94,88 +94,88 @@ public partial class ChessBoardViewModel
             this.CommonCommandMiddlewareAsync());
 
     [RelayCommand(CanExecute = nameof(IsChessboardFreeFromAutoMoving))]
-    private void OnReset() =>
-        CommandMiddlewareHelper.Execute(
+    private async Task OnResetAsync() =>
+        await CommandMiddlewareHelper.ExecuteAsync(
             this.Reset,
-            this.RefreshEngineCommandMiddleware(),
-            this.CommonCommandMiddleware());
+            this.RefreshEngineCommandMiddlewareAsync(),
+            this.CommonCommandMiddlewareAsync());
 
     [RelayCommand(CanExecute = nameof(IsChessboardFreeFromAutoMoving))]
-    private void OnMoveBackward() =>
-        CommandMiddlewareHelper.Execute(
+    private async Task OnMoveBackwardAsync() =>
+        await CommandMiddlewareHelper.ExecuteAsync(
             this.MoveBackward,
-            this.RefreshEngineCommandMiddleware(),
-            this.CommonCommandMiddleware());
+            this.RefreshEngineCommandMiddlewareAsync(),
+            this.CommonCommandMiddlewareAsync());
 
     [RelayCommand(CanExecute = nameof(IsChessboardFreeFromAutoMoving))]
-    private void OnMoveForward() =>
-        CommandMiddlewareHelper.Execute(
+    private async Task OnMoveForward() =>
+        await CommandMiddlewareHelper.ExecuteAsync(
             this.MoveForward,
-            this.RefreshEngineCommandMiddleware(),
-            this.CommonCommandMiddleware());
+            this.RefreshEngineCommandMiddlewareAsync(),
+            this.CommonCommandMiddlewareAsync());
 
     [RelayCommand(CanExecute = nameof(IsChessboardFreeFromAutoMoving))]
-    private void OnMoveToStart() =>
-        CommandMiddlewareHelper.Execute(
+    private async Task OnMoveToStartAsync() =>
+        await CommandMiddlewareHelper.ExecuteAsync(
             this.MoveToStart,
-            this.RefreshEngineCommandMiddleware(),
-            this.CommonCommandMiddleware());
+            this.RefreshEngineCommandMiddlewareAsync(),
+            this.CommonCommandMiddlewareAsync());
 
     [RelayCommand(CanExecute = nameof(IsChessboardFreeFromAutoMoving))]
-    private void OnMoveToEnd() =>
-        CommandMiddlewareHelper.Execute(
+    private async Task OnMoveToEndAsync() =>
+        await CommandMiddlewareHelper.ExecuteAsync(
             this.MoveToEnd,
-            this.RefreshEngineCommandMiddleware(),
-            this.CommonCommandMiddleware());
+            this.RefreshEngineCommandMiddlewareAsync(),
+            this.CommonCommandMiddlewareAsync());
 
     [RelayCommand]
-    private void OnConnectOrDisconnectEngine() =>
-        CommandMiddlewareHelper.Execute(
-            this.ConnectOrDisconnectEngine,
-            this.CommonCommandMiddleware());
+    private async Task OnConnectOrDisconnectEngineAsync() =>
+        await CommandMiddlewareHelper.ExecuteAsync(
+            this.ConnectOrDisconnectEngineAsync,
+            this.CommonCommandMiddlewareAsync());
 
     [RelayCommand]
-    private void OnStopEngine() =>
-        CommandMiddlewareHelper.Execute(
+    private async Task OnStopEngineAsync() =>
+        await CommandMiddlewareHelper.ExecuteAsync(
             () => this.SwitchInteractMode(EngineInteractiveMode.IdleMode),
-            this.RefreshEngineCommandMiddleware(),
-            this.CommonCommandMiddleware());
+            this.RefreshEngineCommandMiddlewareAsync(),
+            this.CommonCommandMiddlewareAsync());
 
     [RelayCommand]
-    private void OnSwitchToAnalyzeMode() =>
-        CommandMiddlewareHelper.Execute(
+    private async Task OnSwitchToAnalyzeModeAsync() =>
+        await CommandMiddlewareHelper.ExecuteAsync(
             () => this.SwitchInteractMode(EngineInteractiveMode.AnalyzeMode),
-            this.RefreshEngineCommandMiddleware(),
-            this.CommonCommandMiddleware());
+            this.RefreshEngineCommandMiddlewareAsync(),
+            this.CommonCommandMiddlewareAsync());
 
     [RelayCommand]
-    private void OnSwitchToBlackAutoMode() =>
-        CommandMiddlewareHelper.Execute(
+    private async Task OnSwitchToBlackAutoMode() =>
+        await CommandMiddlewareHelper.ExecuteAsync(
             () => this.SwitchInteractMode(EngineInteractiveMode.BlackAutoMode),
-            this.RefreshEngineCommandMiddleware(),
-            this.CommonCommandMiddleware());
+            this.RefreshEngineCommandMiddlewareAsync(),
+            this.CommonCommandMiddlewareAsync());
 
     [RelayCommand]
-    private void OnSwitchToRedAutoMode() =>
-        CommandMiddlewareHelper.Execute(
+    private async Task OnSwitchToRedAutoMode() =>
+        await CommandMiddlewareHelper.ExecuteAsync(
             () => this.SwitchInteractMode(EngineInteractiveMode.RedAutoMode),
-            this.RefreshEngineCommandMiddleware(),
-            this.CommonCommandMiddleware());
+            this.RefreshEngineCommandMiddlewareAsync(),
+            this.CommonCommandMiddlewareAsync());
 
     [RelayCommand]
-    private void OnSwitchToAutoMode() =>
-        CommandMiddlewareHelper.Execute(
+    private async Task OnSwitchToAutoMode() =>
+        await CommandMiddlewareHelper.ExecuteAsync(
             () => this.SwitchInteractMode(EngineInteractiveMode.AutoMode),
-            this.RefreshEngineCommandMiddleware(),
-            this.CommonCommandMiddleware());
+            this.RefreshEngineCommandMiddlewareAsync(),
+            this.CommonCommandMiddlewareAsync());
 
     [RelayCommand(CanExecute = nameof(CanInvokeBestMovement))]
-    private void OnInvokeBestMovement() =>
-        CommandMiddlewareHelper.Execute(
+    private async Task OnInvokeBestMovementAsync() =>
+        await CommandMiddlewareHelper.ExecuteAsync(
             this.InvokeBestMovement,
-            this.AutoSaveChessManualMiddleware(),
-            this.RefreshEngineCommandMiddleware(),
-            this.CommonCommandMiddleware());
+            this.AutoSaveChessManualMiddlewareAsync(),
+            this.RefreshEngineCommandMiddlewareAsync(),
+            this.CommonCommandMiddlewareAsync());
 
     [RelayCommand]
     private void OnRotateBoard() =>
@@ -184,11 +184,11 @@ public partial class ChessBoardViewModel
             this.CommonCommandMiddleware());
 
     [RelayCommand]
-    private void OnExchangeTurn() =>
-        CommandMiddlewareHelper.Execute(
+    private async Task OnExchangeTurnAsync() =>
+        await CommandMiddlewareHelper.ExecuteAsync(
             this.ExchangeTurn,
-            this.RefreshEngineCommandMiddleware(),
-            this.CommonCommandMiddleware());
+            this.RefreshEngineCommandMiddlewareAsync(),
+            this.CommonCommandMiddlewareAsync());
 
     [RelayCommand]
     private void OnSaveChessManual() =>
@@ -197,12 +197,11 @@ public partial class ChessBoardViewModel
             this.CommonCommandMiddleware());
 
     [RelayCommand]
-    private void OnSwitchToSelectedMovement(object sender) =>
-        CommandMiddlewareHelper.BuildCommand(
-            new Command<object>(this.SwitchToSelectedMovement),
-            this.AutoSaveChessManualMiddleware(),
-            this.RefreshEngineCommandMiddleware(),
-            this.CommonCommandMiddleware()).Execute(sender);
+    private async Task OnSwitchToSelectedMovement(object sender) =>
+        await CommandMiddlewareHelper.ExecuteAsync(
+            () => this.SwitchToSelectedMovement(sender),
+            this.RefreshEngineCommandMiddlewareAsync(),
+            this.CommonCommandMiddlewareAsync());
 
     #endregion
 
@@ -225,7 +224,7 @@ public partial class ChessBoardViewModel
         {
             return async () =>
             {
-                this.StopEngine();
+                await this.StopEngineAsync();
 
                 await next();
                 SaveChessManual();
@@ -239,9 +238,9 @@ public partial class ChessBoardViewModel
         {
             return new Command<object>(_ =>
             {
-                this.StopEngine();
+                StopEngineAsync().GetAwaiter().GetResult();
                 command.Execute(_);
-                RefreshUciEngine();
+                RefreshUciEngineAsync().GetAwaiter().GetResult();
             });
         };
     }
@@ -252,10 +251,9 @@ public partial class ChessBoardViewModel
         {
             return async () =>
             {
-                StopEngine();
-
+                await StopEngineAsync();
                 await next();
-                RefreshUciEngine();
+                await RefreshUciEngineAsync();
             };
         };
     }

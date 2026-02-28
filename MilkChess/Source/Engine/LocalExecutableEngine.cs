@@ -45,31 +45,15 @@ public class LocalExecutableEngine : INativeUciEngine
         this.Process = Process.Start(startInfo);
     }
 
-    public void SendCommand(string command)
+    public async Task SendCommandAsync(string command)
     {
         this.UciLogger.WriteCommand(command);
-        this.Process.StandardInput.WriteLine(command);
+        await this.Process.StandardInput.WriteLineAsync(command).ConfigureAwait(false);
     }
 
     public async Task<UciFeedback> GetFeedbackAsync(CancellationToken cancellationToken)
     {
         string feedback = await this.Process.StandardOutput.ReadLineAsync(cancellationToken).ConfigureAwait(false);
-        this.UciLogger.WriteFeedback(feedback);
-
-        if (!UciFeedback.TryParse(feedback, out UciFeedback uciFeedback))
-        {
-            Logger.LogError("Can't parse feedback: {Feedback}", feedback);
-            return null;
-        }
-        else
-        {
-            return uciFeedback;
-        }
-    }
-
-    public UciFeedback GetFeedback()
-    {
-        string feedback = this.Process.StandardOutput.ReadLine();
         this.UciLogger.WriteFeedback(feedback);
 
         if (!UciFeedback.TryParse(feedback, out UciFeedback uciFeedback))

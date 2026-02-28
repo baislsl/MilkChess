@@ -1,7 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using MilkChess.Helper;
 using MilkChess.Model;
 using MilkChess.Protocol;
@@ -116,7 +115,7 @@ public partial class ChessBoardViewModel : ObservableObject, IChessBoardContext
 
             CursorSelector.Position = clickedButton.Position;
 
-            RefreshUciEngine();
+            RefreshUciEngineAsync().GetAwaiter().GetResult();
         }
         else
         {
