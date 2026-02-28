@@ -112,12 +112,11 @@ public partial class UciEngine : ObservableObject, IUciEngine
         await this.ThreadSafeExecute(async () =>
         {
             this.ThrowIfNotReady();
-            await this.ExecuteForeverInternalAsync(option, chessBoardContext, onInfoReceived, onBestMovementReceived)
-                .ConfigureAwait(false);
-        }).ConfigureAwait(false);
+            await this.ExecuteForeverInternalAsync(option, chessBoardContext, onInfoReceived, onBestMovementReceived);
+        });
     }
 
-    private async Task ExecuteForeverInternalAsync(
+    private Task ExecuteForeverInternalAsync(
         GoOption option,
         IChessBoardContext chessBoardContext,
         Action<InfoFeedback> onInfoReceived,
@@ -144,6 +143,8 @@ public partial class UciEngine : ObservableObject, IUciEngine
                 onBestMovementReceived?.Invoke(bestmove);
             }
         }, cancellationToken);
+
+        return Task.CompletedTask;
     }
 
     // Execute one step at a new thread.
@@ -156,9 +157,8 @@ public partial class UciEngine : ObservableObject, IUciEngine
         await this.ThreadSafeExecute(async () =>
         {
             this.ThrowIfNotReady();
-            await this.GoInternalAsync(option, chessBoardContext, onFeedbackReceived, onBestMovementReceived)
-                .ConfigureAwait(false);
-        }).ConfigureAwait(false);
+            await this.GoInternalAsync(option, chessBoardContext, onFeedbackReceived, onBestMovementReceived);
+        });
     }
 
     // Go infinite for current chess board at a new thread.
@@ -169,8 +169,8 @@ public partial class UciEngine : ObservableObject, IUciEngine
         await this.ThreadSafeExecute(async () =>
         {
             this.ThrowIfNotReady();
-            await this.GoInternalAsync(option, chessBoardContext, onFeedbackReceived, null).ConfigureAwait(false);
-        }).ConfigureAwait(false);
+            await this.GoInternalAsync(option, chessBoardContext, onFeedbackReceived, null);
+        });
     }
 
     private async Task GoInternalAsync(GoOption option,
@@ -180,8 +180,8 @@ public partial class UciEngine : ObservableObject, IUciEngine
     {
         this.State = EngineState.Thinking;
 
-        await this.SetFenPositionAsync(chessBoardContext).ConfigureAwait(false);
-        await this.SendCommandAsync(this.BuildGoCommand(option)).ConfigureAwait(false);
+        await this.SetFenPositionAsync(chessBoardContext);
+        await this.SendCommandAsync(this.BuildGoCommand(option));
 
         this.cancellationTokenSource = new CancellationTokenSource();
 
@@ -265,11 +265,7 @@ public partial class UciEngine : ObservableObject, IUciEngine
     // Stop from thinking state.
     public async Task StopAsync()
     {
-        await this.ThreadSafeExecute(async () =>
-            {
-                await this.StopInternalAsync().ConfigureAwait(false);
-            })
-            .ConfigureAwait(false);
+        await this.ThreadSafeExecute(async () => { await this.StopInternalAsync(); });
     }
 
     private async Task StopInternalAsync()
@@ -288,7 +284,8 @@ public partial class UciEngine : ObservableObject, IUciEngine
         {
             await this.thinkingTask.ConfigureAwait(false);
         }
-        catch (Exception ex) when (ExceptionUtil.GetInnerMostException(ex) is TaskCanceledException or OperationCanceledException)
+        catch (Exception ex) when (ExceptionUtil.GetInnerMostException(ex) is TaskCanceledException
+                                       or OperationCanceledException)
         {
         }
         catch (Exception ex)
@@ -312,15 +309,16 @@ public partial class UciEngine : ObservableObject, IUciEngine
 
     private async Task ThreadSafeExecute(Func<Task> task)
     {
-        await semaphore.WaitAsync();
-        try
-        {
-            await task().ConfigureAwait(false);
-        }
-        finally
-        {
-            semaphore.Release();
-        }
+        await task();
+        // await semaphore.WaitAsync();
+        // try
+        // {
+        //     await task();
+        // }
+        // finally
+        // {
+        //     semaphore.Release();
+        // }
     }
 
     private string BuildGoCommand(GoOption option)

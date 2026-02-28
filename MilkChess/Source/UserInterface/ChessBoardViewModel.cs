@@ -96,8 +96,9 @@ public partial class ChessBoardViewModel : ObservableObject, IChessBoardContext
         Iterator.IterateOverChessBoard(position => { layout.Add(Matrix[position.Y][position.X]); });
     }
 
-    [RelayCommand]
-    private void OnChessSelected(ChessButton clickedButton)
+    // 不set AllowConcurrentExecutions会导致执行期间其他棋子变虚化
+    [RelayCommand(AllowConcurrentExecutions = true)]
+    private async Task OnChessSelected(ChessButton clickedButton)
     {
         Logger.LogInformation(
             $"Clicked {clickedButton.Position} {clickedButton.Chess}; Selected {CursorSelector.Position}, {CursorSelector.Chess}");
@@ -115,7 +116,7 @@ public partial class ChessBoardViewModel : ObservableObject, IChessBoardContext
 
             CursorSelector.Position = clickedButton.Position;
 
-            RefreshUciEngineAsync().GetAwaiter().GetResult();
+            await RefreshUciEngineAsync();
         }
         else
         {
