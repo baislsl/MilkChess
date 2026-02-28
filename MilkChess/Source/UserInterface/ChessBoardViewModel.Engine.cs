@@ -60,8 +60,7 @@ public partial class ChessBoardViewModel
         Logger.LogInformation("Initailzing engine...");
         if (Config.EngineConfig == null)
         {
-            Logger.LogError("No engine config selected");
-
+            AlertService.PopAlert("No engine config selected");
             return;
         }
 
@@ -112,12 +111,12 @@ public partial class ChessBoardViewModel
         if (InteractiveMode == EngineInteractiveMode.AnalyzeMode)
         {
             option.Depth = -1;
-            Engine.GoInfinite(option, this, this.onFeedbackReceived);
+            Engine.GoInfinite(option, this, this.OnFeedbackReceived);
         }
         else if (InteractiveMode == EngineInteractiveMode.AutoMode)
         {
             option.Depth = this.Config.EngineConfig.GoDepth;
-            Engine.ExecuteForever(option, this, this.onFeedbackReceived, this.onBestMovementReceived);
+            Engine.ExecuteForever(option, this, this.OnFeedbackReceived, this.OnBestMovementReceived);
         }
         else if (InteractiveMode == EngineInteractiveMode.BlackAutoMode ||
                  InteractiveMode == EngineInteractiveMode.RedAutoMode)
@@ -129,12 +128,12 @@ public partial class ChessBoardViewModel
             if (engineOperateColor == HistoryManager.ExecutionTurn)
             {
                 option.Depth = this.Config.EngineConfig.GoDepth;
-                Engine.ExecuteOnce(option, this, this.onFeedbackReceived, this.onBestMovementReceived);
+                Engine.ExecuteOnce(option, this, this.OnFeedbackReceived, this.OnBestMovementReceived);
             }
         }
     }
 
-    private void onFeedbackReceived(InfoFeedback feedback)
+    private void OnFeedbackReceived(InfoFeedback feedback)
     {
         Logger.LogDebug("[HandleInfoFeedback] {}", feedback);
         this.DispatchAction(() =>
@@ -157,7 +156,7 @@ public partial class ChessBoardViewModel
         }, false);
     }
 
-    private void onBestMovementReceived(BestMove bestMove)
+    private void OnBestMovementReceived(BestMove bestMove)
     {
         if (this.ParseUnifyStringMovement(bestMove.BestMovement, out Movement bestMovement))
         {

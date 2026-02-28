@@ -83,6 +83,7 @@ public partial class ChessBoardViewModel
         await CommandMiddlewareHelper.ExecuteAsync(
             this.EditAsync,
             this.RefreshEngineCommandMiddlewareAsync(),
+            this.AutoSaveChessManualMiddlewareAsync(),
             this.CommonCommandMiddlewareAsync());
 
     [RelayCommand(CanExecute = nameof(IsChessboardFreeFromAutoMoving))]
@@ -91,8 +92,6 @@ public partial class ChessBoardViewModel
             this.ConfigureEngineAsync,
             this.RefreshEngineCommandMiddlewareAsync(),
             this.CommonCommandMiddlewareAsync());
-
-
 
     [RelayCommand(CanExecute = nameof(IsChessboardFreeFromAutoMoving))]
     private void OnReset() =>
@@ -105,7 +104,6 @@ public partial class ChessBoardViewModel
     private void OnMoveBackward() =>
         CommandMiddlewareHelper.Execute(
             this.MoveBackward,
-            this.AutoSaveChessManualMiddleware(),
             this.RefreshEngineCommandMiddleware(),
             this.CommonCommandMiddleware());
 
@@ -113,7 +111,6 @@ public partial class ChessBoardViewModel
     private void OnMoveForward() =>
         CommandMiddlewareHelper.Execute(
             this.MoveForward,
-            this.AutoSaveChessManualMiddleware(),
             this.RefreshEngineCommandMiddleware(),
             this.CommonCommandMiddleware());
 
@@ -121,7 +118,6 @@ public partial class ChessBoardViewModel
     private void OnMoveToStart() =>
         CommandMiddlewareHelper.Execute(
             this.MoveToStart,
-            this.AutoSaveChessManualMiddleware(),
             this.RefreshEngineCommandMiddleware(),
             this.CommonCommandMiddleware());
 
@@ -129,7 +125,6 @@ public partial class ChessBoardViewModel
     private void OnMoveToEnd() =>
         CommandMiddlewareHelper.Execute(
             this.MoveToEnd,
-            this.AutoSaveChessManualMiddleware(),
             this.RefreshEngineCommandMiddleware(),
             this.CommonCommandMiddleware());
 
@@ -224,6 +219,20 @@ public partial class ChessBoardViewModel
         };
     }
 
+    private CommandMiddlewareHelper.AsyncCommandMiddleware AutoSaveChessManualMiddlewareAsync()
+    {
+        return next =>
+        {
+            return async () =>
+            {
+                this.StopEngine();
+
+                await next();
+                SaveChessManual();
+            };
+        };
+    }
+
     private CommandMiddlewareHelper.CommandMiddleware RefreshEngineCommandMiddleware()
     {
         return delegate(ICommand command)
@@ -243,7 +252,7 @@ public partial class ChessBoardViewModel
         {
             return async () =>
             {
-                this.StopEngine();
+                StopEngine();
 
                 await next();
                 RefreshUciEngine();

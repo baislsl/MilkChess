@@ -49,10 +49,11 @@ namespace MilkChess
             builder.Services.AddTransient<EditChessBoardViewModel>();
             builder.Services.AddTransient<MilkChessConfigService>();
             builder.Services.AddSingleton<MilkChessConfig>(serviceProvider =>
-                MilkChessConfig.CreateMilkChessConfig(serviceProvider.GetRequiredService<MilkChessConfigService>()));
+                MilkChessConfig.Create(serviceProvider.GetRequiredService<MilkChessConfigService>()));
             builder.Services.AddTransient<EngineManager>();
             builder.Services.AddTransient<EngineConfigViewModel>();
             builder.Services.AddTransient<EngineConfigPage>();
+            builder.Services.AddTransient<AlertService>();
             builder.Services.AddSingleton<GlobalConfig>(GlobalConfig.Instance);
 
             using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(ConfigResourcePath);

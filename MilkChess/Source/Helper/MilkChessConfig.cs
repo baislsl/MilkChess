@@ -15,8 +15,7 @@ public class MilkChessConfigService
 
         options = new JsonSerializerOptions
         {
-            WriteIndented = true,
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            WriteIndented = true
         };
     }
 
@@ -28,7 +27,8 @@ public class MilkChessConfigService
         }
 
         var json = File.ReadAllText(filePath);
-        return JsonSerializer.Deserialize<MilkChessConfig>(json, options) ?? new MilkChessConfig();
+
+        return JsonSerializer.Deserialize<MilkChessConfig>(json) ?? new MilkChessConfig();
     }
 
     public void Save(MilkChessConfig config)
@@ -41,7 +41,7 @@ public class MilkChessConfigService
 
 public class MilkChessConfig
 {
-    public static MilkChessConfig CreateMilkChessConfig(MilkChessConfigService service)
+    public static MilkChessConfig Create(MilkChessConfigService service)
     {
         return service.Load();
     }

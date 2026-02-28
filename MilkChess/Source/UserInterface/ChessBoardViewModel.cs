@@ -23,6 +23,8 @@ public partial class ChessBoardViewModel : ObservableObject, IChessBoardContext
 
     private readonly MilkChessConfigService MilkChessConfigService;
 
+    private readonly AlertService AlertService;
+
     [ObservableProperty] private GlobalConfig _globalConfig;
 
     [ObservableProperty] private CursorSelector _cursorSelector;
@@ -43,7 +45,8 @@ public partial class ChessBoardViewModel : ObservableObject, IChessBoardContext
         MilkChessConfig milkChessConfig,
         GlobalConfig globalConfig,
         EngineFeedback engineFeedback,
-        MilkChessConfigService milkChessConfigService)
+        MilkChessConfigService milkChessConfigService,
+        AlertService alertService)
     {
         ChessModel = chessModel;
         Logger = logger;
@@ -53,6 +56,7 @@ public partial class ChessBoardViewModel : ObservableObject, IChessBoardContext
         EngineFeedback = engineFeedback;
         GlobalConfig = globalConfig;
         MilkChessConfigService = milkChessConfigService;
+        AlertService = alertService;
 
         Matrix = new List<List<ChessButton>>(Constants.ChessBoardWidth);
         for (int i = 0; i < Constants.ChessBoardHeight; i++)
