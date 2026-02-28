@@ -139,13 +139,13 @@
                             Command="{Binding SwitchToBlackAutoModeCommand}" />
 
                     <Button Grid.Row="7" Grid.Column="0"
-                            BackgroundColor="{Binding InvokeBestMovementColor}"
-                            Text="InvokeImmediate"
-                            Command="{Binding InvokeBestMovementCommand}" />
-                    <Button Grid.Row="7" Grid.Column="1"
                             BackgroundColor="{Binding SwitchToIdleModeColor}"
                             Text="{Binding SwitchToIdleModeText}"
                             Command="{Binding StopEngineCommand }" />
+
+                    <Button Grid.Row="7" Grid.Column="1"
+                            Text="InvokeImmediate"
+                            Command="{Binding InvokeBestMovementCommand}" />
 
                     <BoxView
                         Grid.Row="8"

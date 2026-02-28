@@ -11,8 +11,6 @@ public partial class ChessBoardViewModel
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(InvokeBestMovementCommand))]
     [NotifyPropertyChangedFor(nameof(ConnectOrDisconnectEngineText))]
-    [NotifyPropertyChangedFor(nameof(CanInvokeBestMovement))]
-    [NotifyPropertyChangedFor(nameof(InvokeBestMovementColor))]
     private UciEngine _engine;
 
     private void DispatchAction(Action action, bool wait = false)

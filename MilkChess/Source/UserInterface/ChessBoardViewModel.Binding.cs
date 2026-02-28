@@ -24,22 +24,13 @@ public partial class ChessBoardViewModel
     [NotifyCanExecuteChangedFor(nameof(MoveForwardCommand))]
     [NotifyCanExecuteChangedFor(nameof(MoveToStartCommand))]
     [NotifyCanExecuteChangedFor(nameof(MoveToEndCommand))]
-    [NotifyCanExecuteChangedFor(nameof(InvokeBestMovementCommand))]
     [NotifyPropertyChangedFor(nameof(SwitchToIdleModeColor))]
     [NotifyPropertyChangedFor(nameof(SwitchToAnalyzeModeColor))]
     [NotifyPropertyChangedFor(nameof(SwitchToAutoModeColor))]
     [NotifyPropertyChangedFor(nameof(SwitchToBlackAutoModeColor))]
     [NotifyPropertyChangedFor(nameof(SwitchToRedAutoModeColor))]
     [NotifyPropertyChangedFor(nameof(SwitchToIdleModeText))]
-    [NotifyPropertyChangedFor(nameof(InvokeBestMovementColor))]
     private EngineInteractiveMode _interactiveMode = EngineInteractiveMode.None;
-
-    public bool CanInvokeBestMovement =>
-        this.InteractiveMode == EngineInteractiveMode.AnalyzeMode && this.Engine != null;
-
-    public Color InvokeBestMovementColor => CanInvokeBestMovement
-        ? ActiveInteractiveModeColor
-        : InactiveInteractiveModeColor;
 
     public string ConnectOrDisconnectEngineText => this.Engine == null
         ? UIConstants.ConnectedEngineText
@@ -174,7 +165,7 @@ public partial class ChessBoardViewModel
             this.RefreshEngineCommandMiddlewareAsync(),
             this.CommonCommandMiddlewareAsync());
 
-    [RelayCommand(CanExecute = nameof(CanInvokeBestMovement))]
+    [RelayCommand]
     private async Task OnInvokeBestMovementAsync() =>
         await CommandMiddlewareHelper.ExecuteAsync(
             this.InvokeBestMovement,
