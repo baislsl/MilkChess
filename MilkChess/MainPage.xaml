@@ -107,6 +107,7 @@
                             Command="{Binding  MoveToEndCommand}" />
 
                     <BoxView
+                        Grid.Column="0"
                         Grid.Row="3"
                         Grid.ColumnSpan="2"
                         HeightRequest="1"
@@ -161,9 +162,13 @@
                             Text="ExchangeTurn"
                             Command="{Binding ExchangeTurnCommand}" />
 
-                    <Button Grid.Row="10" Grid.Column="0" Grid.ColumnSpan="2"
+                    <Button Grid.Row="10" Grid.Column="0"
                             Text="SaveLayout"
                             Command="{Binding SaveChessManualCommand}" />
+
+                    <Button Grid.Row="10" Grid.Column="1"
+                            Text="CopyFen"
+                            Command="{Binding CopyFenCommand}" />
 
                     <Slider
                         Grid.Row="11"

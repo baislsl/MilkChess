@@ -76,7 +76,7 @@ public partial class IdleChessPanel : ObservableObject
     {
         foreach (var chessBucket in IdleChessList)
         {
-            if (chessBucket.Chess.Equals(chess) && !chessBucket.IsIdle)
+            if (chessBucket.Chess.IsSame(chess) && !chessBucket.IsIdle)
             {
                 chessBucket.IsIdle = true;
                 return;
@@ -90,7 +90,7 @@ public partial class IdleChessPanel : ObservableObject
     {
         foreach (var chessBucket in IdleChessList)
         {
-            if (chessBucket.Chess.Equals(chess) && chessBucket.IsIdle)
+            if (chessBucket.Chess.IsSame(chess) && chessBucket.IsIdle)
             {
                 chessBucket.IsIdle = false;
                 return;

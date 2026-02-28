@@ -26,7 +26,7 @@ public class UcciFeedbackTest
             "info depth 245 seldepth 3 multipv 1 score mate -1 nodes 980 nps 980000 hashfull 0 tbhits 0 time 1 pv d0d1 b4b1";
         result = UciFeedback.TryParse(feedback, out feedbackResult);
         Assert.IsTrue(result);
-        Assert.AreEqual("29999", feedbackResult.InfoDict["score"]);
+        Assert.AreEqual("-29999", feedbackResult.InfoDict["score"]);
         Assert.AreEqual("-1", feedbackResult.InfoDict["mate"]);
     }
 

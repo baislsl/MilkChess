@@ -202,6 +202,12 @@ public partial class ChessBoardViewModel
             this.CommonCommandMiddleware());
 
     [RelayCommand]
+    private async Task OnCopyFenAsync() =>
+        await CommandMiddlewareHelper.ExecuteAsync(
+            this.CopyFenAsync,
+            this.CommonCommandMiddlewareAsync());
+
+    [RelayCommand]
     private async Task OnSwitchToSelectedMovement(object sender) =>
         await CommandMiddlewareHelper.ExecuteAsync(
             () => this.SwitchToSelectedMovement(sender),

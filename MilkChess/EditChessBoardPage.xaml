@@ -75,15 +75,18 @@
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
             </CollectionView>
-
             <Grid
                 Grid.Row="1"
                 WidthRequest="{Binding Source={x:Static userInterface:UIConstants.IdleChessPanelWidth}}"
                 RowSpacing="2"
                 ColumnSpacing="2">
                 <Grid.RowDefinitions>
+                    <RowDefinition Height="12" /> <!-- spacer -->
                     <RowDefinition Height="*" />
                     <RowDefinition Height="*" />
+                    <RowDefinition Height="12" /> <!-- spacer -->
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="12" /> <!-- spacer -->
                     <RowDefinition Height="*" />
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
@@ -92,29 +95,54 @@
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
 
-                <Button Grid.Row="0" Grid.Column="0"
+                <BoxView
+                    Grid.Row="0"
+                    Grid.ColumnSpan="2"
+                    HeightRequest="1"
+                    Margin="4,6" />
+
+                <Button Grid.Row="1" Grid.Column="0"
                         Text="Reset"
                         Command="{Binding ResetChessBoardCommand}" />
 
-                <Button Grid.Row="0" Grid.Column="1"
+                <Button Grid.Row="1" Grid.Column="1"
                         Text="Clear"
                         Command="{Binding ClearChessBoardCommand}" />
-                <Button Grid.Row="1" Grid.Column="0"
+                <Button Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
+                        Text="InputFen"
+                        Command="{Binding InputFenCommand}" />
+
+                <BoxView
+                    Grid.Row="3"
+                    Grid.Column="0"
+                    Grid.ColumnSpan="2"
+                    HeightRequest="1"
+                    Margin="4,6" />
+
+                <Button Grid.Row="4" Grid.Column="0"
                         Text="Save"
                         Command="{Binding
                         Source={RelativeSource AncestorType={x:Type milkChess:EditChessBoardPage}},
                         Path=ConfirmCommand}" />
-                <Button Grid.Row="1" Grid.Column="1"
+                <Button Grid.Row="4" Grid.Column="1"
                         Text="Cancel"
                         Command="{Binding
                         Source={RelativeSource AncestorType={x:Type milkChess:EditChessBoardPage}},
                         Path=CancelCommand}" />
-                <Button Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
+
+                <BoxView
+                    Grid.Row="5"
+                    Grid.Column="0"
+                    Grid.ColumnSpan="2"
+                    HeightRequest="1"
+                    Margin="4,6" />
+
+                <Button Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2"
                         Text="Rotate"
                         Command="{Binding RotateChessBoardCommand}" />
 
                 <Slider
-                    Grid.Row="3"
+                    Grid.Row="7"
                     Grid.Column="0"
                     Grid.ColumnSpan="2"
                     Minimum="0.65"
@@ -122,8 +150,5 @@
                     Value="{Binding GlobalConfig.ChessBoardScale}" />
             </Grid>
         </Grid>
-
-
     </Grid>
-
 </ContentPage>

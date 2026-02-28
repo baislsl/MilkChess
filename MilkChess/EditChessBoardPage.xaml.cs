@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.Input;
 using MilkChess.Model;
+using MilkChess.Protocol;
 using MilkChess.UserInterface;
 
 namespace MilkChess;
@@ -18,6 +19,7 @@ public partial class EditChessBoardPage : ContentPage
     public EditChessBoardPage(EditChessBoardViewModel editChessBoardViewModel)
     {
         this.EditChessBoardViewModel = editChessBoardViewModel;
+        this.EditChessBoardViewModel.ParentPage = this;
 
         InitializeComponent();
 

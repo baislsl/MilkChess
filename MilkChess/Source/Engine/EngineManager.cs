@@ -16,7 +16,7 @@ public class EngineManager
         this.Config = config;
     }
 
-    public void Save(IEnumerable<EngineConfig> engines, string? defaultEngine = null)
+    public void Save(IEnumerable<EngineConfig> engines, string defaultEngine = null)
     {
         Config.Engines.Clear();
         Config.Engines.AddRange(engines);

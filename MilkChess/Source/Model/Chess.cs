@@ -79,16 +79,9 @@ public abstract class Chess : ICloneable
         return this.MemberwiseClone();
     }
 
-    public override bool Equals(object obj)
+    public bool IsSame(Chess otherChess)
     {
-        if (obj is not Chess otherChess)
-        {
-            return false;
-        }
-        else
-        {
-            return this.ChessDefinition.Equals(otherChess.ChessDefinition) && this.Color.Equals(otherChess.Color);
-        }
+        return this.ChessDefinition.Equals(otherChess.ChessDefinition) && this.Color.Equals(otherChess.Color);
     }
 
     public virtual bool IsValidPosition(Position position)

@@ -15,8 +15,7 @@
 - [x] AbsoluteLayout scale
 - [x] 引擎position输入优化
 - [x] 绝杀局面处理
-- [ ] 编辑页面支持fen
-- [ ] 编辑页面title
+- [x] 编辑页面支持fen
 - [ ] AppIcon
 - [ ] 多引擎选择
 - [ ] 引擎配置选择,从ini文件移除
@@ -24,5 +23,4 @@
 - [ ] 屏幕捕捉
 - [ ] 历史分支
 - [ ] 棋谱导入导出
-- [x] pop error windows
 

@@ -12,7 +12,7 @@ public partial class EngineConfigViewModel : ObservableObject
 
     public ObservableCollection<EngineConfig> Engines { get; }
 
-    [ObservableProperty] private EngineConfig? selectedEngine;
+    [ObservableProperty] private EngineConfig selectedEngine;
 
     public EngineConfigViewModel(EngineManager engineManager)
     {

@@ -274,7 +274,8 @@ public partial class ChessBoardViewModel : ObservableObject, IChessBoardContext
 
     private bool LoadChessManual()
     {
-        if (ForsythEdwardsNotation.ParseString(Config.LastChessBoardFen, out ForsythEdwardsNotation forsythEdwardsNotation))
+        if (ForsythEdwardsNotation.ParseString(Config.LastChessBoardFen,
+                out ForsythEdwardsNotation forsythEdwardsNotation))
         {
             this.AdoptForsythEdwardsNotation(forsythEdwardsNotation);
         }
@@ -315,6 +316,14 @@ public partial class ChessBoardViewModel : ObservableObject, IChessBoardContext
             this.ApplyMovement(newMovement);
             HistoryManager.InsertMovement(newMovement);
         }
+    }
+
+    private async Task CopyFenAsync()
+    {
+        var fen = this.BuildForsythEdwardsNotation().GetFenString();
+
+        await Clipboard.Default.SetTextAsync(fen);
+        await AlertService.PopAlertAsync($"Copied to clipboard. \n Fen: {fen}");
     }
 
     private void SwitchToSelectedMovement(object sender)

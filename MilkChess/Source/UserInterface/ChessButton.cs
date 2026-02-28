@@ -19,7 +19,7 @@ namespace MilkChess.UserInterface;
 public class ChessButton : ImageButton
 {
     private Chess _chess;
-    private bool rightClickHooked;
+    private bool rightClickHooked = false;
 
     public readonly Position Position;
 
@@ -39,9 +39,9 @@ public class ChessButton : ImageButton
             typeof(ICommand),
             typeof(ChessButton));
 
-    public ICommand? RightClickCommand
+    public ICommand RightClickCommand
     {
-        get => (ICommand?)GetValue(RightClickCommandProperty);
+        get => (ICommand)GetValue(RightClickCommandProperty);
         set => SetValue(RightClickCommandProperty, value);
     }
 
@@ -57,7 +57,7 @@ public class ChessButton : ImageButton
         Refresh();
     }
 
-    private void OnHandlerChanged(object? sender, EventArgs e)
+    private void OnHandlerChanged(object sender, EventArgs e)
     {
         if (rightClickHooked || Handler?.PlatformView == null)
             return;
@@ -107,7 +107,7 @@ public class ChessButton : ImageButton
             this.button = button;
         }
 
-        public override UIContextMenuConfiguration? GetConfigurationForMenu(
+        public override UIContextMenuConfiguration GetConfigurationForMenu(
             UIContextMenuInteraction interaction,
             CGPoint location)
         {

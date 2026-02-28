@@ -10,11 +10,15 @@ namespace MilkChess.UserInterface;
 
 public partial class EditChessBoardViewModel : ObservableObject, IChessBoard
 {
+    public EditChessBoardPage ParentPage { get; set; }
+
     private readonly ILogger<EditChessBoardViewModel> Logger;
 
     private readonly ChessModel ChessModel;
 
     private readonly List<List<ChessButton>> Matrix;
+
+    private readonly AlertService AlertService;
 
     [ObservableProperty] private GlobalConfig _globalConfig;
 
@@ -26,12 +30,14 @@ public partial class EditChessBoardViewModel : ObservableObject, IChessBoard
         ILogger<EditChessBoardViewModel> logger,
         IdleChessPanel idleChessPanel,
         ChessModel chessModel,
-        GlobalConfig globalConfig)
+        GlobalConfig globalConfig,
+        AlertService alertService)
     {
         Logger = logger;
         ChessModel = chessModel;
         IdleChessPanel = idleChessPanel;
         GlobalConfig = globalConfig;
+        AlertService = alertService;
 
         Matrix = new List<List<ChessButton>>(Constants.ChessBoardWidth);
         for (int i = 0; i < Constants.ChessBoardHeight; i++)
@@ -228,5 +234,39 @@ public partial class EditChessBoardViewModel : ObservableObject, IChessBoard
         Iterator.IterateOverChessBoard(position => { Matrix[position.Y][position.X].Refresh(); });
 
         this.ChessBoardCursor.Refresh();
+    }
+
+    [RelayCommand]
+    private async Task InputFen()
+    {
+        string result = await ParentPage.DisplayPromptAsync(
+            "Input FEN",
+            "Input fen string:",
+            accept: "Confirm",
+            cancel: "Cancel",
+            placeholder: "e.g. rnbakabnr/9/4c4/p1p1p1p1p/9/9/P1P1P1P1P/1C3CN2/9/1RBAKAB1R b - - 0 1"
+        );
+
+        if (!string.IsNullOrEmpty(result))
+        {
+            if (ForsythEdwardsNotation.ParseString(result, out var forsythEdwardsNotation))
+            {
+                this.AdoptForsythEdwardsNotation(forsythEdwardsNotation);
+
+                this.IdleChessPanel.Reset();
+                Iterator.IterateOverChessBoard(position =>
+                {
+                    var chess = this.GetChessAtPosition(position);
+                    if (chess != null && chess is not King)
+                    {
+                        this.IdleChessPanel.RemoveChess(chess);
+                    }
+                });
+            }
+            else
+            {
+                await AlertService.PopAlertAsync($"'{result}' is not a valid FEN'");
+            }
+        }
     }
 }
