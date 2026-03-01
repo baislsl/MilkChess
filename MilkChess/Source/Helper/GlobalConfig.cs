@@ -11,9 +11,17 @@ public partial class GlobalConfig : ObservableObject
     {
     }
 
+    public GlobalConfig Init(MilkChessConfig config)
+    {
+        this.ChessBoardScale = config.ChessBoardScale;
+        this.IsRotated = config.IsRotated;
+        return this;
+    }
+
     public bool IsRotated { get; set; } = false;
 
-    [ObservableProperty] private double _chessBoardScale = 1.0;
+    [ObservableProperty]
+    private double _chessBoardScale = 1.0;
 
     public int ChessBoardVisualHeight => (int)(UIConstants.ChessBoardHeight * this.ChessBoardScale);
 

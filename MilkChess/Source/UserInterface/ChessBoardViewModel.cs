@@ -24,11 +24,14 @@ public partial class ChessBoardViewModel : ObservableObject, IChessBoardContext
 
     private readonly AlertService AlertService;
 
-    [ObservableProperty] private GlobalConfig _globalConfig;
+    [ObservableProperty]
+    private GlobalConfig _globalConfig;
 
-    [ObservableProperty] private CursorSelector _cursorSelector;
+    [ObservableProperty]
+    private CursorSelector _cursorSelector;
 
-    [ObservableProperty] private MovementIndicator _movementIndicator;
+    [ObservableProperty]
+    private MovementIndicator _movementIndicator;
 
     private static readonly Color ActiveInteractiveModeColor = Colors.Blue;
 
@@ -269,6 +272,9 @@ public partial class ChessBoardViewModel : ObservableObject, IChessBoardContext
     private void SaveChessManual()
     {
         Config.LastChessBoardFen = this.BuildForsythEdwardsNotation().GetFenString();
+        Config.IsRotated = GlobalConfig.IsRotated;
+        Config.ChessBoardScale = GlobalConfig.ChessBoardScale;
+
         MilkChessConfigService.Save(Config);
     }
 

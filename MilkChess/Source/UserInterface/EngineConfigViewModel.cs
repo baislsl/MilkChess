@@ -13,7 +13,8 @@ public partial class EngineConfigViewModel : ObservableObject
 
     public MilkChessConfig MilkChessConfig { get; set; }
 
-    [ObservableProperty] private EngineConfig _selectedEngine;
+    [ObservableProperty]
+    private EngineConfig _selectedEngine;
 
     public EngineConfigViewModel(
         MilkChessConfigService milkChessConfigService,

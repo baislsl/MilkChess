@@ -17,7 +17,7 @@ public class UciLogger
     public UciLogger(MilkChessConfig config, ILogger<UciLogger> logger)
     {
         this.logger = logger;
-        string logFile = config.EngineConfig.Log;
+        string logFile = config.DefaultEngineConfig.Log;
 
         if (!string.IsNullOrWhiteSpace(logFile))
         {

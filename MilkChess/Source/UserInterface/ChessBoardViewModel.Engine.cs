@@ -64,7 +64,7 @@ public partial class ChessBoardViewModel
     public async Task InitializeUciEngineAsync()
     {
         Logger.LogInformation("Initailzing engine...");
-        if (Config.EngineConfig == null)
+        if (Config.DefaultEngineConfig == null)
         {
             await AlertService.PopAlertAsync("No engine config selected");
             return;
@@ -73,7 +73,7 @@ public partial class ChessBoardViewModel
         Engine = ServiceProvider.GetService<UciEngine>();
 
         CancellationTokenSource cancellationTokenSource =
-            new CancellationTokenSource(TimeSpan.FromSeconds(this.Config.EngineConfig.ConnectionTimeoutSeconds));
+            new CancellationTokenSource(TimeSpan.FromSeconds(this.Config.DefaultEngineConfig.ConnectionTimeoutSeconds));
 
         var startUciFeedback = await Engine.StartUciAsync(cancellationTokenSource.Token); // EngineState = Connected
 
@@ -86,9 +86,9 @@ public partial class ChessBoardViewModel
             Logger.LogInformation($"init engine success");
         }
 
-        if (this.Config.EngineConfig?.Threads > 0)
+        if (this.Config.DefaultEngineConfig?.Threads > 0)
         {
-            await Engine.SetOptionAsync("Threads", this.Config.EngineConfig.Threads.ToString(),
+            await Engine.SetOptionAsync("Threads", this.Config.DefaultEngineConfig.Threads.ToString(),
                 cancellationTokenSource.Token);
         }
 
@@ -130,7 +130,7 @@ public partial class ChessBoardViewModel
         }
         else if (InteractiveMode == EngineInteractiveMode.AutoMode)
         {
-            option.Depth = this.Config.EngineConfig.GoDepth;
+            option.Depth = this.Config.DefaultEngineConfig.GoDepth;
             await Engine.ExecuteForeverAsync(option, this, this.OnFeedbackReceived, this.OnBestMovementReceived);
         }
         else if (InteractiveMode == EngineInteractiveMode.BlackAutoMode ||
@@ -142,7 +142,7 @@ public partial class ChessBoardViewModel
 
             if (engineOperateColor == HistoryManager.ExecutionTurn)
             {
-                option.Depth = this.Config.EngineConfig.GoDepth;
+                option.Depth = this.Config.DefaultEngineConfig.GoDepth;
                 await Engine.ExecuteOnceAsync(option, this, this.OnFeedbackReceived, this.OnBestMovementReceived);
             }
         }

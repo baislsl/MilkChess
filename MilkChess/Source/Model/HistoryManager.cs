@@ -9,7 +9,8 @@ namespace MilkChess.Model;
 
 public partial class HistoryManager : ObservableObject
 {
-    [ObservableProperty] [NotifyPropertyChangedFor(nameof(ExecutionTurnColor))]
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ExecutionTurnColor))]
     private Color _executionTurn;
 
     public Microsoft.Maui.Graphics.Color ExecutionTurnColor =>
@@ -17,7 +18,8 @@ public partial class HistoryManager : ObservableObject
 
     public ObservableCollection<Movement> Movements { get; private set; }
 
-    [ObservableProperty] private int _cursor;
+    [ObservableProperty]
+    private int _cursor;
 
     private readonly ILogger Logger;
 
@@ -145,6 +147,5 @@ public partial class HistoryManager : ObservableObject
         }
 
         OnPropertyChanged();
-
     }
 }

@@ -41,7 +41,8 @@ public partial class ChessBoardViewModel
             ? UIConstants.EngineIdleStateText
             : UIConstants.StopEngineText;
 
-    [ObservableProperty] private EngineFeedback _engineFeedback;
+    [ObservableProperty]
+    private EngineFeedback _engineFeedback;
 
     public Color SwitchToIdleModeColor => (this.InteractiveMode == EngineInteractiveMode.IdleMode)
         ? ActiveInteractiveModeColor
@@ -169,7 +170,6 @@ public partial class ChessBoardViewModel
     private async Task OnInvokeBestMovementAsync() =>
         await CommandMiddlewareHelper.ExecuteAsync(
             this.InvokeBestMovement,
-            this.AutoSaveChessManualMiddlewareAsync(),
             this.RefreshEngineCommandMiddlewareAsync(),
             this.CommonCommandMiddlewareAsync());
 

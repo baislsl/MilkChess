@@ -20,11 +20,14 @@ public partial class EditChessBoardViewModel : ObservableObject, IChessBoard
 
     private readonly AlertService AlertService;
 
-    [ObservableProperty] private GlobalConfig _globalConfig;
+    [ObservableProperty]
+    private GlobalConfig _globalConfig;
 
-    [ObservableProperty] private IdleChessPanel _idleChessPanel;
+    [ObservableProperty]
+    private IdleChessPanel _idleChessPanel;
 
-    [ObservableProperty] private CursorSelector _chessBoardCursor;
+    [ObservableProperty]
+    private CursorSelector _chessBoardCursor;
 
     public EditChessBoardViewModel(
         ILogger<EditChessBoardViewModel> logger,

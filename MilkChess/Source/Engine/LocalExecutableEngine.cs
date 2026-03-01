@@ -23,7 +23,7 @@ public class LocalExecutableEngine : INativeUciEngine
     {
         this.Logger = logger;
         this.UciLogger = UciLogger;
-        this.Config = config.EngineConfig.Clone();
+        this.Config = config.DefaultEngineConfig.Clone();
 
         this.Name = this.Config.Name;
     }

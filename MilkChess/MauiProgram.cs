@@ -54,7 +54,8 @@ namespace MilkChess
             builder.Services.AddTransient<EngineConfigViewModel>();
             builder.Services.AddTransient<EngineConfigPage>();
             builder.Services.AddTransient<AlertService>();
-            builder.Services.AddSingleton<GlobalConfig>(GlobalConfig.Instance);
+            builder.Services.AddSingleton<GlobalConfig>(serviceProvider =>
+                GlobalConfig.Instance.Init(serviceProvider.GetRequiredService<MilkChessConfig>()));
 
             using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(ConfigResourcePath);
             var config = new ConfigurationBuilder().AddIniStream(stream).Build();

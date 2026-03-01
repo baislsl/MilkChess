@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using CommunityToolkit.Mvvm.ComponentModel;
+using MilkChess.UserInterface;
 
 namespace MilkChess.Helper;
 
@@ -52,11 +53,17 @@ public partial class MilkChessConfig : ObservableObject
 
     public Dictionary<string, string> EngineOption { get; set; } = new();
 
-    [ObservableProperty] private string _defaultEngine = string.Empty;
+    [ObservableProperty]
+    private string _defaultEngine = string.Empty;
 
     public string LastChessBoardFen { get; set; } = string.Empty;
 
-    [JsonIgnore] public EngineConfig EngineConfig => Engines.FirstOrDefault(e => e.Name == DefaultEngine);
+    [JsonIgnore]
+    public EngineConfig DefaultEngineConfig => Engines.FirstOrDefault(e => e.Name == DefaultEngine);
+
+    public bool IsRotated { get; set; } = false;
+
+    public double ChessBoardScale { get; set; } = 1.0;
 
     partial void OnDefaultEngineChanged(string oldValue, string newValue)
     {

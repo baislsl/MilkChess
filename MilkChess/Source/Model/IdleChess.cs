@@ -6,7 +6,9 @@ namespace MilkChess.Model;
 
 public partial class IdleChess : ObservableObject
 {
-    [NotNull] [ObservableProperty] [NotifyPropertyChangedFor(nameof(ImageSource))]
+    [NotNull]
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ImageSource))]
     private Chess _chess;
 
     [ObservableProperty]
