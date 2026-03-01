@@ -11,7 +11,11 @@
     x:Name="EngineConfig"
     x:Class="MilkChess.EngineConfigPage"
     Title="Engine Settings">
-
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <helper:StringListToStringConverter x:Key="ArgsConverter" />
+        </ResourceDictionary>
+    </ContentPage.Resources>
     <Grid ColumnDefinitions="250,*"
           RowDefinitions="Auto,*,Auto"
           Padding="15"
@@ -28,8 +32,7 @@
         <VerticalStackLayout Grid.Row="1"
                              Grid.Column="0"
                              Spacing="10">
-
-            <CollectionView ItemsSource="{Binding Engines}"
+            <CollectionView ItemsSource="{Binding MilkChessConfig.Engines}"
                             SelectionMode="Single"
                             SelectedItem="{Binding SelectedEngine}"
                             HeightRequest="400">
@@ -37,79 +40,77 @@
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="helper:EngineConfig">
                         <Frame Padding="8"
-                               Margin="0,3"
                                BorderColor="LightGray">
+                            <HorizontalStackLayout Spacing="6">
+                                <Label Text="{Binding Name}"
+                                       FontAttributes="Bold" />
 
-                            <Label Text="{Binding Name}"
-                                   FontAttributes="Bold" />
+                                <!-- 默认标识 -->
+                                <Label Text="(Default)"
+                                       TextColor="Green"
+                                       FontSize="12"
+                                       IsVisible="{Binding IsDefault}" />
+                            </HorizontalStackLayout>
                         </Frame>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
             </CollectionView>
-
             <Button Text="Add Engine"
                     Command="{Binding AddEngineCommand}" />
-
             <Button Text="Delete Selected"
                     Command="{Binding RemoveEngineCommand}"
-                    CommandParameter="{Binding SelectedEngine}"
-                    IsEnabled="{Binding SelectedEngine}" />
-
+                    CommandParameter="{Binding SelectedEngine}" />
         </VerticalStackLayout>
 
         <!-- 右侧：编辑区 -->
         <ScrollView Grid.Row="1"
                     Grid.Column="1">
-
-            <VerticalStackLayout Spacing="12"
-                                 IsEnabled="{Binding SelectedEngine}">
-
+            <VerticalStackLayout Spacing="12">
                 <Label Text="Engine Details"
                        FontSize="16"
                        FontAttributes="Bold" />
-
                 <VerticalStackLayout>
                     <Label Text="Name" />
                     <Entry Placeholder="Name"
                            Text="{Binding SelectedEngine.Name}" />
                 </VerticalStackLayout>
-
                 <VerticalStackLayout>
                     <Label Text="Executable Path" />
-                    <Entry Placeholder="Executable Path"
-                           Text="{Binding SelectedEngine.Path}" />
+                    <VerticalStackLayout>
+                        <Entry Placeholder="Execuftable Absolute Path"
+                               Text="{Binding SelectedEngine.Path}" />
+                    </VerticalStackLayout>
                 </VerticalStackLayout>
-
                 <VerticalStackLayout>
                     <Label Text="Arguments" />
-                    <Entry Placeholder="Arguments"
-                           Text="{Binding SelectedEngine.Arguments}" />
+                    <Entry
+                        Placeholder="Arguments"
+                        Text="{Binding SelectedEngine.Arguments,
+                        Converter={StaticResource ArgsConverter},
+                        Mode=TwoWay}" />
                 </VerticalStackLayout>
-
                 <VerticalStackLayout>
                     <Label Text="Log File" />
                     <Entry Placeholder="Log File"
                            Text="{Binding SelectedEngine.Log}" />
                 </VerticalStackLayout>
-
                 <VerticalStackLayout>
                     <Label Text="AutoMode Search Depth" />
                     <Entry Text="{Binding SelectedEngine.GoDepth}"
                            Keyboard="Numeric" />
                 </VerticalStackLayout>
-
                 <VerticalStackLayout>
                     <Label Text="Threads" />
                     <Entry Text="{Binding SelectedEngine.Threads}"
                            Keyboard="Numeric" />
                 </VerticalStackLayout>
-
                 <VerticalStackLayout>
                     <Label Text="Connection Timeout (seconds)" />
                     <Entry Text="{Binding SelectedEngine.ConnectionTimeoutSeconds}"
                            Keyboard="Numeric" />
                 </VerticalStackLayout>
-
+                <Button Text="Set As Default"
+                        Command="{Binding SetAsDefaultCommand}" />
             </VerticalStackLayout>
         </ScrollView>
 
@@ -118,9 +119,6 @@
                                Grid.ColumnSpan="2"
                                HorizontalOptions="End"
                                Spacing="10">
-
-            <Button Text="Cancel"
-                    Clicked="OnCancelClicked" />
 
             <Button Text="Save"
                     Command="{Binding CloseCommand}" />

@@ -4,7 +4,7 @@ namespace MilkChess.Helper;
 
 public class AlertService
 {
-    public ILogger<AlertService> Logger;
+    private ILogger<AlertService> Logger;
 
     public AlertService(ILogger<AlertService> logger)
     {

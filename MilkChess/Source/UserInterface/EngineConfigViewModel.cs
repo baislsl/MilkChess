@@ -8,34 +8,37 @@ namespace MilkChess.UserInterface;
 
 public partial class EngineConfigViewModel : ObservableObject
 {
-    private readonly EngineManager EngineManager;
+    private readonly MilkChessConfigService MilkChessConfigService;
+    private readonly AlertService AlertService;
 
-    public ObservableCollection<EngineConfig> Engines { get; }
+    public MilkChessConfig MilkChessConfig { get; set; }
 
-    [ObservableProperty] private EngineConfig selectedEngine;
+    [ObservableProperty] private EngineConfig _selectedEngine;
 
-    public EngineConfigViewModel(EngineManager engineManager)
+    public EngineConfigViewModel(
+        MilkChessConfigService milkChessConfigService,
+        MilkChessConfig milkChessConfig,
+        AlertService alertService)
     {
-        EngineManager = engineManager;
+        AlertService = alertService;
+        MilkChessConfigService = milkChessConfigService;
+        MilkChessConfig = milkChessConfig;
 
-        Engines = new ObservableCollection<EngineConfig>(
-            engineManager.Engines.Select(e => e.Clone()));
-
-        SelectedEngine = Engines.FirstOrDefault(e => e.Name == engineManager.Config.DefaultEngine);
+        SelectedEngine = MilkChessConfig.Engines.FirstOrDefault(e => e.Name == MilkChessConfig.DefaultEngine);
     }
 
     [RelayCommand]
     private void AddEngine()
     {
         var engine = new EngineConfig { Name = "NewEngine" };
-        Engines.Add(engine);
+        MilkChessConfig.Engines.Add(engine);
         SelectedEngine = engine;
     }
 
     [RelayCommand]
     private void RemoveEngine(EngineConfig engine)
     {
-        Engines.Remove(engine);
+        MilkChessConfig.Engines.Remove(engine);
 
         if (SelectedEngine == engine)
         {
@@ -46,10 +49,19 @@ public partial class EngineConfigViewModel : ObservableObject
     [RelayCommand]
     private async Task CloseAsync()
     {
-        EngineManager.Save(
-            Engines,
-            SelectedEngine?.Name);
+        MilkChessConfigService.Save(this.MilkChessConfig);
 
         await Application.Current.MainPage.Navigation.PopModalAsync();
+    }
+
+    [RelayCommand]
+    private void SetAsDefault()
+    {
+        if (SelectedEngine == null)
+        {
+            return;
+        }
+
+        MilkChessConfig.DefaultEngine = SelectedEngine.Name;
     }
 }

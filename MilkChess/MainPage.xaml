@@ -123,7 +123,7 @@
                             Command="{Binding ConnectOrDisconnectEngineCommand}" />
 
                     <Button Grid.Row="4" Grid.Column="1"
-                            Text="ConfigureEngine"
+                            Text="EditEngine"
                             Command="{Binding ConfigureEngineCommand}" />
 
                     <Button Grid.Row="5" Grid.Column="0"

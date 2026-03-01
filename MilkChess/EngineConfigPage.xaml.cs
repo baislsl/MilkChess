@@ -9,9 +9,4 @@ public partial class EngineConfigPage : ContentPage
         InitializeComponent();
         BindingContext = engineConfigViewModel;
     }
-
-    private async void OnCancelClicked(object sender, EventArgs e)
-    {
-        await Navigation.PopModalAsync();
-    }
 }

@@ -16,12 +16,12 @@ public class EngineManager
         this.Config = config;
     }
 
-    public void Save(IEnumerable<EngineConfig> engines, string defaultEngine = null)
+    public void Save(IEnumerable<EngineConfig> engines, string defaultEngine)
     {
-        Config.Engines.Clear();
-        Config.Engines.AddRange(engines);
-        Config.DefaultEngine = defaultEngine;
-
-        MilkChessConfigService.Save(Config);
+        // Config.Engines.Clear();
+        // Config.Engines.AddRange(engines);
+        // Config.DefaultEngine = defaultEngine;
+        //
+        // MilkChessConfigService.Save(Config);
     }
 }

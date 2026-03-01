@@ -1,5 +1,7 @@
+using System.Collections.ObjectModel;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace MilkChess.Helper;
 
@@ -39,25 +41,41 @@ public class MilkChessConfigService
     }
 }
 
-public class MilkChessConfig
+public partial class MilkChessConfig : ObservableObject
 {
     public static MilkChessConfig Create(MilkChessConfigService service)
     {
         return service.Load();
     }
 
-    public List<EngineConfig> Engines { get; set; } = [];
+    public ObservableCollection<EngineConfig> Engines { get; set; } = [];
 
     public Dictionary<string, string> EngineOption { get; set; } = new();
 
-    public string DefaultEngine { get; set; } = string.Empty;
+    [ObservableProperty] private string _defaultEngine = string.Empty;
 
     public string LastChessBoardFen { get; set; } = string.Empty;
 
     [JsonIgnore] public EngineConfig EngineConfig => Engines.FirstOrDefault(e => e.Name == DefaultEngine);
+
+    partial void OnDefaultEngineChanged(string oldValue, string newValue)
+    {
+        foreach (var engine in Engines)
+        {
+            if (engine.Name == oldValue)
+            {
+                engine.IsDefault = false;
+            }
+
+            if (engine.Name == newValue)
+            {
+                engine.IsDefault = true;
+            }
+        }
+    }
 }
 
-public class EngineConfig
+public partial class EngineConfig : ObservableObject
 {
     public string Name { get; set; }
     public string Path { get; set; }
@@ -71,6 +89,9 @@ public class EngineConfig
     public int ConnectionTimeoutSeconds { get; set; } = 20;
 
     public int Threads { get; set; } = 4;
+
+    [ObservableProperty]
+    private bool _isDefault;
 
     public EngineConfig Clone() => new()
     {
