@@ -2,9 +2,8 @@ using System.Collections.ObjectModel;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using CommunityToolkit.Mvvm.ComponentModel;
-using MilkChess.UserInterface;
 
-namespace MilkChess.Helper;
+namespace MilkChess.Model;
 
 public class MilkChessConfigService
 {
@@ -18,7 +17,8 @@ public class MilkChessConfigService
 
         options = new JsonSerializerOptions
         {
-            WriteIndented = true
+            WriteIndented = true,
+            PropertyNameCaseInsensitive = true
         };
     }
 
@@ -100,6 +100,8 @@ public partial class EngineConfig : ObservableObject
     [ObservableProperty]
     private bool _isDefault;
 
+    public int MultiPv { get; set; } = 1;
+
     public EngineConfig Clone() => new()
     {
         Name = Name,
@@ -110,5 +112,6 @@ public partial class EngineConfig : ObservableObject
         ConnectionTimeoutSeconds = ConnectionTimeoutSeconds,
         Threads = Threads,
         IsDefault = IsDefault,
+        MultiPv = MultiPv
     };
 }

@@ -90,14 +90,16 @@ public class InfoFeedback
 
     public int Depth;
 
-    public List<Movement> Movements;
+    public int MultiPV = 1;
 
-    public string ViewableMovementList;
+    public List<Movement> Movements { get; set; }
+
+    public string ViewableMovementList { get; set; }
 
     public InfoFeedback()
     {
         this.Pv = new List<string>();
-        this.Info = new Dictionary<string, string>();
+        this.Info = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         this.Movements = new List<Movement>();
     }
 

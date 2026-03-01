@@ -1,6 +1,4 @@
-﻿using System.Reflection;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using MilkChess.Engine;
 using MilkChess.Helper;
 using MilkChess.Model;

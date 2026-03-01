@@ -86,20 +86,6 @@ public partial class ChessBoardViewModel
             Logger.LogInformation($"init engine success");
         }
 
-        if (this.Config.DefaultEngineConfig?.Threads > 0)
-        {
-            await Engine.SetOptionAsync("Threads", this.Config.DefaultEngineConfig.Threads.ToString(),
-                cancellationTokenSource.Token);
-        }
-
-        if (this.Config.EngineOption?.Count > 0)
-        {
-            foreach (var option in this.Config.EngineOption)
-            {
-                await Engine.SetOptionAsync(option.Key, option.Value, cancellationTokenSource.Token);
-            }
-        }
-
         await Engine.WaitToReadyAsync(cancellationTokenSource.Token); // EngineState = Ready
 
         if (this.InteractiveMode == EngineInteractiveMode.None)
@@ -155,7 +141,8 @@ public partial class ChessBoardViewModel
         {
             if (feedback.Movements?.Count > 0)
             {
-                if (MovementIndicator.Movement?.ToUnifyString() != feedback.Movements[0].ToUnifyString())
+                if (feedback.MultiPV == 1 &&
+                    MovementIndicator.Movement?.ToUnifyString() != feedback.Movements[0].ToUnifyString())
                 {
                     // Set best movement
                     MovementIndicator.SetMovement(feedback.Movements[0]);
@@ -166,6 +153,8 @@ public partial class ChessBoardViewModel
                     Score = feedback.Score,
                     Depth = feedback.Depth,
                     Movements = feedback.ViewableMovementList,
+                    MultiPv = feedback.MultiPV,
+                    IsMultiPv = Engine?.IsMultiPv ?? false,
                 });
             }
         }, false);

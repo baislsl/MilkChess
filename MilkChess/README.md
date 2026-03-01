@@ -16,12 +16,12 @@
 - [x] 引擎position输入优化
 - [x] 绝杀局面处理
 - [x] 编辑页面支持fen
-- [ ] AppIcon
+- [x] AppIcon
 - [x] 多引擎选择
 - [x] 引擎配置选择,从ini文件移除
-- [ ] multipv support
-- [ ] check mate时卡死
+- [x] multipv support
 - [ ] 预测局面跳转
+- [ ] 棋谱导入导出
 - [ ] 屏幕捕捉
 - [ ] 历史分支
 

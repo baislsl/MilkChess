@@ -1,8 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using System.Collections.ObjectModel;
-using MilkChess.Engine;
 using MilkChess.Helper;
+using MilkChess.Model;
 
 namespace MilkChess.UserInterface;
 
@@ -34,6 +33,23 @@ public partial class EngineConfigViewModel : ObservableObject
         var engine = new EngineConfig { Name = "NewEngine" };
         MilkChessConfig.Engines.Add(engine);
         SelectedEngine = engine;
+    }
+
+    [RelayCommand]
+    private void DuplicateEngine(EngineConfig engine)
+    {
+        if (engine == null)
+        {
+            return;
+        }
+
+        var newEngine = SelectedEngine.Clone();
+
+        newEngine.Name += "_copy";
+        newEngine.IsDefault = false;
+
+        MilkChessConfig.Engines.Add(newEngine);
+        SelectedEngine = newEngine;
     }
 
     [RelayCommand]

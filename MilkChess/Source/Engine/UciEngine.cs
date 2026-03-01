@@ -11,16 +11,22 @@ namespace MilkChess.Engine;
 
 public partial class UciEngine : ObservableObject, IUciEngine
 {
-    [ObservableProperty] private EngineState state = EngineState.Disconnected;
+    [ObservableProperty]
+    private EngineState state = EngineState.Disconnected;
 
     private readonly INativeUciEngine NativeUciEngine;
-    private readonly MilkChessConfig Config;
+    private readonly MilkChessConfig MilkChessConfig;
     private readonly ILogger Logger;
+    private readonly EngineConfig Config;
 
     private CancellationTokenSource cancellationTokenSource;
     private Task thinkingTask;
 
     private static readonly SemaphoreSlim semaphore = new SemaphoreSlim(1, 1);
+
+    public bool IsMultiPv => this.Config.MultiPv > 1;
+
+    public int MultiPv => this.Config.MultiPv;
 
     public string Name => this.NativeUciEngine.Name;
 
@@ -29,7 +35,8 @@ public partial class UciEngine : ObservableObject, IUciEngine
     {
         this.Logger = logger;
         this.NativeUciEngine = localExecutableEngine;
-        this.Config = config;
+        this.MilkChessConfig = config;
+        this.Config = config.DefaultEngineConfig.Clone();
     }
 
     public async Task<StartUciFeedback> StartUciAsync(CancellationToken cancellationToken)
@@ -42,42 +49,73 @@ public partial class UciEngine : ObservableObject, IUciEngine
         StartUciFeedback feedback = new StartUciFeedback();
         while (!cancellationToken.IsCancellationRequested && !feedback.ReceivedUciOk)
         {
-            Logger.LogInformation("Loop");
-            UciFeedback UciFeedback =
+            UciFeedback uciFeedback =
                 await this.NativeUciEngine.GetFeedbackAsync(cancellationToken).ConfigureAwait(false);
-            if (UciFeedback == null) continue;
 
-            if (UciFeedback.Command == FeedbackCommand.UciOk)
+            if (uciFeedback == null) continue;
+
+            if (uciFeedback.Command == FeedbackCommand.UciOk)
             {
                 feedback.ReceivedUciOk = true;
             }
-            else if (UciFeedback.Command == FeedbackCommand.Id)
+            else if (uciFeedback.Command == FeedbackCommand.Id)
             {
-                feedback.ID[UciFeedback.IdName] = UciFeedback.IdValue;
+                feedback.ID[uciFeedback.IdName] = uciFeedback.IdValue;
             }
-            else if (UciFeedback.Command == FeedbackCommand.Info)
+            else if (uciFeedback.Command == FeedbackCommand.Info)
             {
                 // TODO: skip
             }
+
+            Logger.LogInformation("StartUciAsync loop GetFeedbackAsync, last feedback {uciFeedback}", uciFeedback);
         }
 
         return feedback;
     }
 
+    private async Task ConfigureOption(CancellationToken cancellationToken)
+    {
+        if (this.Config.Threads > 0)
+        {
+            await this.SetOptionAsync("Threads", this.Config.Threads.ToString(), cancellationToken);
+        }
+
+        cancellationToken.ThrowIfCancellationRequested();
+
+        if (this.IsMultiPv)
+        {
+            await this.SetOptionAsync("MultiPV", this.MultiPv.ToString(), cancellationToken);
+        }
+
+        cancellationToken.ThrowIfCancellationRequested();
+
+        if (this.MilkChessConfig.EngineOption?.Count > 0)
+        {
+            foreach (var option in this.MilkChessConfig.EngineOption)
+            {
+                await this.SetOptionAsync(option.Key, option.Value, cancellationToken);
+            }
+        }
+    }
+
     public async Task WaitToReadyAsync(CancellationToken cancellationToken)
     {
-        await this.SendCommandAsync(Command.IsReady).ConfigureAwait(false);
+        await this.ConfigureOption(cancellationToken);
+        await this.SendCommandAsync(Command.IsReady);
 
         while (!cancellationToken.IsCancellationRequested)
         {
-            UciFeedback UciFeedback =
+            UciFeedback uciFeedback =
                 await this.NativeUciEngine.GetFeedbackAsync(cancellationToken).ConfigureAwait(false);
-            if (UciFeedback?.Command == FeedbackCommand.ReadyOk)
+
+            if (uciFeedback?.Command == FeedbackCommand.ReadyOk)
             {
                 Logger.LogError("Engine IsReady");
                 this.State = EngineState.Ready;
                 return;
             }
+
+            Logger.LogInformation("WaitToReadyAsync loop GetFeedbackAsync, last feedback {uciFeedback}", uciFeedback);
         }
 
         throw new Exception("IsReady receive no feedback");
@@ -419,9 +457,14 @@ public partial class UciEngine : ObservableObject, IUciEngine
             }
         }
 
-        if (feedback.Info.ContainsKey("depth"))
+        if (feedback.Info.TryGetValue("depth", out var depth))
         {
-            int.TryParse(feedback.Info["depth"], out feedback.Depth);
+            int.TryParse(depth, out feedback.Depth);
+        }
+
+        if (feedback.Info.TryGetValue("multipv", out var multipv))
+        {
+            int.TryParse(multipv, out feedback.MultiPV);
         }
 
         if (feedback.Pv?.Count > 0)

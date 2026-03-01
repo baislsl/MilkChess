@@ -268,9 +268,10 @@
                     Padding="10, 2"
                     TextColor="{Binding EngineFeedback.ScoreColor}">
                     <Label.Text>
-                        <MultiBinding StringFormat="Score: {0},  Engine: {1}, State {2}">
+                        <MultiBinding StringFormat="Score: {0},  Engine: {1}, MultiPV: {2}, State: {3}">
                             <Binding Path="EngineFeedback.ScoreText" />
                             <Binding Path="Engine.Name" />
+                            <Binding Path="Engine.MultiPv" />
                             <Binding Path="Engine.State" />
                         </MultiBinding>
                     </Label.Text>
@@ -299,9 +300,10 @@
                                     <Label.FormattedText>
                                         <FormattedString>
                                             <Span Text="Score: " TextColor="Black" />
-                                            <Span Text="{Binding Score}" TextColor="Black" FontAttributes="Bold" />
+                                            <Span Text="{Binding Score}" TextColor="Black" />
                                             <Span Text=" Depth: " TextColor="Black" />
-                                            <Span Text="{Binding Depth}" TextColor="Black" FontAttributes="Bold" />
+                                            <Span Text="{Binding Depth}" TextColor="Black" />
+                                            <Span Text="{Binding MultiPvText}" TextColor="Black" />
                                             <Span Text="{Binding Path=Movements, StringFormat='  {0}' }"
                                                   FontAttributes="Italic" />
                                         </FormattedString>

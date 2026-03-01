@@ -41,7 +41,7 @@
                                        ItemSpacing="8" />
                 </CollectionView.ItemsLayout>
                 <CollectionView.ItemTemplate>
-                    <DataTemplate x:DataType="helper:EngineConfig">
+                    <DataTemplate x:DataType="model:EngineConfig">
                         <Frame x:Name="RootFrame"
                                Padding="10"
                                CornerRadius="8"
@@ -87,6 +87,9 @@
                     Command="{Binding AddEngineCommand}" />
             <Button Text="Delete Selected"
                     Command="{Binding RemoveEngineCommand}"
+                    CommandParameter="{Binding SelectedEngine}" />
+            <Button Text="Duplicate Selected"
+                    Command="{Binding DuplicateEngineCommand}"
                     CommandParameter="{Binding SelectedEngine}" />
         </VerticalStackLayout>
 
@@ -162,6 +165,14 @@
                                    FontSize="12"
                                    TextColor="#777777" />
                             <Entry Text="{Binding SelectedEngine.Threads}"
+                                   Keyboard="Numeric"
+                                   HeightRequest="36" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="MultiPV"
+                                   FontSize="12"
+                                   TextColor="#777777" />
+                            <Entry Text="{Binding SelectedEngine.MultiPv}"
                                    Keyboard="Numeric"
                                    HeightRequest="36" />
                         </VerticalStackLayout>

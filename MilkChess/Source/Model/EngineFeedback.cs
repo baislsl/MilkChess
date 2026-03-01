@@ -10,7 +10,7 @@ public partial class EngineFeedback : ObservableObject
     [NotifyPropertyChangedFor(nameof(ScoreColor))]
     private ObservableCollection<PredictMovementTrace> _predictMovementTraces;
 
-    private int? EvalScore => this.PredictMovementTraces?.FirstOrDefault()?.Score;
+    private int? EvalScore => this.PredictMovementTraces?.FirstOrDefault(t => t.MultiPv == 1)?.Score;
 
     public string ScoreText => EvalScore?.ToString() ?? string.Empty;
 
@@ -42,4 +42,11 @@ public class PredictMovementTrace
     public int Depth { get; set; }
 
     public string Movements { get; set; }
+
+    public int MultiPv { get; set; } = 1;   // Default 1
+
+
+    public bool IsMultiPv { get; set; }
+
+    public string MultiPvText => IsMultiPv ? $" MultiPV: {MultiPv}" : string.Empty;
 }

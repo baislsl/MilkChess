@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using MilkChess.Model;
 using MilkChess.UserInterface;
 
 namespace MilkChess.Helper;
