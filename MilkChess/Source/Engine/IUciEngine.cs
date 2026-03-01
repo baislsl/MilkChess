@@ -6,6 +6,8 @@ namespace MilkChess.Engine;
 
 internal interface INativeUciEngine : IDisposable
 {
+    public string Name { get; }
+
     void Initialize();
 
     public Task SendCommandAsync(string command);

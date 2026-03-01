@@ -42,7 +42,18 @@ public partial class ChessBoardViewModel
     {
         if (this.Engine == null)
         {
-            await this.InitializeUciEngineAsync();
+            try
+            {
+                await this.InitializeUciEngineAsync();
+            }
+            catch (Exception ex)
+            {
+                // Setting engine back to null
+                this.Engine = null;
+
+                await AlertService.PopAlertAsync($"Error initializing Uci engine, {ex}");
+                throw;
+            }
         }
         else
         {

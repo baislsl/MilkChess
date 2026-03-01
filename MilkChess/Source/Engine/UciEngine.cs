@@ -22,6 +22,8 @@ public partial class UciEngine : ObservableObject, IUciEngine
 
     private static readonly SemaphoreSlim semaphore = new SemaphoreSlim(1, 1);
 
+    public string Name => this.NativeUciEngine.Name;
+
     public UciEngine(ILogger<UciEngine> logger, LocalExecutableEngine localExecutableEngine,
         MilkChessConfig config)
     {

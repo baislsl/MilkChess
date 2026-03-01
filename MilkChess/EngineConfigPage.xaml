@@ -36,19 +36,47 @@
                             SelectionMode="Single"
                             SelectedItem="{Binding SelectedEngine}"
                             HeightRequest="400">
-
+                <CollectionView.ItemsLayout>
+                    <LinearItemsLayout Orientation="Vertical"
+                                       ItemSpacing="8" />
+                </CollectionView.ItemsLayout>
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="helper:EngineConfig">
-                        <Frame Padding="8"
-                               BorderColor="LightGray">
+                        <Frame x:Name="RootFrame"
+                               Padding="10"
+                               CornerRadius="8"
+                               BorderColor="#DDDDDD"
+                               BackgroundColor="Transparent">
+                            <VisualStateManager.VisualStateGroups>
+                                <VisualStateGroup Name="CommonStates">
+                                    <VisualState Name="Normal">
+                                        <VisualState.Setters>
+                                            <Setter Property="BackgroundColor"
+                                                    Value="Transparent" />
+                                            <Setter Property="BorderColor"
+                                                    Value="#DDDDDD" />
+                                        </VisualState.Setters>
+                                    </VisualState>
+
+                                    <VisualState Name="Selected">
+                                        <VisualState.Setters>
+                                            <Setter Property="BackgroundColor"
+                                                    Value="#E8F0FE" />
+                                            <Setter Property="BorderColor"
+                                                    Value="#4F7DF3" />
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                </VisualStateGroup>
+                            </VisualStateManager.VisualStateGroups>
                             <HorizontalStackLayout Spacing="6">
                                 <Label Text="{Binding Name}"
-                                       FontAttributes="Bold" />
-
-                                <!-- 默认标识 -->
-                                <Label Text="(Default)"
-                                       TextColor="Green"
-                                       FontSize="12"
+                                       FontAttributes="Bold"
+                                       FontSize="14" />
+                                <Label Text="Default"
+                                       FontSize="11"
+                                       Padding="4,1"
+                                       BackgroundColor="#DFF5E1"
+                                       TextColor="#2E7D32"
                                        IsVisible="{Binding IsDefault}" />
                             </HorizontalStackLayout>
                         </Frame>
@@ -65,61 +93,121 @@
         <!-- 右侧：编辑区 -->
         <ScrollView Grid.Row="1"
                     Grid.Column="1">
-            <VerticalStackLayout Spacing="12">
-                <Label Text="Engine Details"
-                       FontSize="16"
-                       FontAttributes="Bold" />
-                <VerticalStackLayout>
-                    <Label Text="Name" />
-                    <Entry Placeholder="Name"
-                           Text="{Binding SelectedEngine.Name}" />
-                </VerticalStackLayout>
-                <VerticalStackLayout>
-                    <Label Text="Executable Path" />
-                    <VerticalStackLayout>
-                        <Entry Placeholder="Execuftable Absolute Path"
-                               Text="{Binding SelectedEngine.Path}" />
+            <Frame Padding="18"
+                   CornerRadius="12"
+                   BorderColor="#DDDDDD"
+                   BackgroundColor="#FAFAFA">
+                <VerticalStackLayout Spacing="18">
+                    <Grid ColumnDefinitions="*,Auto"
+                          VerticalOptions="Center">
+                        <!-- 左侧标题 -->
+                        <Label Text="Engine Details"
+                               FontSize="16"
+                               FontAttributes="Bold"
+                               TextColor="#333333"
+                               VerticalOptions="Center" />
+                        <!-- 右侧按钮 -->
+                        <Button Grid.Column="1"
+                                Text="Set As Default"
+                                FontSize="13"
+                                Padding="10,6"
+                                CornerRadius="8"
+                                BackgroundColor="#4F7DF3"
+                                TextColor="White"
+                                Command="{Binding SetAsDefaultCommand}"
+                                VerticalOptions="Center" />
+                    </Grid>
+                    <!-- ========== Basic ========== -->
+                    <Label Text="Basic"
+                           FontSize="14"
+                           FontAttributes="Bold"
+                           TextColor="#555555" />
+                    <VerticalStackLayout Spacing="10">
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="Name"
+                                   FontSize="12"
+                                   TextColor="#777777" />
+                            <Entry Text="{Binding SelectedEngine.Name}"
+                                   HeightRequest="36" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="Executable Path"
+                                   FontSize="12"
+                                   TextColor="#777777" />
+                            <Entry Text="{Binding SelectedEngine.Path}"
+                                   HeightRequest="36" />
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+                    <!-- 分割线 -->
+                    <BoxView HeightRequest="1"
+                             BackgroundColor="#E0E0E0" />
+                    <!-- ========== Runtime ========== -->
+                    <Label Text="Runtime"
+                           FontSize="14"
+                           FontAttributes="Bold"
+                           TextColor="#555555" />
+                    <VerticalStackLayout Spacing="10">
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="Arguments"
+                                   FontSize="12"
+                                   TextColor="#777777" />
+                            <Entry
+                                Text="{Binding SelectedEngine.Arguments,
+                                  Converter={StaticResource ArgsConverter},
+                                  Mode=TwoWay}"
+                                HeightRequest="36" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="Threads"
+                                   FontSize="12"
+                                   TextColor="#777777" />
+                            <Entry Text="{Binding SelectedEngine.Threads}"
+                                   Keyboard="Numeric"
+                                   HeightRequest="36" />
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+                    <!-- 分割线 -->
+                    <BoxView HeightRequest="1"
+                             BackgroundColor="#E0E0E0" />
+
+                    <!-- ========== Advanced ========== -->
+                    <Label Text="Advanced"
+                           FontSize="14"
+                           FontAttributes="Bold"
+                           TextColor="#555555" />
+                    <VerticalStackLayout Spacing="10">
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="Search Depth"
+                                   FontSize="12"
+                                   TextColor="#777777" />
+                            <Entry Text="{Binding SelectedEngine.GoDepth}"
+                                   Keyboard="Numeric"
+                                   HeightRequest="36" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="Connection Timeout (seconds)"
+                                   FontSize="12"
+                                   TextColor="#777777" />
+                            <Entry Text="{Binding SelectedEngine.ConnectionTimeoutSeconds}"
+                                   Keyboard="Numeric"
+                                   HeightRequest="36" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="Log File"
+                                   FontSize="12"
+                                   TextColor="#777777" />
+                            <Entry Text="{Binding SelectedEngine.Log}"
+                                   HeightRequest="36" />
+                        </VerticalStackLayout>
                     </VerticalStackLayout>
                 </VerticalStackLayout>
-                <VerticalStackLayout>
-                    <Label Text="Arguments" />
-                    <Entry
-                        Placeholder="Arguments"
-                        Text="{Binding SelectedEngine.Arguments,
-                        Converter={StaticResource ArgsConverter},
-                        Mode=TwoWay}" />
-                </VerticalStackLayout>
-                <VerticalStackLayout>
-                    <Label Text="Log File" />
-                    <Entry Placeholder="Log File"
-                           Text="{Binding SelectedEngine.Log}" />
-                </VerticalStackLayout>
-                <VerticalStackLayout>
-                    <Label Text="AutoMode Search Depth" />
-                    <Entry Text="{Binding SelectedEngine.GoDepth}"
-                           Keyboard="Numeric" />
-                </VerticalStackLayout>
-                <VerticalStackLayout>
-                    <Label Text="Threads" />
-                    <Entry Text="{Binding SelectedEngine.Threads}"
-                           Keyboard="Numeric" />
-                </VerticalStackLayout>
-                <VerticalStackLayout>
-                    <Label Text="Connection Timeout (seconds)" />
-                    <Entry Text="{Binding SelectedEngine.ConnectionTimeoutSeconds}"
-                           Keyboard="Numeric" />
-                </VerticalStackLayout>
-                <Button Text="Set As Default"
-                        Command="{Binding SetAsDefaultCommand}" />
-            </VerticalStackLayout>
+            </Frame>
         </ScrollView>
-
         <!-- 底部按钮区 -->
         <HorizontalStackLayout Grid.Row="2"
                                Grid.ColumnSpan="2"
                                HorizontalOptions="End"
                                Spacing="10">
-
             <Button Text="Save"
                     Command="{Binding CloseCommand}" />
 

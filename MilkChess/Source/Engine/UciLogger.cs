@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MilkChess.Helper;
 
@@ -6,20 +7,29 @@ namespace MilkChess.Engine;
 
 public class UciLogger
 {
+    private readonly ILogger<UciLogger> logger;
     private readonly object obj = new();
 
     private readonly FileStream fileStream;
 
     private readonly StreamWriter writer;
 
-    public UciLogger(MilkChessConfig config)
+    public UciLogger(MilkChessConfig config, ILogger<UciLogger> logger)
     {
+        this.logger = logger;
         string logFile = config.EngineConfig.Log;
 
         if (!string.IsNullOrWhiteSpace(logFile))
         {
-            this.fileStream = new FileStream(logFile, FileMode.Append, FileAccess.Write, FileShare.Read);
-            this.writer = new StreamWriter(fileStream) { AutoFlush = true };
+            try
+            {
+                this.fileStream = new FileStream(logFile, FileMode.Append, FileAccess.Write, FileShare.Read);
+                this.writer = new StreamWriter(fileStream) { AutoFlush = true };
+            }
+            catch (Exception ex)
+            {
+                this.logger.LogError(ex, "Error init log file");
+            }
         }
     }
 

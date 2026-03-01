@@ -82,7 +82,7 @@ public partial class ChessBoardViewModel
             this.AutoSaveChessManualMiddlewareAsync(),
             this.CommonCommandMiddlewareAsync());
 
-    [RelayCommand(CanExecute = nameof(IsChessboardFreeFromAutoMoving))]
+    [RelayCommand]
     private async Task OnConfigureEngineAsync() =>
         await CommandMiddlewareHelper.ExecuteAsync(
             this.ConfigureEngineAsync,

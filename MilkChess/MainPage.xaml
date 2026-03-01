@@ -268,8 +268,9 @@
                     Padding="10, 2"
                     TextColor="{Binding EngineFeedback.ScoreColor}">
                     <Label.Text>
-                        <MultiBinding StringFormat="Score: {0}  Engine: {1}">
+                        <MultiBinding StringFormat="Score: {0},  Engine: {1}, State {2}">
                             <Binding Path="EngineFeedback.ScoreText" />
+                            <Binding Path="Engine.Name" />
                             <Binding Path="Engine.State" />
                         </MultiBinding>
                     </Label.Text>

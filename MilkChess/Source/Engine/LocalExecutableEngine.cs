@@ -10,7 +10,9 @@ public class LocalExecutableEngine : INativeUciEngine
 {
     private readonly UciLogger UciLogger;
     private readonly ILogger<LocalExecutableEngine> Logger;
-    private readonly MilkChessConfig Config;
+    private readonly EngineConfig Config;
+
+    public string Name { get; private set; }
 
     private Process Process;
 
@@ -21,21 +23,23 @@ public class LocalExecutableEngine : INativeUciEngine
     {
         this.Logger = logger;
         this.UciLogger = UciLogger;
-        this.Config = config;
+        this.Config = config.EngineConfig.Clone();
+
+        this.Name = this.Config.Name;
     }
 
     public void Initialize()
     {
         var startInfo = new ProcessStartInfo()
         {
-            FileName = this.Config.EngineConfig.Path,
+            FileName = this.Config.Path,
             RedirectStandardInput = true,
             RedirectStandardOutput = true,
         };
 
-        if (this.Config.EngineConfig.Arguments?.Count > 0)
+        if (this.Config.Arguments?.Count > 0)
         {
-            foreach (var argument in this.Config.EngineConfig.Arguments)
+            foreach (var argument in this.Config.Arguments)
             {
                 startInfo.ArgumentList.Add(argument);
             }
