@@ -111,7 +111,3 @@ public partial class EngineConfig : ObservableObject
         Threads = Threads
     };
 }
-
-public class AppSettings
-{
-}

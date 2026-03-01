@@ -10,9 +10,6 @@ namespace MilkChess
 {
     public static class MauiProgram
     {
-        private const string ConfigResourcePath = "MilkChess.Resources.Config.appsettings.ini";
-
-
 #if !(IOS || ANDROID || MACCATALYST || WINDOWS)
         public static void Main(string[] args)
         {
@@ -56,10 +53,6 @@ namespace MilkChess
             builder.Services.AddTransient<AlertService>();
             builder.Services.AddSingleton<GlobalConfig>(serviceProvider =>
                 GlobalConfig.Instance.Init(serviceProvider.GetRequiredService<MilkChessConfig>()));
-
-            using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(ConfigResourcePath);
-            var config = new ConfigurationBuilder().AddIniStream(stream).Build();
-            builder.Services.Configure<AppSettings>(config);
 
             return builder.Build();
         }
