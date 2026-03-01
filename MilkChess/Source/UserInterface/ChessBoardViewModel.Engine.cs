@@ -75,6 +75,12 @@ public partial class ChessBoardViewModel
             Logger.LogInformation($"init engine success");
         }
 
+        if (this.Config.EngineConfig?.Threads > 0)
+        {
+            await Engine.SetOptionAsync("Threads", this.Config.EngineConfig.Threads.ToString(),
+                cancellationTokenSource.Token);
+        }
+
         if (this.Config.EngineOption?.Count > 0)
         {
             foreach (var option in this.Config.EngineOption)

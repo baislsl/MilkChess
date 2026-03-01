@@ -1,4 +1,5 @@
-<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8"?>
+
 <ContentPage
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
@@ -40,7 +41,7 @@
                                BorderColor="LightGray">
 
                             <Label Text="{Binding Name}"
-                                   FontAttributes="Bold"/>
+                                   FontAttributes="Bold" />
                         </Frame>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
@@ -67,39 +68,46 @@
                        FontSize="16"
                        FontAttributes="Bold" />
 
-                <Entry Placeholder="Name"
-                       Text="{Binding SelectedEngine.Name}" />
+                <VerticalStackLayout>
+                    <Label Text="Name" />
+                    <Entry Placeholder="Name"
+                           Text="{Binding SelectedEngine.Name}" />
+                </VerticalStackLayout>
 
-                <Entry Placeholder="Executable Path"
-                       Text="{Binding SelectedEngine.Path}" />
+                <VerticalStackLayout>
+                    <Label Text="Executable Path" />
+                    <Entry Placeholder="Executable Path"
+                           Text="{Binding SelectedEngine.Path}" />
+                </VerticalStackLayout>
 
-                <Entry Placeholder="Arguments"
-                       Text="{Binding SelectedEngine.Arguments}" />
+                <VerticalStackLayout>
+                    <Label Text="Arguments" />
+                    <Entry Placeholder="Arguments"
+                           Text="{Binding SelectedEngine.Arguments}" />
+                </VerticalStackLayout>
 
-                <Entry Placeholder="Log File"
-                       Text="{Binding SelectedEngine.Log}" />
+                <VerticalStackLayout>
+                    <Label Text="Log File" />
+                    <Entry Placeholder="Log File"
+                           Text="{Binding SelectedEngine.Log}" />
+                </VerticalStackLayout>
 
-                <Grid ColumnDefinitions="*,*"
-                      ColumnSpacing="10">
+                <VerticalStackLayout>
+                    <Label Text="AutoMode Search Depth" />
+                    <Entry Text="{Binding SelectedEngine.GoDepth}"
+                           Keyboard="Numeric" />
+                </VerticalStackLayout>
 
-                    <VerticalStackLayout>
-                        <Label Text="Search Depth"/>
-                        <Entry Text="{Binding SelectedEngine.GoDepth}"
-                               Keyboard="Numeric"/>
-                    </VerticalStackLayout>
-
-                    <VerticalStackLayout>
-                        <Label Text="Threads"/>
-                        <Entry Text="{Binding SelectedEngine.Threads}"
-                               Keyboard="Numeric"/>
-                    </VerticalStackLayout>
-
-                </Grid>
+                <VerticalStackLayout>
+                    <Label Text="Threads" />
+                    <Entry Text="{Binding SelectedEngine.Threads}"
+                           Keyboard="Numeric" />
+                </VerticalStackLayout>
 
                 <VerticalStackLayout>
                     <Label Text="Connection Timeout (seconds)" />
                     <Entry Text="{Binding SelectedEngine.ConnectionTimeoutSeconds}"
-                           Keyboard="Numeric"/>
+                           Keyboard="Numeric" />
                 </VerticalStackLayout>
 
             </VerticalStackLayout>
@@ -112,7 +120,7 @@
                                Spacing="10">
 
             <Button Text="Cancel"
-                    Clicked="OnCancelClicked"/>
+                    Clicked="OnCancelClicked" />
 
             <Button Text="Save"
                     Command="{Binding CloseCommand}" />

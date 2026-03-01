@@ -4,16 +4,21 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:userInterface="clr-namespace:MilkChess.UserInterface"
              xmlns:model="clr-namespace:MilkChess.Model"
+             xmlns:helper="clr-namespace:MilkChess.Helper"
              x:DataType="userInterface:ChessBoardViewModel"
              x:Name="ChessBoardPage"
              x:Class="MilkChess.MainPage">
+    <ContentPage.Resources>
+        <helper:MaxDoubleConverter x:Key="MaxDoubleConverter" />
+    </ContentPage.Resources>
     <Grid>
         <Grid.RowDefinitions>
-            <!-- <RowDefinition Height="{Binding GlobalConfig.ChessBoardVisualHeight}" /> -->
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        <Grid Grid.Row="0" ColumnDefinitions="Auto,Auto,Auto">
+        <Grid Grid.Row="0"
+              ColumnDefinitions="Auto,Auto,Auto"
+              RowDefinitions="Auto">
             <ContentView
                 Grid.Column="0"
                 VerticalOptions="Start"
@@ -182,9 +187,16 @@
             </Border>
             <Border
                 Grid.Column="2"
+                VerticalOptions="Fill"
                 Margin="6"
                 WidthRequest="220"
                 x:Name="HistoryMovements">
+                <Border.MaximumHeightRequest>
+                    <MultiBinding Converter="{StaticResource MaxDoubleConverter}">
+                        <Binding Source="{x:Reference ChessBoardLayout}" Path="Height" />
+                        <Binding Source="{x:Reference CommonFunction}" Path="Height" />
+                    </MultiBinding>
+                </Border.MaximumHeightRequest>
                 <Grid
                     WidthRequest="200">
                     <Grid.RowDefinitions>
