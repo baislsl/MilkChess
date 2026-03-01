@@ -47,7 +47,6 @@ namespace MilkChess
             builder.Services.AddTransient<MilkChessConfigService>();
             builder.Services.AddSingleton<MilkChessConfig>(serviceProvider =>
                 MilkChessConfig.Create(serviceProvider.GetRequiredService<MilkChessConfigService>()));
-            builder.Services.AddTransient<EngineManager>();
             builder.Services.AddTransient<EngineConfigViewModel>();
             builder.Services.AddTransient<EngineConfigPage>();
             builder.Services.AddTransient<AlertService>();

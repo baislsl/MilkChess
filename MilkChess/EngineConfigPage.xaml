@@ -177,7 +177,7 @@
                            TextColor="#555555" />
                     <VerticalStackLayout Spacing="10">
                         <VerticalStackLayout Spacing="4">
-                            <Label Text="Search Depth"
+                            <Label Text="Search Depth at AutoMode"
                                    FontSize="12"
                                    TextColor="#777777" />
                             <Entry Text="{Binding SelectedEngine.GoDepth}"

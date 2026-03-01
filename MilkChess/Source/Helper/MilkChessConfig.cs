@@ -108,6 +108,7 @@ public partial class EngineConfig : ObservableObject
         GoDepth = GoDepth,
         Log = Log,
         ConnectionTimeoutSeconds = ConnectionTimeoutSeconds,
-        Threads = Threads
+        Threads = Threads,
+        IsDefault = IsDefault,
     };
 }

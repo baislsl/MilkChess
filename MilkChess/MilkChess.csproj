@@ -29,32 +29,32 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
-        <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="10.0.3" />
-        <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="10.0.3" />
-        <PackageReference Include="Microsoft.Extensions.Configuration.Ini" Version="10.0.3" />
-        <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.3" />
-        <PackageReference Include="Microsoft.Maui.Controls" Version="8.0.100" />
+        <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0"/>
+        <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="10.0.3"/>
+        <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="10.0.3"/>
+        <PackageReference Include="Microsoft.Extensions.Configuration.Ini" Version="10.0.3"/>
+        <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.3"/>
+        <PackageReference Include="Microsoft.Maui.Controls" Version="8.0.100"/>
     </ItemGroup>
 
     <ItemGroup>
         <!-- App Icon -->
-        <MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#512BD4" />
+        <MauiIcon Include="Resources\AppIcon\appicon.svg" Color="#FFFFFF" />
 
         <!-- Splash Screen -->
-        <MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#512BD4" BaseSize="128,128" />
+        <MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#512BD4" BaseSize="128,128"/>
 
-        <MauiImage Include="Resources\Images\large\*" />
+        <MauiImage Include="Resources\Images\large\*"/>
 
         <!-- Custom Fonts -->
-        <MauiFont Include="Resources\Fonts\*" />
+        <MauiFont Include="Resources\Fonts\*"/>
 
         <!-- Raw Assets (also remove the "Resources\Raw" prefix) -->
-        <MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
+        <MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)"/>
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Resources\Config\" />
+        <Folder Include="Resources\Config\"/>
     </ItemGroup>
 
 

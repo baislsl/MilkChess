@@ -35,21 +35,27 @@ public class UciLogger
 
     public void WriteCommand(string message)
     {
-        lock (obj)
+        if (this.writer != null)
         {
-            this.writer?.WriteLine(
-                $"{DateTime.Now:yyyy-MM-dd HH:mm:ss} [Command] {message}"
-            );
+            lock (obj)
+            {
+                this.writer?.WriteLine(
+                    $"{DateTime.Now:yyyy-MM-dd HH:mm:ss} [Command] {message}"
+                );
+            }
         }
     }
 
     public void WriteFeedback(string message)
     {
-        lock (obj)
+        if (this.writer != null)
         {
-            this.writer?.WriteLine(
-                $"{DateTime.Now:yyyy-MM-dd HH:mm:ss} [Feedback] {message}"
-            );
+            lock (obj)
+            {
+                this.writer?.WriteLine(
+                    $"{DateTime.Now:yyyy-MM-dd HH:mm:ss} [Feedback] {message}"
+                );
+            }
         }
     }
 
