@@ -9,7 +9,7 @@ namespace MilkChess.Model;
 public class ChessModel : IChessBoard
 {
     public List<List<Chess>> board { get; set; }
-    
+
     public ChessModel()
     {
         this.InternalReset();
@@ -60,12 +60,6 @@ public class ChessModel : IChessBoard
     {
         SetChessAtPosition(movement.MovedChess, movement.From, out _);
         SetChessAtPosition(movement.RemovedChess, movement.To, out _);
-    }
-
-    public virtual void MoveChess(Position from, Position to, out Chess removedChess)
-    {
-        Chess chess = this.GetChessAtPosition(from);
-        this.SetChessAtPosition(chess, to, out removedChess);
     }
 
     public bool ValidateMovement(Position from, Position to)

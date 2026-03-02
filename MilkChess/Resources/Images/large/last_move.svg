@@ -1,0 +1,25 @@
+<svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="56"
+        height="56"
+        viewBox="0 0 56 56"
+        fill="none">
+
+    <!-- 外圆细环 -->
+    <circle
+            cx="28"
+            cy="28"
+            r="10"
+            stroke="white"
+            stroke-width="2"
+            stroke-opacity="0.6"
+            fill="none" />
+
+    <!-- 中心实心圆 -->
+    <circle
+            cx="28"
+            cy="28"
+            r="5"
+            stroke-opacity="0.6"
+            fill="white" />
+</svg>

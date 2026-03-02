@@ -15,7 +15,5 @@ public interface IChessBoard
 
     public void RevertMovement(Movement movement);
 
-    public void MoveChess(Position from, Position to, out Chess removedChess);
-
     public void Reset();
 }

@@ -13,6 +13,7 @@ public class UIConstants
     public const string CursorBackgroundResource = "mask.png";
     public const string BlackMovementCursorResource = "bmask.png";
     public const string RedMovementCursorResource = "rmask.png";
+    public const string LastMoveResource = "last_move.svg.png";
 
     public const int HorizontalOffset = 39;
     public const int VerticalOffset = 39;
@@ -28,6 +29,7 @@ public class UIConstants
     public const int ExecutionTurnZIndex = (int)ChessBoardZIndex.ExecutionTurn;
     public const int MovementIndicatorZIndex = (int)ChessBoardZIndex.MovementIndicator;
     public const int CursorSelectorZIndex = (int)ChessBoardZIndex.CursorSelector;
+    public const int LastMoveIndicatorZIndex = (int)ChessBoardZIndex.LastMoveIndicator;
     public const int ChessZIndex = (int)ChessBoardZIndex.Chess;
 
     public const int IdleChessPanelWidth = 4*ChessSize;
@@ -39,6 +41,7 @@ public class UIConstants
         ExecutionTurn,
         MovementIndicator,
         CursorSelector,
+        LastMoveIndicator,
         Chess,
     }
 }

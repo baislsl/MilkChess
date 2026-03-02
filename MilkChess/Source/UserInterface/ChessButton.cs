@@ -19,6 +19,7 @@ namespace MilkChess.UserInterface;
 public class ChessButton : ImageButton
 {
     private Chess _chess;
+
     private bool rightClickHooked = false;
 
     public readonly Position Position;

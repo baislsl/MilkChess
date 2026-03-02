@@ -16,6 +16,9 @@ public partial class PredictTracePreviewViewModel : ObservableObject, IChessBoar
 
     private readonly List<List<ChessButton>> Matrix;
 
+    [ObservableProperty]
+    private CursorSelector _lastMoveIndicator;
+
     public HistoryManager HistoryManager { get; }
 
     public Rect ExecutionTurnLayoutBound => new Rect(UIConstants.HorizontalOffset / 2.0,
@@ -35,6 +38,7 @@ public partial class PredictTracePreviewViewModel : ObservableObject, IChessBoar
         this.ChessModel = chessModel;
         this.GlobalConfig = globalConfig;
         this.HistoryManager = historyManager;
+        this.LastMoveIndicator = new CursorSelector(this, null);
 
         Matrix = new List<List<ChessButton>>(Constants.ChessBoardWidth);
         for (int i = 0; i < Constants.ChessBoardHeight; i++)
@@ -145,17 +149,19 @@ public partial class PredictTracePreviewViewModel : ObservableObject, IChessBoar
     {
         SetChessAtPosition(null, movement.From, out _);
         SetChessAtPosition(movement.MovedChess, movement.To, out _);
+
+        this.LastMoveIndicator.Position = movement.From;
     }
 
     public void RevertMovement(Movement movement)
     {
         SetChessAtPosition(movement.MovedChess, movement.From, out _);
         SetChessAtPosition(movement.RemovedChess, movement.To, out _);
-    }
 
-    public void MoveChess(Position from, Position to, out Chess removedChess)
-    {
-        throw new NotImplementedException();
+        if (HistoryManager.LastMovement != null)
+        {
+            LastMoveIndicator.Position = HistoryManager.LastMovement.From;
+        }
     }
 
     public void Reset()

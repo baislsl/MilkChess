@@ -33,6 +33,9 @@ public partial class ChessBoardViewModel : ObservableObject, IChessBoardContext
     [ObservableProperty]
     private MovementIndicator _movementIndicator;
 
+    [ObservableProperty]
+    private CursorSelector _lastMoveIndicator;
+
     private static readonly Color ActiveInteractiveModeColor = Colors.Blue;
 
     private static readonly Color InactiveInteractiveModeColor = Colors.CornflowerBlue;
@@ -92,6 +95,7 @@ public partial class ChessBoardViewModel : ObservableObject, IChessBoardContext
 
         CursorSelector = new CursorSelector(this, null);
         MovementIndicator = new MovementIndicator(this);
+        LastMoveIndicator = new CursorSelector(this, null);
         EngineFeedback.OpenPredictTracePreview = this.OpenPredictTracePreviewCommand;
     }
 
@@ -135,6 +139,7 @@ public partial class ChessBoardViewModel : ObservableObject, IChessBoardContext
         SetChessAtPosition(null, movement.From, out _);
         SetChessAtPosition(movement.MovedChess, movement.To, out _);
 
+        this.LastMoveIndicator.Position = movement.From;
         this.MovementIndicator.Reset();
     }
 
@@ -154,13 +159,10 @@ public partial class ChessBoardViewModel : ObservableObject, IChessBoardContext
         SetChessAtPosition(movement.MovedChess, movement.From, out _);
         SetChessAtPosition(movement.RemovedChess, movement.To, out _);
 
-        this.MovementIndicator.Reset();
-    }
-
-    public virtual void MoveChess(Position from, Position to, out Chess removedChess)
-    {
-        Chess chess = this.GetChessAtPosition(from);
-        this.SetChessAtPosition(chess, to, out removedChess);
+        if (HistoryManager.LastMovement != null)
+        {
+            LastMoveIndicator.Position = HistoryManager.LastMovement.From;
+        }
 
         this.MovementIndicator.Reset();
     }
@@ -178,6 +180,7 @@ public partial class ChessBoardViewModel : ObservableObject, IChessBoardContext
         });
 
         this.CursorSelector.Position = null;
+        LastMoveIndicator.Position = null;
     }
 
     private async Task EditAsync()
