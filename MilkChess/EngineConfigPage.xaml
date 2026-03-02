@@ -131,6 +131,7 @@
                                    FontSize="12"
                                    TextColor="#777777" />
                             <Entry Text="{Binding SelectedEngine.Name}"
+                                   Placeholder="Engine name. Must be unique."
                                    HeightRequest="36" />
                         </VerticalStackLayout>
                         <VerticalStackLayout Spacing="4">
@@ -138,6 +139,7 @@
                                    FontSize="12"
                                    TextColor="#777777" />
                             <Entry Text="{Binding SelectedEngine.Path}"
+                                   Placeholder="Absolute path of uci engine executable file."
                                    HeightRequest="36" />
                         </VerticalStackLayout>
                     </VerticalStackLayout>
@@ -158,6 +160,7 @@
                                 Text="{Binding SelectedEngine.Arguments,
                                   Converter={StaticResource ArgsConverter},
                                   Mode=TwoWay}"
+                                Placeholder="Uci engine startup parameters. Default empty."
                                 HeightRequest="36" />
                         </VerticalStackLayout>
                         <VerticalStackLayout Spacing="4">
@@ -208,6 +211,7 @@
                                    FontSize="12"
                                    TextColor="#777777" />
                             <Entry Text="{Binding SelectedEngine.Log}"
+                                   Placeholder="Uci input/output log. Default empty if no logging required."
                                    HeightRequest="36" />
                         </VerticalStackLayout>
                     </VerticalStackLayout>
@@ -219,9 +223,8 @@
                                Grid.ColumnSpan="2"
                                HorizontalOptions="End"
                                Spacing="10">
-            <Button Text="Save"
+            <Button Text="Close"
                     Command="{Binding CloseCommand}" />
-
         </HorizontalStackLayout>
 
     </Grid>

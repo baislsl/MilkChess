@@ -58,6 +58,18 @@ public partial class Movement : ObservableObject
 
         return true;
     }
+
+    public Movement Clone() => new()
+    {
+        IsPredict = IsPredict,
+        From = From,
+        To = To,
+        MovedChess = MovedChess,
+        RemovedChess = RemovedChess,
+        ActionCount = ActionCount,
+        IsSelected = IsSelected,
+        ChineseViewableString = ChineseViewableString
+    };
 }
 
 public class MovementColorConvertor : IMultiValueConverter

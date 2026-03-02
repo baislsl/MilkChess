@@ -34,7 +34,7 @@ namespace MilkChess
             builder.Services.AddTransient<ChessModel>();
             builder.Services.AddTransient<MainPage>();
             builder.Services.AddTransient<ChessBoardViewModel>();
-            builder.Services.AddSingleton<HistoryManager>();
+            builder.Services.AddTransient<HistoryManager>();
             builder.Services.AddTransient<UciLogger>();
             builder.Services.AddTransient<UciEngine>();
             builder.Services.AddTransient<EngineFeedback>();
@@ -47,6 +47,8 @@ namespace MilkChess
                 MilkChessConfig.Create(serviceProvider.GetRequiredService<MilkChessConfigService>()));
             builder.Services.AddTransient<EngineConfigViewModel>();
             builder.Services.AddTransient<EngineConfigPage>();
+            builder.Services.AddTransient<PredictTracePreviewViewModel>();
+            builder.Services.AddTransient<PredictTracePreviewPage>();
             builder.Services.AddTransient<AlertService>();
             builder.Services.AddSingleton<GlobalConfig>(serviceProvider =>
                 GlobalConfig.Instance.Init(serviceProvider.GetRequiredService<MilkChessConfig>()));

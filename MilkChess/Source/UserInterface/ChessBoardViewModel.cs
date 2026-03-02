@@ -92,6 +92,7 @@ public partial class ChessBoardViewModel : ObservableObject, IChessBoardContext
 
         CursorSelector = new CursorSelector(this, null);
         MovementIndicator = new MovementIndicator(this);
+        EngineFeedback.OpenPredictTracePreview = this.OpenPredictTracePreviewCommand;
     }
 
     public void AddToAbsoluteLayout(AbsoluteLayout layout)
@@ -332,27 +333,29 @@ public partial class ChessBoardViewModel : ObservableObject, IChessBoardContext
         await AlertService.PopAlertAsync($"Copied to clipboard. \n Fen: {fen}");
     }
 
-    private void SwitchToSelectedMovement(object sender)
+    private void SwitchToSelectedMovement(Movement movement)
     {
-        Logger.LogDebug("[SwitchToSelectedMovement] {}", sender);
+        Logger.LogDebug("[SwitchToSelectedMovement] {movement}", movement);
 
-        Movement senderMovement = (Movement)sender;
-        int cursor = senderMovement.ActionCount;
+        int cursor = movement.ActionCount;
 
-        if (cursor < HistoryManager.LastMovement.ActionCount)
+        while (HistoryManager.CanMoveForward() && cursor > HistoryManager.Cursor)
         {
-            while (HistoryManager.LastMovement.ActionCount != cursor)
-            {
-                MoveBackward();
-            }
+            this.MoveForward();
         }
-        else
+
+        while (HistoryManager.CanMoveBackward() && cursor < HistoryManager.Cursor)
         {
-            while (HistoryManager.LastMovement.ActionCount != cursor)
-            {
-                MoveForward();
-            }
+            this.MoveBackward();
         }
+    }
+
+    private async Task OpenPredictTracePreviewAsync(PredictMovementTrace trace)
+    {
+        var predictTracePreviewPage = ServiceProvider.GetRequiredService<PredictTracePreviewPage>();
+        predictTracePreviewPage.ViewModel.InitFromPredictTrace(trace);
+
+        await Application.Current.MainPage.Navigation.PushModalAsync(predictTracePreviewPage);
     }
 
     private bool IsEngineOperatingChessBoard()

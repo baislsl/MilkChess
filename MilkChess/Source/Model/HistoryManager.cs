@@ -54,6 +54,11 @@ public partial class HistoryManager : ObservableObject
         this.Cursor = Movements.Count;
     }
 
+    public bool CanMoveBackward()
+    {
+        return this.Cursor != 0;
+    }
+
     public Movement MoveBackward()
     {
         if (this.Cursor == 0) return null;
@@ -62,6 +67,11 @@ public partial class HistoryManager : ObservableObject
         var ret = LastMovement;
         this.Cursor--;
         return ret;
+    }
+
+    public bool CanMoveForward()
+    {
+        return this.Cursor < Movements.Count;
     }
 
     public Movement MoveForward()

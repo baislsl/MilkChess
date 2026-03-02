@@ -14,6 +14,7 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         <Grid Grid.Row="0"
@@ -98,10 +99,10 @@
                             Command="{Binding ResetCommand}" />
 
                     <Button Grid.Row="1" Grid.Column="0"
-                            Text="Go back"
+                            Text="Go Back"
                             Command="{Binding MoveBackwardCommand}" />
                     <Button Grid.Row="1" Grid.Column="1"
-                            Text="Go forward"
+                            Text="Go Forward"
                             Command="{Binding MoveForwardCommand}" />
 
                     <Button Grid.Row="2" Grid.Column="0"
@@ -121,36 +122,32 @@
                     <Button Grid.Row="4" Grid.Column="0"
                             Text="{Binding ConnectOrDisconnectEngineText}"
                             Command="{Binding ConnectOrDisconnectEngineCommand}" />
-
                     <Button Grid.Row="4" Grid.Column="1"
                             Text="EditEngine"
                             Command="{Binding ConfigureEngineCommand}" />
-
                     <Button Grid.Row="5" Grid.Column="0"
+                            Text="StopEngine"
+                            Command="{Binding StopEngineCommand }" />
+                    <Button Grid.Row="5" Grid.Column="1"
+                            Text="InvokeImmediate"
+                            Command="{Binding InvokeBestMovementCommand}" />
+
+                    <Button Grid.Row="6" Grid.Column="0"
                             BackgroundColor="{Binding SwitchToAnalyzeModeColor}"
                             Text="AnalyzeMode"
                             Command="{Binding SwitchToAnalyzeModeCommand }" />
-                    <Button Grid.Row="5" Grid.Column="1"
+                    <Button Grid.Row="6" Grid.Column="1"
                             BackgroundColor="{Binding SwitchToAutoModeColor}"
                             Text="AutoMode"
                             Command="{Binding SwitchToAutoModeCommand }" />
-                    <Button Grid.Row="6" Grid.Column="0"
+                    <Button Grid.Row="7" Grid.Column="0"
                             BackgroundColor="{Binding SwitchToRedAutoModeColor}"
                             Text="RedAutoMode"
                             Command="{Binding SwitchToRedAutoModeCommand}" />
-                    <Button Grid.Row="6" Grid.Column="1"
+                    <Button Grid.Row="7" Grid.Column="1"
                             BackgroundColor="{Binding SwitchToBlackAutoModeColor}"
                             Text="BlackAutoMode"
                             Command="{Binding SwitchToBlackAutoModeCommand}" />
-
-                    <Button Grid.Row="7" Grid.Column="0"
-                            BackgroundColor="{Binding SwitchToIdleModeColor}"
-                            Text="{Binding SwitchToIdleModeText}"
-                            Command="{Binding StopEngineCommand }" />
-
-                    <Button Grid.Row="7" Grid.Column="1"
-                            Text="InvokeImmediate"
-                            Command="{Binding InvokeBestMovementCommand}" />
 
                     <BoxView
                         Grid.Row="8"
@@ -224,6 +221,7 @@
                                     Padding="6,0">
                                     <Border.GestureRecognizers>
                                         <TapGestureRecognizer
+                                            NumberOfTapsRequired="2"
                                             Command="{Binding Source={x:Reference ChessBoardPage}, Path=ChessBoardViewModel.SwitchToSelectedMovementCommand}"
                                             CommandParameter="{Binding}" />
                                     </Border.GestureRecognizers>
@@ -256,64 +254,76 @@
                 </Grid>
             </Border>
         </Grid>
-        <Border
+        <Label
             Grid.Row="1"
-            Margin="6"
+            FontSize="18"
+            FontAttributes="Bold"
+            Padding="20, 6, 10, 0"
+            TextColor="{Binding EngineFeedback.ScoreColor}">
+            <Label.Text>
+                <MultiBinding StringFormat="Score: {0},  Engine: {1}, MultiPV: {2}, State: {3}">
+                    <Binding Path="EngineFeedback.ScoreText" />
+                    <Binding Path="Engine.Name" />
+                    <Binding Path="Engine.MultiPv" />
+                    <Binding Path="Engine.State" />
+                </MultiBinding>
+            </Label.Text>
+        </Label>
+        <Border
+            Grid.Row="2"
+            Margin="4"
             x:Name="EngineFeedback">
-            <Grid
-                RowDefinitions="Auto,*">
-                <Label
-                    FontSize="18"
-                    FontAttributes="Bold"
-                    Padding="10, 2"
-                    TextColor="{Binding EngineFeedback.ScoreColor}">
-                    <Label.Text>
-                        <MultiBinding StringFormat="Score: {0},  Engine: {1}, MultiPV: {2}, State: {3}">
-                            <Binding Path="EngineFeedback.ScoreText" />
-                            <Binding Path="Engine.Name" />
-                            <Binding Path="Engine.MultiPv" />
-                            <Binding Path="Engine.State" />
-                        </MultiBinding>
-                    </Label.Text>
-                </Label>
-                <CollectionView
-                    Grid.Row="1"
-                    MinimumHeightRequest="100"
-                    HorizontalScrollBarVisibility="Default"
-                    ItemsUpdatingScrollMode="KeepScrollOffset"
-                    ItemsSource="{Binding  EngineFeedback.PredictMovementTraces}">
-                    <CollectionView.ItemTemplate>
-                        <DataTemplate>
-                            <Border
-                                Margin="2"
-                                Stroke="#DDDDDD"
-                                StrokeThickness="1"
-                                Padding="6,0">
-                                <Label
-                                    x:DataType="model:PredictMovementTrace"
-                                    Margin="2"
-                                    LineBreakMode="WordWrap"
-                                    MaxLines="5"
-                                    TextColor="Black"
-                                    FontFamily="Monospace"
-                                    FontSize="18">
-                                    <Label.FormattedText>
-                                        <FormattedString>
-                                            <Span Text="Score: " TextColor="Black" />
-                                            <Span Text="{Binding Score}" TextColor="Black" />
-                                            <Span Text=" Depth: " TextColor="Black" />
-                                            <Span Text="{Binding Depth}" TextColor="Black" />
-                                            <Span Text="{Binding MultiPvText}" TextColor="Black" />
-                                            <Span Text="{Binding Path=Movements, StringFormat='  {0}' }"
-                                                  FontAttributes="Italic" />
-                                        </FormattedString>
-                                    </Label.FormattedText>
-                                </Label>
-                            </Border>
-                        </DataTemplate>
-                    </CollectionView.ItemTemplate>
-                </CollectionView>
-            </Grid>
+            <CollectionView
+                x:Name="PredictMovementTraceList"
+                MinimumHeightRequest="100"
+                HorizontalScrollBarVisibility="Default"
+                ItemsUpdatingScrollMode="KeepScrollOffset"
+                ItemsSource="{Binding EngineFeedback.PredictMovementTraces}">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="model:PredictMovementTrace">
+                        <Frame
+                            Margin="2"
+                            Padding="6,4"
+                            HasShadow="False"
+                            BorderColor="#DDDDDD"
+                            BackgroundColor="Transparent"
+                            CornerRadius="6">
+                            <Frame.GestureRecognizers>
+                                <TapGestureRecognizer
+                                    NumberOfTapsRequired="1"
+                                    Command="{Binding Source={x:Reference ChessBoardLayout}, Path=BindingContext.EngineFeedback.SelectionChangedTaskCommand}"
+                                    CommandParameter="{Binding}" />
+                            </Frame.GestureRecognizers>
+                            <Label
+                                FontFamily="Monospace"
+                                FontSize="18"
+                                LineBreakMode="WordWrap"
+                                MaxLines="5">
+                                <Label.Triggers>
+                                    <DataTrigger
+                                        Binding="{Binding IsSelected}"
+                                        TargetType="Label"
+                                        Value="True">
+                                        <Setter Property="FontAttributes" Value="Bold" />
+                                        <Setter Property="TextColor" Value="#2176FF" />
+                                    </DataTrigger>
+                                </Label.Triggers>
+                                <Label.FormattedText>
+                                    <FormattedString>
+                                        <Span Text="Score: " />
+                                        <Span Text="{Binding Score}" />
+                                        <Span Text=" Depth: " />
+                                        <Span Text="{Binding Depth}" />
+                                        <Span Text="{Binding MultiPvText}" />
+                                        <Span Text="{Binding Movements, StringFormat='  {0}'}"
+                                              FontAttributes="Italic" />
+                                    </FormattedString>
+                                </Label.FormattedText>
+                            </Label>
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
         </Border>
     </Grid>
 </ContentPage>

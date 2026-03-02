@@ -146,21 +146,21 @@ public partial class UciEngine : ObservableObject, IUciEngine
     public async Task ExecuteForeverAsync(
         GoOption option,
         IChessBoardContext chessBoardContext,
-        Action<InfoFeedback> onInfoReceived,
-        Action<BestMove> onBestMovementReceived)
+        IUciEngine.OnFeedbackReceivedDelegate onFeedbackReceived,
+        IUciEngine.OnBestMovementReceivedDelegate onBestMovementReceived)
     {
         await this.ThreadSafeExecute(async () =>
         {
             this.ThrowIfNotReady();
-            await this.ExecuteForeverInternalAsync(option, chessBoardContext, onInfoReceived, onBestMovementReceived);
+            await this.ExecuteForeverInternalAsync(option, chessBoardContext, onFeedbackReceived, onBestMovementReceived);
         });
     }
 
     private Task ExecuteForeverInternalAsync(
         GoOption option,
         IChessBoardContext chessBoardContext,
-        Action<InfoFeedback> onInfoReceived,
-        Action<BestMove> onBestMovementReceived)
+        IUciEngine.OnFeedbackReceivedDelegate onFeedbackReceived,
+        IUciEngine.OnBestMovementReceivedDelegate onBestMovementReceived)
     {
         this.State = EngineState.Thinking;
         this.cancellationTokenSource = new CancellationTokenSource();
@@ -169,18 +169,20 @@ public partial class UciEngine : ObservableObject, IUciEngine
 
         this.thinkingTask = Task.Run(async () =>
         {
-            while (!cancellationToken.IsCancellationRequested)
+            bool bestMovementInvokeResult = true;
+            while (!cancellationToken.IsCancellationRequested && bestMovementInvokeResult)
             {
                 await this.SetFenPositionAsync(chessBoardContext).ConfigureAwait(false);
                 await this.SendCommandAsync(this.BuildGoCommand(option)).ConfigureAwait(false);
 
                 var bestmove = await this
-                    .ListenEngineFeedbackAsync(CancellationToken.None, chessBoardContext, onInfoReceived)
+                    .ListenEngineFeedbackAsync(CancellationToken.None, chessBoardContext, onFeedbackReceived)
                     .ConfigureAwait(false);
 
                 cancellationToken.ThrowIfCancellationRequested();
 
-                onBestMovementReceived?.Invoke(bestmove);
+                // bestMovementInvokeResult turn false if check mate and no chess to move
+                bestMovementInvokeResult = onBestMovementReceived.Invoke(bestmove);
             }
         }, cancellationToken);
 
@@ -191,8 +193,8 @@ public partial class UciEngine : ObservableObject, IUciEngine
     public async Task ExecuteOnceAsync(
         GoOption option,
         IChessBoardContext chessBoardContext,
-        Action<InfoFeedback> onFeedbackReceived,
-        Action<BestMove> onBestMovementReceived)
+        IUciEngine.OnFeedbackReceivedDelegate onFeedbackReceived,
+        IUciEngine.OnBestMovementReceivedDelegate onBestMovementReceived)
     {
         await this.ThreadSafeExecute(async () =>
         {
@@ -204,7 +206,7 @@ public partial class UciEngine : ObservableObject, IUciEngine
     // Go infinite for current chess board at a new thread.
     public async Task GoInfiniteAsync(GoOption option,
         IChessBoardContext chessBoardContext,
-        Action<InfoFeedback> onFeedbackReceived)
+        IUciEngine.OnFeedbackReceivedDelegate onFeedbackReceived)
     {
         await this.ThreadSafeExecute(async () =>
         {
@@ -215,8 +217,8 @@ public partial class UciEngine : ObservableObject, IUciEngine
 
     private async Task GoInternalAsync(GoOption option,
         IChessBoardContext chessBoardContext,
-        Action<InfoFeedback> onInfoReceived,
-        Action<BestMove> onBestMovementReceived)
+        IUciEngine.OnFeedbackReceivedDelegate onFeedbackReceived,
+        IUciEngine.OnBestMovementReceivedDelegate onBestMovementReceived)
     {
         this.State = EngineState.Thinking;
 
@@ -229,7 +231,7 @@ public partial class UciEngine : ObservableObject, IUciEngine
         this.thinkingTask = Task.Run(async () =>
         {
             var bestmove = await this
-                .ListenEngineFeedbackAsync(CancellationToken.None, chessBoardContext, onInfoReceived)
+                .ListenEngineFeedbackAsync(CancellationToken.None, chessBoardContext, onFeedbackReceived)
                 .ConfigureAwait(false);
 
             // If user stop the engine manually, throw and no need to execute onBestMovementReceived.
@@ -248,7 +250,7 @@ public partial class UciEngine : ObservableObject, IUciEngine
     private async Task<BestMove> ListenEngineFeedbackAsync(
         CancellationToken cancellationToken,
         IChessBoardContext chessBoardContext,
-        Action<InfoFeedback> onInfoReceived)
+        IUciEngine.OnFeedbackReceivedDelegate onFeedbackReceived)
     {
         bool isMateReceived = false;
         while (!cancellationToken.IsCancellationRequested)
@@ -281,7 +283,7 @@ public partial class UciEngine : ObservableObject, IUciEngine
             {
                 if (!isMateReceived)
                 {
-                    onInfoReceived.Invoke(this.ParseIntoFeedback(feedback, chessBoardContext));
+                    onFeedbackReceived.Invoke(this.ParseIntoFeedback(feedback, chessBoardContext));
                 }
 
                 // Terminate info update if mate.
@@ -467,6 +469,8 @@ public partial class UciEngine : ObservableObject, IUciEngine
             int.TryParse(multipv, out feedback.MultiPV);
         }
 
+        feedback.InitFen = chessBoardContext.BuildForsythEdwardsNotation();
+
         if (feedback.Pv?.Count > 0)
         {
             var predict = new StringBuilder();
@@ -477,6 +481,11 @@ public partial class UciEngine : ObservableObject, IUciEngine
                 if (!tmpChessModel.ParseUnifyStringMovement(feedback.Pv[i], out Movement movement))
                 {
                     Logger.LogError("Error parsing movement {}", feedback.Pv[i]);
+
+                    // abort feedback result
+                    feedback.Movements.Clear();
+                    predict.Clear();
+
                     break;
                 }
 

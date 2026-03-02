@@ -2,20 +2,24 @@ using System.Collections.ObjectModel;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using CommunityToolkit.Mvvm.ComponentModel;
+using Microsoft.Extensions.Logging;
 
 namespace MilkChess.Model;
 
 public class MilkChessConfigService
 {
+    private readonly ILogger<MilkChessConfigService> logger;
+
     private readonly string filePath;
 
     private readonly JsonSerializerOptions options;
 
-    public MilkChessConfigService()
+    public MilkChessConfigService(ILogger<MilkChessConfigService> logger)
     {
-        filePath = Path.Combine(FileSystem.Current.AppDataDirectory, "MilkChess", "MilkChessConfig.json");
+        this.filePath = Path.Combine(FileSystem.Current.AppDataDirectory, "MilkChess", "MilkChessConfig.json");
+        this.logger = logger;
 
-        options = new JsonSerializerOptions
+        this.options = new JsonSerializerOptions
         {
             WriteIndented = true,
             PropertyNameCaseInsensitive = true
@@ -24,12 +28,16 @@ public class MilkChessConfigService
 
     public MilkChessConfig Load()
     {
+        this.logger.LogInformation("Load MilkChessConfig.json at {filePath}", this.filePath);
+
         if (!File.Exists(filePath))
         {
             return new MilkChessConfig();
         }
 
         var json = File.ReadAllText(filePath);
+
+        this.logger.LogInformation("Getting config: {json}", json);
 
         return JsonSerializer.Deserialize<MilkChessConfig>(json) ?? new MilkChessConfig();
     }

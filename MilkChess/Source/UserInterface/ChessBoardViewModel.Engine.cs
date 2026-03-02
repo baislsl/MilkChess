@@ -13,6 +13,9 @@ public partial class ChessBoardViewModel
     [NotifyPropertyChangedFor(nameof(ConnectOrDisconnectEngineText))]
     private UciEngine _engine;
 
+    [ObservableProperty]
+    private EngineFeedback _engineFeedback;
+
     private void DispatchAction(Action action, bool wait = false)
     {
         if (Application.Current == null || Application.Current.MainPage == null)
@@ -63,7 +66,7 @@ public partial class ChessBoardViewModel
 
     public async Task InitializeUciEngineAsync()
     {
-        Logger.LogInformation("Initailzing engine...");
+        Logger.LogInformation("Initialzing engine...");
         if (Config.DefaultEngineConfig == null)
         {
             await AlertService.PopAlertAsync("No engine config selected");
@@ -90,7 +93,7 @@ public partial class ChessBoardViewModel
 
         if (this.InteractiveMode == EngineInteractiveMode.None)
         {
-            this.InteractiveMode = EngineInteractiveMode.IdleMode;
+            this.InteractiveMode = EngineInteractiveMode.AnalyzeMode;
         }
 
         await RefreshUciEngineAsync();
@@ -150,6 +153,7 @@ public partial class ChessBoardViewModel
 
                 EngineFeedback.Insert(new PredictMovementTrace()
                 {
+                    RawInfoFeedback = feedback,
                     Score = feedback.Score,
                     Depth = feedback.Depth,
                     Movements = feedback.ViewableMovementList,
@@ -160,7 +164,7 @@ public partial class ChessBoardViewModel
         }, false);
     }
 
-    private void OnBestMovementReceived(BestMove bestMove)
+    private bool OnBestMovementReceived(BestMove bestMove)
     {
         if (this.ParseUnifyStringMovement(bestMove.BestMovement, out Movement bestMovement))
         {
@@ -177,12 +181,14 @@ public partial class ChessBoardViewModel
 
                 EngineFeedback.Clear();
             }, true);
+
+            return true;
         }
         else
         {
+            // Usually because of check mate and no chess to move
             Logger.LogError($"Unable to parse best movement {bestMove.BestMovement}");
-
-            throw new Exception($"Unable to parse best movement {bestMove.BestMovement}");
+            return false;
         }
     }
 

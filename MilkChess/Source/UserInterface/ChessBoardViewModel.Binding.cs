@@ -1,11 +1,8 @@
-using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
-using MilkChess.Engine;
 using MilkChess.Helper;
 using MilkChess.Model;
 using Color = Microsoft.Maui.Graphics.Color;
@@ -24,29 +21,15 @@ public partial class ChessBoardViewModel
     [NotifyCanExecuteChangedFor(nameof(MoveForwardCommand))]
     [NotifyCanExecuteChangedFor(nameof(MoveToStartCommand))]
     [NotifyCanExecuteChangedFor(nameof(MoveToEndCommand))]
-    [NotifyPropertyChangedFor(nameof(SwitchToIdleModeColor))]
     [NotifyPropertyChangedFor(nameof(SwitchToAnalyzeModeColor))]
     [NotifyPropertyChangedFor(nameof(SwitchToAutoModeColor))]
     [NotifyPropertyChangedFor(nameof(SwitchToBlackAutoModeColor))]
     [NotifyPropertyChangedFor(nameof(SwitchToRedAutoModeColor))]
-    [NotifyPropertyChangedFor(nameof(SwitchToIdleModeText))]
     private EngineInteractiveMode _interactiveMode = EngineInteractiveMode.None;
 
     public string ConnectOrDisconnectEngineText => this.Engine == null
         ? UIConstants.ConnectedEngineText
         : UIConstants.DisconnectedEngineText;
-
-    public string SwitchToIdleModeText =>
-        this.InteractiveMode is EngineInteractiveMode.IdleMode or EngineInteractiveMode.None || this.Engine == null
-            ? UIConstants.EngineIdleStateText
-            : UIConstants.StopEngineText;
-
-    [ObservableProperty]
-    private EngineFeedback _engineFeedback;
-
-    public Color SwitchToIdleModeColor => (this.InteractiveMode == EngineInteractiveMode.IdleMode)
-        ? ActiveInteractiveModeColor
-        : InactiveInteractiveModeColor;
 
     public Color SwitchToAnalyzeModeColor => (this.InteractiveMode == EngineInteractiveMode.AnalyzeMode)
         ? ActiveInteractiveModeColor
@@ -146,21 +129,21 @@ public partial class ChessBoardViewModel
             this.CommonCommandMiddlewareAsync());
 
     [RelayCommand]
-    private async Task OnSwitchToBlackAutoMode() =>
+    private async Task OnSwitchToBlackAutoModeAsync() =>
         await CommandMiddlewareHelper.ExecuteAsync(
             () => this.SwitchInteractMode(EngineInteractiveMode.BlackAutoMode),
             this.RefreshEngineCommandMiddlewareAsync(),
             this.CommonCommandMiddlewareAsync());
 
     [RelayCommand]
-    private async Task OnSwitchToRedAutoMode() =>
+    private async Task OnSwitchToRedAutoModeAsync() =>
         await CommandMiddlewareHelper.ExecuteAsync(
             () => this.SwitchInteractMode(EngineInteractiveMode.RedAutoMode),
             this.RefreshEngineCommandMiddlewareAsync(),
             this.CommonCommandMiddlewareAsync());
 
     [RelayCommand]
-    private async Task OnSwitchToAutoMode() =>
+    private async Task OnSwitchToAutoModeAsync() =>
         await CommandMiddlewareHelper.ExecuteAsync(
             () => this.SwitchInteractMode(EngineInteractiveMode.AutoMode),
             this.RefreshEngineCommandMiddlewareAsync(),
@@ -199,9 +182,16 @@ public partial class ChessBoardViewModel
             this.CommonCommandMiddlewareAsync());
 
     [RelayCommand]
-    private async Task OnSwitchToSelectedMovement(object sender) =>
+    private async Task OnSwitchToSelectedMovementAsync(Movement movement) =>
         await CommandMiddlewareHelper.ExecuteAsync(
-            () => this.SwitchToSelectedMovement(sender),
+            () => this.SwitchToSelectedMovement(movement),
+            this.RefreshEngineCommandMiddlewareAsync(),
+            this.CommonCommandMiddlewareAsync());
+
+    [RelayCommand]
+    private async Task OnOpenPredictTracePreviewAsync(PredictMovementTrace trace) =>
+        await CommandMiddlewareHelper.ExecuteAsync(
+            () => this.OpenPredictTracePreviewAsync(trace),
             this.RefreshEngineCommandMiddlewareAsync(),
             this.CommonCommandMiddlewareAsync());
 

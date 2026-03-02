@@ -1,5 +1,8 @@
 using System.Collections.ObjectModel;
+using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using MilkChess.Engine;
 
 namespace MilkChess.Model;
 
@@ -17,6 +20,12 @@ public partial class EngineFeedback : ObservableObject
     public Microsoft.Maui.Graphics.Color ScoreColor =>
         (EvalScore.HasValue && this.EvalScore.Value > 0) ? Colors.Red : Colors.Black;
 
+    public IAsyncRelayCommand<PredictMovementTrace> OpenPredictTracePreview;
+
+    private PredictMovementTrace lastSelected;
+
+    private DateTime lastClickTime;
+
     public EngineFeedback()
     {
         this.PredictMovementTraces = new ObservableCollection<PredictMovementTrace>();
@@ -33,9 +42,43 @@ public partial class EngineFeedback : ObservableObject
     {
         this.PredictMovementTraces.Clear();
     }
+
+
+    [RelayCommand]
+    private async Task OnSelectionChangedTaskAsync(PredictMovementTrace current)
+    {
+        if (current == null)
+        {
+            return;
+        }
+
+        var now = DateTime.UtcNow;
+
+        if (lastSelected == current &&
+            (now - lastClickTime).TotalMilliseconds < 350)
+        {
+            // 双击
+            if (this.OpenPredictTracePreview != null)
+            {
+                await this.OpenPredictTracePreview.ExecuteAsync(current);
+            }
+        }
+        else
+        {
+            if (lastSelected != null)
+            {
+                lastSelected.IsSelected = false;
+            }
+
+            current.IsSelected = true;
+        }
+
+        lastSelected = current;
+        lastClickTime = now;
+    }
 }
 
-public class PredictMovementTrace
+public partial class PredictMovementTrace : ObservableObject
 {
     public int Score { get; set; }
 
@@ -43,10 +86,15 @@ public class PredictMovementTrace
 
     public string Movements { get; set; }
 
-    public int MultiPv { get; set; } = 1;   // Default 1
+    public int MultiPv { get; set; } = 1; // Default 1
 
 
     public bool IsMultiPv { get; set; }
 
     public string MultiPvText => IsMultiPv ? $" MultiPV: {MultiPv}" : string.Empty;
+
+    [ObservableProperty]
+    private bool _isSelected;
+
+    public InfoFeedback RawInfoFeedback { get; set; }
 }

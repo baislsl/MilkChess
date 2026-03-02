@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:milkChess="clr-namespace:MilkChess"
+    xmlns:userInterface="clr-namespace:MilkChess.UserInterface"
+    xmlns:model="clr-namespace:MilkChess.Model"
+    xmlns:helper="clr-namespace:MilkChess.Helper"
+    x:DataType="userInterface:PredictTracePreviewViewModel"
+    x:Name="PredictTracePreview"
+    x:Class="MilkChess.PredictTracePreviewPage">
+    <Grid
+        Padding="10"
+        ColumnSpacing="10">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="{Binding GlobalConfig.ChessBoardVisualWidth}" />
+            <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+        <AbsoluteLayout
+            Grid.Column="0"
+            VerticalOptions="Start"
+            AnchorX="0"
+            AnchorY="0"
+            WidthRequest="{Binding GlobalConfig.ChessBoardVisualWidth}"
+            HeightRequest="{Binding GlobalConfig.ChessBoardVisualHeight}"
+            Scale="{Binding GlobalConfig.ChessBoardScale}"
+            x:Name="ChessBoardAbsoluteLayout">
+            <Image
+                ZIndex="{x:Static userInterface:UIConstants.BackgroundZIndex}"
+                Source="{Binding Source={x:Static userInterface:UIConstants.ChessBoardBackgroundResource}}"
+                AbsoluteLayout.LayoutFlags="PositionProportional"
+                AbsoluteLayout.LayoutBounds="0,0,AutoSize,AutoSize" />
+            <BoxView
+                ZIndex="{x:Static userInterface:UIConstants.ExecutionTurnZIndex}"
+                WidthRequest="20"
+                HeightRequest="20"
+                CornerRadius="10"
+                Color="{Binding HistoryManager.ExecutionTurnColor}"
+                AbsoluteLayout.LayoutFlags="None"
+                AbsoluteLayout.LayoutBounds="{Binding ExecutionTurnLayoutBound}" />
+        </AbsoluteLayout>
+        <Border
+            Grid.Column="1"
+            VerticalOptions="Start"
+            Margin="6"
+            WidthRequest="300"
+            HeightRequest="{Binding GlobalConfig.ChessBoardVisualHeight}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="12" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Label
+                    Grid.Row="0"
+                    Text="Movements"
+                    FontAttributes="Bold"
+                    Margin="2"
+                    FontSize="18" />
+                <CollectionView
+                    Grid.Row="1"
+                    x:Name="Movements"
+                    ItemsUpdatingScrollMode="KeepLastItemInView"
+                    ItemsSource="{Binding HistoryManager.Movements}">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <Border
+                                WidthRequest="190"
+                                HeightRequest="28"
+                                Margin="2"
+                                Stroke="#DDDDDD"
+                                StrokeThickness="1"
+                                Padding="6,0">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer
+                                        NumberOfTapsRequired="2"
+                                        Command="{Binding Source={x:Reference PredictTracePreview}, Path=ViewModel.SwitchToSelectedMovementCommand}"
+                                        CommandParameter="{Binding}" />
+                                </Border.GestureRecognizers>
+                                <Label
+                                    x:Name="MovementLabel"
+                                    VerticalTextAlignment="Center"
+                                    HorizontalTextAlignment="Start"
+                                    FontSize="18"
+                                    TextColor="Black">
+                                    <Label.Triggers>
+                                        <DataTrigger
+                                            Binding="{Binding IsSelected}"
+                                            TargetType="Label"
+                                            Value="True">
+                                            <Setter Property="FontAttributes" Value="Bold" />
+                                            <Setter Property="TextColor" Value="#2176FF" />
+                                        </DataTrigger>
+                                    </Label.Triggers>
+                                    <Label.Text>
+                                        <MultiBinding StringFormat="{}{0}. {1}">
+                                            <Binding Path="ActionCount" />
+                                            <Binding Path="ChineseViewableString" />
+                                        </MultiBinding>
+                                    </Label.Text>
+                                </Label>
+                            </Border>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+                <BoxView
+                    Grid.Row="2"
+                    Grid.Column="0"
+                    HeightRequest="1"
+                    Margin="4,6" />
+                <Grid
+                    Grid.Row="3"
+                    x:Name="CommonFunction">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="12" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Button Grid.Row="0" Grid.Column="0"
+                            Text="Go Back"
+                            Command="{Binding MoveBackwardCommand}" />
+                    <Button Grid.Row="0" Grid.Column="1"
+                            Text="Go Forward"
+                            Command="{Binding MoveForwardCommand}" />
+                    <Button Grid.Row="1" Grid.Column="0"
+                            Text="To Start"
+                            Command="{Binding MoveToStartCommand}" />
+                    <Button Grid.Row="1" Grid.Column="1"
+                            Text="To End"
+                            Command="{Binding  MoveToEndCommand}" />
+                    <Slider
+                        Grid.Row="2"
+                        Grid.Column="0"
+                        Grid.ColumnSpan="2"
+                        Minimum="0.5"
+                        Maximum="2.0"
+                        Value="{Binding GlobalConfig.ChessBoardScale}">
+                    </Slider>
+
+                    <BoxView
+                        Grid.Row="3"
+                        Grid.Column="0"
+                        Grid.ColumnSpan="2"
+                        HeightRequest="1"
+                        Margin="4,6" />
+
+                    <Button Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2"
+                            VerticalOptions="End"
+                            Text="Close"
+                            Command="{Binding  CloseCommand}" />
+                </Grid>
+            </Grid>
+        </Border>
+    </Grid>
+</ContentPage>

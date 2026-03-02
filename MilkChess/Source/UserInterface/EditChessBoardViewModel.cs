@@ -52,7 +52,6 @@ public partial class EditChessBoardViewModel : ObservableObject, IChessBoard
         {
             ChessButton chessButton = new ChessButton(null, position);
 
-            // chessButton.Released += this.WrapEventHandler(this.OnChessSelected);
             chessButton.Command = ChessClickedCommand;
             chessButton.RightClickCommand = ChessRightClickedCommand;
             chessButton.CommandParameter = chessButton;

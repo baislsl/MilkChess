@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using Microsoft.Extensions.Logging;
 using MilkChess.Model;
+using MilkChess.Protocol;
 
 namespace MilkChess.Engine;
 
@@ -23,7 +24,7 @@ public enum EngineState
     Thinking,
 }
 
-internal interface IUciEngine
+public interface IUciEngine
 {
     public EngineState State { get; }
 
@@ -35,21 +36,25 @@ internal interface IUciEngine
 
     public Task BanMovesAsync(IEnumerable<string> banMoves, CancellationToken cancellationToken);
 
+    public delegate void OnFeedbackReceivedDelegate(InfoFeedback infoFeedback);
+
+    public delegate bool OnBestMovementReceivedDelegate(BestMove bestMove);
+
     public Task ExecuteForeverAsync(
         GoOption option,
         IChessBoardContext chessBoardContext,
-        Action<InfoFeedback> onInfoReceived,
-        Action<BestMove> onBestMovementReceived);
+        OnFeedbackReceivedDelegate onFeedbackReceived,
+        OnBestMovementReceivedDelegate onBestMovementReceived);
 
     public Task ExecuteOnceAsync(
         GoOption option,
         IChessBoardContext chessBoardContext,
-        Action<InfoFeedback> onInfoReceived,
-        Action<BestMove> onBestMovementReceived);
+        OnFeedbackReceivedDelegate onFeedbackReceived,
+        OnBestMovementReceivedDelegate onBestMovementReceived);
 
     public Task GoInfiniteAsync(GoOption option,
         IChessBoardContext chessBoardContext,
-        Action<InfoFeedback> onInfoReceived);
+        OnFeedbackReceivedDelegate onFeedbackReceived);
 
     // Stop from thinking state.
     public Task StopAsync();
@@ -95,6 +100,8 @@ public class InfoFeedback
     public List<Movement> Movements { get; set; }
 
     public string ViewableMovementList { get; set; }
+
+    public ForsythEdwardsNotation InitFen { get; set; }
 
     public InfoFeedback()
     {
