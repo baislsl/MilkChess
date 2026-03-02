@@ -9,7 +9,7 @@
     <circle
             cx="28"
             cy="28"
-            r="10"
+            r="8"
             stroke="white"
             stroke-width="2"
             stroke-opacity="0.6"
@@ -19,7 +19,7 @@
     <circle
             cx="28"
             cy="28"
-            r="5"
+            r="4"
             stroke-opacity="0.6"
             fill="white" />
 </svg>

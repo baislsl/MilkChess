@@ -127,8 +127,8 @@ public class ChessButton : ImageButton
     {
         this.Source = _chess?.DrawableResource();
         AbsoluteLayout.SetLayoutBounds(this, new Rect(
-            Position.GetAbsoluteCoordinateX(),
-            Position.GetAbsoluteCoordinateY(),
+            Position.GetAbsoluteCoordinateX() + UIConstants.ChessImageExtraOffsetX,
+            Position.GetAbsoluteCoordinateY() + UIConstants.ChessImageExtraOffsetY,
             UIConstants.ChessSize,
             UIConstants.ChessSize));
         AbsoluteLayout.SetLayoutFlags(this, AbsoluteLayoutFlags.None);

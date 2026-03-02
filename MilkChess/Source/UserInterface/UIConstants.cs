@@ -15,9 +15,16 @@ public class UIConstants
     public const string RedMovementCursorResource = "rmask.png";
     public const string LastMoveResource = "last_move.svg.png";
 
-    public const int HorizontalOffset = 39;
-    public const int VerticalOffset = 39;
-    public const int ChessSize = 55;
+    public const double HorizontalOffset = 41.5;
+    public const double VerticalOffset = 41;
+
+    // TODO: remove extra offset
+    public const double ChessImageExtraOffsetX = 2.0;
+    public const double ChessImageExtraOffsetY = 1.0;
+
+    // Chess picture Size is 56x56,
+    // Chess size after removing the transparent board is 54x54
+    public const int ChessSize = 54;
 
     public const string ConnectedEngineText = "ConnectEngine";
     public const string DisconnectedEngineText = "DisconnectEngine";
@@ -48,12 +55,12 @@ public class UIConstants
 
 internal static class UserInterfaceHelper
 {
-    public static int GetAbsoluteCoordinateX(this Position position)
+    public static double GetAbsoluteCoordinateX(this Position position)
     {
         return position.X * UIConstants.ChessSize + UIConstants.HorizontalOffset;
     }
 
-    public static int GetAbsoluteCoordinateY(this Position position)
+    public static double GetAbsoluteCoordinateY(this Position position)
     {
         if (GlobalConfig.Instance.IsRotated)
         {
