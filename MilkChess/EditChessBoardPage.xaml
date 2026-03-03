@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <ContentPage
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:milkChess="clr-namespace:MilkChess"
     xmlns:userInterface="clr-namespace:MilkChess.UserInterface"
     xmlns:model="clr-namespace:MilkChess.Model"
+    xmlns:helper="clr-namespace:MilkChess.Helper"
     x:DataType="userInterface:EditChessBoardViewModel"
     x:Name="EditChessBoard"
     x:Class="MilkChess.EditChessBoardPage">
@@ -83,13 +85,11 @@
                 ColumnSpacing="2">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="12" /> <!-- spacer -->
-                    <RowDefinition Height="*" />
-                    <RowDefinition Height="*" />
-                    <RowDefinition Height="12" /> <!-- spacer -->
-                    <RowDefinition Height="*" />
-                    <RowDefinition Height="12" /> <!-- spacer -->
-                    <RowDefinition Height="*" />
-                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="40" /> <!-- spacer -->
+                    <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
@@ -105,50 +105,42 @@
                 <Button Grid.Row="1" Grid.Column="0"
                         Text="Reset"
                         Command="{Binding ResetChessBoardCommand}" />
-
                 <Button Grid.Row="1" Grid.Column="1"
                         Text="Clear"
                         Command="{Binding ClearChessBoardCommand}" />
-                <Button Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
+                <Button Grid.Row="2" Grid.Column="0"
                         Text="InputFen"
                         Command="{Binding InputFenCommand}" />
-
-                <BoxView
-                    Grid.Row="3"
-                    Grid.Column="0"
-                    Grid.ColumnSpan="2"
-                    HeightRequest="1"
-                    Margin="4,6" />
-
-                <Button Grid.Row="4" Grid.Column="0"
-                        Text="Save"
-                        Command="{Binding
-                        Source={RelativeSource AncestorType={x:Type milkChess:EditChessBoardPage}},
-                        Path=ConfirmCommand}" />
-                <Button Grid.Row="4" Grid.Column="1"
-                        Text="Cancel"
-                        Command="{Binding
-                        Source={RelativeSource AncestorType={x:Type milkChess:EditChessBoardPage}},
-                        Path=CancelCommand}" />
-
-                <BoxView
-                    Grid.Row="5"
-                    Grid.Column="0"
-                    Grid.ColumnSpan="2"
-                    HeightRequest="1"
-                    Margin="4,6" />
-
-                <Button Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2"
+                <Button Grid.Row="2" Grid.Column="1"
                         Text="Rotate"
                         Command="{Binding RotateChessBoardCommand}" />
 
                 <Slider
-                    Grid.Row="7"
+                    Grid.Row="3"
                     Grid.Column="0"
                     Grid.ColumnSpan="2"
                     Minimum="0.65"
                     Maximum="2.0"
                     Value="{Binding GlobalConfig.ChessBoardScale}" />
+
+                <BoxView
+                    Grid.Column="0"
+                    Grid.Row="4"
+                    Grid.ColumnSpan="2"
+                    HeightRequest="1"
+                    VerticalOptions="End"
+                    Margin="4,6" />
+
+                <Button Grid.Row="5" Grid.Column="0"
+                        Text="Save"
+                        Command="{Binding
+                        Source={RelativeSource AncestorType={x:Type milkChess:EditChessBoardPage}},
+                        Path=ConfirmCommand}" />
+                <Button Grid.Row="5" Grid.Column="1"
+                        Text="Cancel"
+                        Command="{Binding
+                        Source={RelativeSource AncestorType={x:Type milkChess:EditChessBoardPage}},
+                        Path=CancelCommand}" />
             </Grid>
         </Grid>
     </Grid>

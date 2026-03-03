@@ -53,9 +53,13 @@
                     <Image
                         ZIndex="{x:Static userInterface:UIConstants.LastMoveIndicatorZIndex}"
                         Source="{x:Static userInterface:UIConstants.LastMoveResource}"
-                        IsVisible="{Binding LastMoveIndicator.IsVisible}"
+                        IsVisible="{Binding
+                            Path=HistoryManager.LastMovement,
+                            Converter={x:Static helper:ExtendedConvertor.MovementFromPositionIsVisibleConverter}}"
                         AbsoluteLayout.LayoutFlags="None"
-                        AbsoluteLayout.LayoutBounds="{Binding LastMoveIndicator.LayoutBound}" />
+                        AbsoluteLayout.LayoutBounds="{Binding
+                            Path=HistoryManager.LastMovement,
+                            Converter={x:Static helper:ExtendedConvertor.MovementFromPositionLayoutBoundConverter}}" />
                     <Image
                         ZIndex="{x:Static userInterface:UIConstants.MovementIndicatorZIndex}"
                         Source="{Binding MovementIndicator.UISource}"

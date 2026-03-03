@@ -16,9 +16,14 @@ public partial class HistoryManager : ObservableObject
     public Microsoft.Maui.Graphics.Color ExecutionTurnColor =>
         this.ExecutionTurn == Model.Color.RED ? Colors.Red : Colors.Black;
 
-    public ObservableCollection<Movement> Movements { get; private set; }
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(LastMovement))]
+    [NotifyPropertyChangedFor(nameof(NextMovement))]
+    private ObservableCollection<Movement> _movements;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(LastMovement))]
+    [NotifyPropertyChangedFor(nameof(NextMovement))]
     private int _cursor;
 
     private readonly ILogger Logger;
@@ -28,6 +33,19 @@ public partial class HistoryManager : ObservableObject
         get
         {
             if (Cursor >= 1) return Movements[Cursor - 1];
+            return null;
+        }
+    }
+
+    public Movement NextMovement
+    {
+        get
+        {
+            if (Cursor < Movements.Count)
+            {
+                return Movements[Cursor];
+            }
+
             return null;
         }
     }
@@ -89,14 +107,6 @@ public partial class HistoryManager : ObservableObject
     public int GetCursor()
     {
         return this.Cursor;
-    }
-
-    public void SetCursor(int cursor)
-    {
-        while (this.LastMovement.ActionCount != cursor)
-        {
-            MoveBackward();
-        }
     }
 
     public IEnumerable<Movement> GetMovementHistory()

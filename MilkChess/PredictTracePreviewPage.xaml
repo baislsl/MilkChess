@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <ContentPage
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
@@ -9,6 +10,9 @@
     x:DataType="userInterface:PredictTracePreviewViewModel"
     x:Name="PredictTracePreview"
     x:Class="MilkChess.PredictTracePreviewPage">
+    <ContentPage.Resources>
+        <helper:ExecutorColorMovementMaskConverter x:Key="ExecutorColorMovementMaskConverter" />
+    </ContentPage.Resources>
     <Grid
         Padding="10"
         ColumnSpacing="10">
@@ -33,10 +37,37 @@
             <Image
                 ZIndex="{x:Static userInterface:UIConstants.LastMoveIndicatorZIndex}"
                 Source="{x:Static userInterface:UIConstants.LastMoveResource}"
-                IsVisible="{Binding LastMoveIndicator.IsVisible}"
+                IsVisible="{Binding
+                    Path=HistoryManager.LastMovement,
+                    Converter={x:Static helper:ExtendedConvertor.MovementFromPositionIsVisibleConverter}}"
                 AbsoluteLayout.LayoutFlags="None"
-                AbsoluteLayout.LayoutBounds="{Binding LastMoveIndicator.LayoutBound}" />
-
+                AbsoluteLayout.LayoutBounds="{Binding
+                    Path=HistoryManager.LastMovement,
+                    Converter={x:Static helper:ExtendedConvertor.MovementFromPositionLayoutBoundConverter}}" />
+            <Image
+                ZIndex="{x:Static userInterface:UIConstants.MovementIndicatorZIndex}"
+                Source="{Binding
+                    Path=HistoryManager.ExecutionTurn,
+                    Converter={x:StaticResource ExecutorColorMovementMaskConverter}}"
+                IsVisible="{Binding
+                    Path=HistoryManager.NextMovement,
+                    Converter={x:Static helper:ExtendedConvertor.MovementFromPositionIsVisibleConverter}}"
+                AbsoluteLayout.LayoutFlags="None"
+                AbsoluteLayout.LayoutBounds="{Binding
+                    Path=HistoryManager.NextMovement,
+                    Converter={x:Static helper:ExtendedConvertor.MovementFromPositionLayoutBoundConverter}}" />
+            <Image
+                ZIndex="{x:Static userInterface:UIConstants.MovementIndicatorZIndex}"
+                Source="{Binding
+                    Path=HistoryManager.ExecutionTurn,
+                    Converter={x:StaticResource ExecutorColorMovementMaskConverter}}"
+                IsVisible="{Binding
+                    Path=HistoryManager.NextMovement,
+                    Converter={x:Static helper:ExtendedConvertor.MovementToPositionIsVisibleConverter}}"
+                AbsoluteLayout.LayoutFlags="None"
+                AbsoluteLayout.LayoutBounds="{Binding
+                    Path=HistoryManager.NextMovement,
+                    Converter={x:Static helper:ExtendedConvertor.MovementToPositionLayoutBoundConverter}}" />
             <BoxView
                 ZIndex="{x:Static userInterface:UIConstants.ExecutionTurnZIndex}"
                 WidthRequest="20"
