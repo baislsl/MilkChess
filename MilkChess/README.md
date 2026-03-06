@@ -22,6 +22,7 @@
 - [x] multipv support
 - [x] 预测局面跳转
 - [x] 棋子移动残影
+- [x] engine customized option
 - [ ] 棋谱导入导出
 - [ ] 屏幕捕捉
 - [ ] 棋谱分支

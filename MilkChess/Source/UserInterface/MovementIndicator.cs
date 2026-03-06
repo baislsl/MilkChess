@@ -8,11 +8,14 @@ public partial class MovementIndicator : ObservableObject
 {
     private IChessBoard ChessBoard { get; set; }
 
-    [ObservableProperty] private CursorSelector _from;
+    [ObservableProperty]
+    private CursorSelector _from;
 
-    [ObservableProperty] private CursorSelector _to;
+    [ObservableProperty]
+    private CursorSelector _to;
 
-    [ObservableProperty] [NotifyPropertyChangedFor(nameof(UISource))]
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(UISource))]
     private Movement _movement;
 
     public string UISource => this.Movement?.ExecutedColor == Color.BLACK

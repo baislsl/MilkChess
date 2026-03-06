@@ -236,4 +236,29 @@ public static class ForsythEdwardsNotationExtension
     {
         return chessBoardContext.BuildForsythEdwardsNotation(chessBoardContext.HistoryManager.ExecutionTurn);
     }
+
+    public static (IChessBoard, List<Movement>, Color) GetUnrevertibleChessBoardTrace(
+        this IChessBoardContext chessBoardContext)
+    {
+        ChessModel chessModel = new ChessModel(chessBoardContext);
+        Color executionTurn = chessBoardContext.HistoryManager.ExecutionTurn;
+
+        List<Movement> movements = new List<Movement>();
+
+        foreach (var lastMovement in chessBoardContext.HistoryManager.GetMovementHistory())
+        {
+            if (lastMovement.IsRevertibleMovement())
+            {
+                movements.Add(lastMovement);
+                chessModel.RevertMovement(lastMovement);
+                executionTurn = executionTurn.Reverse();
+            }
+            else
+            {
+                break;
+            }
+        }
+
+        return (chessModel, movements, executionTurn);
+    }
 }

@@ -15,7 +15,6 @@ public partial class UciEngine : ObservableObject, IUciEngine
     private EngineState state = EngineState.Disconnected;
 
     private readonly INativeUciEngine NativeUciEngine;
-    private readonly MilkChessConfig MilkChessConfig;
     private readonly ILogger Logger;
     private readonly EngineConfig Config;
 
@@ -35,7 +34,6 @@ public partial class UciEngine : ObservableObject, IUciEngine
     {
         this.Logger = logger;
         this.NativeUciEngine = localExecutableEngine;
-        this.MilkChessConfig = config;
         this.Config = config.DefaultEngineConfig.Clone();
     }
 
@@ -89,11 +87,16 @@ public partial class UciEngine : ObservableObject, IUciEngine
 
         cancellationToken.ThrowIfCancellationRequested();
 
-        if (this.MilkChessConfig.EngineOption?.Count > 0)
+        if (this.Config.Options?.Count > 0)
         {
-            foreach (var option in this.MilkChessConfig.EngineOption)
+            foreach (var option in this.Config.Options)
             {
-                await this.SetOptionAsync(option.Key, option.Value, cancellationToken);
+                if (string.IsNullOrWhiteSpace(option.Name))
+                {
+                    continue;
+                }
+
+                await this.SetOptionAsync(option.Name, option.Value, cancellationToken);
             }
         }
     }
@@ -152,7 +155,8 @@ public partial class UciEngine : ObservableObject, IUciEngine
         await this.ThreadSafeExecute(async () =>
         {
             this.ThrowIfNotReady();
-            await this.ExecuteForeverInternalAsync(option, chessBoardContext, onFeedbackReceived, onBestMovementReceived);
+            await this.ExecuteForeverInternalAsync(option, chessBoardContext, onFeedbackReceived,
+                onBestMovementReceived);
         });
     }
 
@@ -415,8 +419,7 @@ public partial class UciEngine : ObservableObject, IUciEngine
 
     private async Task SetFenPositionAsync(IChessBoardContext chessBoardContext)
     {
-        var (chessBoard, movements, executionTurn) =
-            chessBoardContext.HistoryManager.GetUnrevertibleChessBoardTrace(chessBoardContext);
+        var (chessBoard, movements, executionTurn) = chessBoardContext.GetUnrevertibleChessBoardTrace();
 
         StringBuilder command = new($"{Command.Position} fen ");
 

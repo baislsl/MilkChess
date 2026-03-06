@@ -64,6 +64,18 @@ public partial class EngineConfigViewModel : ObservableObject
     }
 
     [RelayCommand]
+    void AddOption()
+    {
+        SelectedEngine?.Options.Add(new EngineOption());
+    }
+
+    [RelayCommand]
+    void RemoveOption(EngineOption item)
+    {
+        SelectedEngine?.Options.Remove(item);
+    }
+
+    [RelayCommand]
     private async Task CloseAsync()
     {
         MilkChessConfigService.Save(this.MilkChessConfig);

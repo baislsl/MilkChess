@@ -109,6 +109,16 @@ public sealed class Position
     {
         if (!this.IsLegal()) return false;
 
+        if (color == Color.BLACK && this.Y > 6)
+        {
+            return false;
+        }
+
+        if (color == Color.RED && this.Y < 3)
+        {
+            return false;
+        }
+
         if ((color == Color.BLACK && this.Y >= 5)
             || (color == Color.RED && this.Y <= 4))
         {

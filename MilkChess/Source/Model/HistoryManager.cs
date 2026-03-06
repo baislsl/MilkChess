@@ -111,7 +111,10 @@ public partial class HistoryManager : ObservableObject
 
     public IEnumerable<Movement> GetMovementHistory()
     {
-        return this.Movements;
+        for (int cursor = this.Cursor - 1; cursor >= 0; cursor--)
+        {
+            yield return this.Movements[cursor];
+        }
     }
 
     public void Reset()
@@ -126,32 +129,6 @@ public partial class HistoryManager : ObservableObject
         this.ExecutionTurn = this.ExecutionTurn.Reverse();
         this.Movements.Clear();
         this.Cursor = 0;
-    }
-
-    public (IChessBoard, List<Movement>, Color) GetUnrevertibleChessBoardTrace(IChessBoard chessBoard)
-    {
-        ChessModel chessModel = new ChessModel(chessBoard);
-
-        Color executionTurn = this.ExecutionTurn;
-        List<Movement> movements = new List<Movement>();
-
-        for (int cursor = this.Cursor - 1; cursor >= 0; cursor--)
-        {
-            var lastMovement = this.Movements[cursor];
-
-            if (lastMovement.IsRevertibleMovement())
-            {
-                movements.Add(lastMovement);
-                chessModel.RevertMovement(lastMovement);
-                executionTurn = executionTurn.Reverse();
-            }
-            else
-            {
-                break;
-            }
-        }
-
-        return (chessModel, movements, executionTurn);
     }
 
     partial void OnCursorChanged(int oldValue, int newValue)

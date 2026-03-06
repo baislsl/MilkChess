@@ -9,8 +9,8 @@ namespace MilkChess.UserInterface;
 
 public partial class IdleChessPanel : ObservableObject
 {
-    [ObservableProperty] private List<IdleChess> _idleChessList = new List<IdleChess>();
-
+    [ObservableProperty]
+    private List<IdleChess> _idleChessList = new List<IdleChess>();
 
     private IdleChess _cursor;
 

@@ -193,11 +193,17 @@ public partial class ChessBoardViewModel : ObservableObject, IChessBoardContext
 
             this.Reset();
 
-            Iterator.IterateOverChessBoard(position => this.SetChessAtPosition(
-                result.ChessBoard.GetChessAtPosition(position),
-                position,
-                out _
-            ));
+            Iterator.IterateOverChessBoard(position =>
+            {
+                this.SetChessAtPosition(
+                    result.ChessBoard.GetChessAtPosition(position),
+                    position,
+                    out _
+                );
+
+                // In case chessboard is rotated at editor page.
+                Matrix[position.Y][position.X].Refresh();
+            });
         }
         else
         {

@@ -59,8 +59,6 @@ public partial class MilkChessConfig : ObservableObject
 
     public ObservableCollection<EngineConfig> Engines { get; set; } = [];
 
-    public Dictionary<string, string> EngineOption { get; set; } = new();
-
     [ObservableProperty]
     private string _defaultEngine = string.Empty;
 
@@ -110,6 +108,8 @@ public partial class EngineConfig : ObservableObject
 
     public int MultiPv { get; set; } = 1;
 
+    public ObservableCollection<EngineOption> Options { get; set; } = new();
+
     public EngineConfig Clone() => new()
     {
         Name = Name,
@@ -120,6 +120,14 @@ public partial class EngineConfig : ObservableObject
         ConnectionTimeoutSeconds = ConnectionTimeoutSeconds,
         Threads = Threads,
         IsDefault = IsDefault,
-        MultiPv = MultiPv
+        MultiPv = MultiPv,
+        Options = new ObservableCollection<EngineOption>(Options),
     };
+}
+
+public class EngineOption
+{
+    public string Name { get; set; }
+
+    public string Value { get; set; }
 }
