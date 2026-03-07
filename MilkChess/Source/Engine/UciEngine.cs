@@ -96,6 +96,8 @@ public partial class UciEngine : ObservableObject, IUciEngine
                     continue;
                 }
 
+                cancellationToken.ThrowIfCancellationRequested();
+
                 await this.SetOptionAsync(option.Name, option.Value, cancellationToken);
             }
         }

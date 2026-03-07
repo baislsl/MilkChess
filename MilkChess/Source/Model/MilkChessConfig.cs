@@ -90,7 +90,9 @@ public partial class MilkChessConfig : ObservableObject
 
 public partial class EngineConfig : ObservableObject
 {
-    public string Name { get; set; }
+    [ObservableProperty]
+    private string _name;
+
     public string Path { get; set; }
 
     public List<string> Arguments { get; set; }
