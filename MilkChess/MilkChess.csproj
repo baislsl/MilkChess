@@ -27,7 +27,11 @@
         <TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
         <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'tizen'">6.5</SupportedOSPlatformVersion>
     </PropertyGroup>
-
+    <PropertyGroup Condition="'$(TargetFramework)'=='net8.0-maccatalyst'">
+        <MtouchLink>None</MtouchLink>
+        <UseInterpreter>true</UseInterpreter>
+        <InvariantGlobalization>true</InvariantGlobalization>
+    </PropertyGroup>
     <ItemGroup>
         <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0"/>
         <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="10.0.3"/>
@@ -39,7 +43,7 @@
 
     <ItemGroup>
         <!-- App Icon -->
-        <MauiIcon Include="Resources\AppIcon\appicon.svg" Color="#FFFFFF" />
+        <MauiIcon Include="Resources\AppIcon\appicon.svg" Color="#FFFFFF"/>
 
         <!-- Splash Screen -->
         <MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#512BD4" BaseSize="128,128"/>
