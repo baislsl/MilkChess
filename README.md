@@ -4,9 +4,9 @@
 ![Framework](https://img.shields.io/badge/.NET-MAUI-purple)
 ![License](https://img.shields.io/badge/license-GPLv3-blue)
 
-A lightweight and modern **Chinese Chess (Xiangqi) GUI for macOS**, designed for playing and analyzing games with uci engines such as Pikafish and Xuanfeng.
+A lightweight **Chinese Chess (Xiangqi) GUI for macOS**, designed for playing and analyzing games with uci engines such as Pikafish and Xuanfeng.
 
-一个轻量、现代化的 **macOS 中国象棋 GUI**，支持接入外部象棋引擎（如 Pikafish、旋风）进行对弈与分析。
+一个轻量化的 **macOS 中国象棋 GUI**，支持接入外部象棋引擎（如 Pikafish、旋风）进行对弈与分析。
 
 ## Features | 功能
 
@@ -46,6 +46,9 @@ Build from source:
 git clone git@github.com:baislsl/MilkChess.git
 cd MilkChess/MilkChess/
 dotnet build -t:Run -f net8.0-maccatalyst
+
+# release build:
+# dotnet publish -c Release -f net8.0-maccatalyst
 ```
 
 

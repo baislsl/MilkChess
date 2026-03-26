@@ -221,7 +221,7 @@
                         ItemsUpdatingScrollMode="KeepLastItemInView"
                         ItemsSource="{Binding HistoryManager.Movements}">
                         <CollectionView.ItemTemplate>
-                            <DataTemplate>
+                            <DataTemplate x:DataType="model:Movement">
                                 <Border
                                     WidthRequest="190"
                                     HeightRequest="28"
@@ -232,8 +232,8 @@
                                     <Border.GestureRecognizers>
                                         <TapGestureRecognizer
                                             NumberOfTapsRequired="2"
-                                            Command="{Binding Source={x:Reference ChessBoardPage}, Path=ChessBoardViewModel.SwitchToSelectedMovementCommand}"
-                                            CommandParameter="{Binding}" />
+                                            Command="{Binding Source={x:Reference ChessBoardPage}, Path=BindingContext.SwitchToSelectedMovementCommand}"
+                                            CommandParameter="{Binding .}" />
                                     </Border.GestureRecognizers>
                                     <Label
                                         x:Name="MovementLabel"
@@ -302,7 +302,7 @@
                                 <TapGestureRecognizer
                                     NumberOfTapsRequired="1"
                                     Command="{Binding Source={x:Reference ChessBoardLayout}, Path=BindingContext.EngineFeedback.SelectionChangedTaskCommand}"
-                                    CommandParameter="{Binding}" />
+                                    CommandParameter="{Binding .}" />
                             </Frame.GestureRecognizers>
                             <Label
                                 FontFamily="Monospace"
