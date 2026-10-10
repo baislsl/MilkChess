@@ -281,7 +281,7 @@ public partial class UciEngine : ObservableObject, IUciEngine
             {
                 // Received Invalid feedback, sleep to avoid stuck.
                 Logger.LogWarning("Getting invalid feedback");
-                Thread.Sleep(20);
+                await Task.Delay(20, cancellationToken);
                 continue;
             }
 

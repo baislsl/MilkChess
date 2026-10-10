@@ -26,9 +26,9 @@ A lightweight **Chinese Chess (Xiangqi) GUI for macOS**, designed for playing an
 
 ## Supported Engines
 
-Engines that follow the **UCI protocol** should work. Tested with:
+Engines following **UCI protocol** should work. Tested with:
 - Pikafish
-- Xuanfeng
+- Xuanfeng  
 
 ## Build
 
